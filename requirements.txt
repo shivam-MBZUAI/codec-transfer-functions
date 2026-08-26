@@ -1,0 +1,10 @@
+# Core analysis. Sufficient to run the identity (uncoded) control end to end
+# and to reproduce the estimator noise floor.
+numpy>=1.24
+matplotlib>=3.7
+
+# Codec round trips. EnCodec, DAC and Mimi are all reachable through
+# transformers alone; SpeechTokenizer needs its own package.
+torch>=2.2
+torchaudio>=2.2
+transformers>=4.45

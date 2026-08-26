@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+.venv-test/
+venv/
+.ipynb_checkpoints/
+
+# Large or regenerable. Result CSVs and their .meta.json sidecars ARE tracked:
+# they are small, and they are the record of what was measured.
+*.wav
+*.flac
+data/
+checkpoints/
+figures/*.png
+
+.DS_Store
