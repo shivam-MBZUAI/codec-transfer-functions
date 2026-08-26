@@ -79,7 +79,11 @@ def encodec(bandwidth_kbps: float = 3.0, model_id: str = "facebook/encodec_24khz
     def fn(x: np.ndarray) -> np.ndarray:
         wav = torch.from_numpy(x)[None, None, :].repeat(1, n_ch, 1).to(device)
         enc = model.encode(wav, bandwidth=float(bandwidth_kbps))
-        dec = model.decode(enc.audio_codes, enc.audio_scales)[0]
+        # last_frame_pad_length is needed for an exact-length round trip; it is
+        # a transformers>=5 argument and defaults to 0, which silently returns a
+        # slightly long tail otherwise.
+        dec = model.decode(enc.audio_codes, enc.audio_scales,
+                           last_frame_pad_length=enc.last_frame_pad_length).audio_values
         dec = dec.squeeze(0)
         return (dec[0] if dec.ndim == 2 else dec).cpu().numpy()
 
