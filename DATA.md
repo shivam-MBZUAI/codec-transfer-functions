@@ -66,12 +66,29 @@ python cluster/fetch_all.py
 Repo identifiers for these move more than the core set, so the fetcher reports
 failures rather than aborting. Check its output for what actually resolved.
 
-| Codec | Repo |
-|---|---|
-| SNAC | [hubertsiuzdak/snac_24khz](https://huggingface.co/hubertsiuzdak/snac_24khz), `snac_32khz`, `snac_44khz` |
-| WavTokenizer | [novateur/WavTokenizer](https://huggingface.co/novateur/WavTokenizer) |
-| X-Codec 2.0 | [HKUSTAudio/xcodec2](https://huggingface.co/HKUSTAudio/xcodec2) |
-| BigCodec | search HuggingFace; identifier unstable |
+All of these resolved and are cached:
+
+| Codec | Repo | Cached |
+|---|---|---|
+| SNAC 24 kHz | [hubertsiuzdak/snac_24khz](https://huggingface.co/hubertsiuzdak/snac_24khz) | 76M |
+| SNAC 32 kHz | [hubertsiuzdak/snac_32khz](https://huggingface.co/hubertsiuzdak/snac_32khz) | 209M |
+| SNAC 44 kHz | [hubertsiuzdak/snac_44khz](https://huggingface.co/hubertsiuzdak/snac_44khz) | 209M |
+| WavTokenizer | [novateur/WavTokenizer](https://huggingface.co/novateur/WavTokenizer) | 3.0G |
+| WavTokenizer large, unify | [novateur/WavTokenizer-large-unify-40token](https://huggingface.co/novateur/WavTokenizer-large-unify-40token) | 1.7G |
+| WavTokenizer large, speech | [novateur/WavTokenizer-large-speech-75token](https://huggingface.co/novateur/WavTokenizer-large-speech-75token) | 1.7G |
+| X-Codec 2.0 | [HKUSTAudio/xcodec2](https://huggingface.co/HKUSTAudio/xcodec2) | 14G |
+| BigCodec | [Alethia/BigCodec](https://huggingface.co/Alethia/BigCodec) | 609M |
+
+**None of these has a wrapper in `codec_zoo.py` yet.** The weights are cached;
+each still needs an adapter, since none loads through `transformers`.
+
+### A trap this fetcher now guards against
+
+`snapshot_download` returns **success when `allow_patterns` matched nothing**.
+WavTokenizer ships `.ckpt`, which the original pattern list omitted, so it
+reported OK having downloaded 8 KB and no weights at all. `fetch_all.py` now
+counts weight files after each download and raises if the count is zero. Treat
+any "ok" that is not backed by a file count as unverified.
 
 ---
 
@@ -164,12 +181,17 @@ other side, which is not a coherent measurement.
 
 ## Disk footprint
 
+Verified 2026-08-26 on the cluster cache:
+
 | Component | Size |
 |---|---|
-| Python environment | ~4.8 GB |
-| 7 codec checkpoints | ~1.9 GB |
-| Whisper + MMS | ~23 GB |
-| FLEURS, 23 languages test split | see fetch output |
+| Python environment | 4.8 GB |
+| 7 core codec checkpoints | 1.9 GB |
+| 8 additional codec checkpoints | 21 GB |
+| Whisper large-v3 | 8.7 GB |
+| MMS-1B-all (1199 language adapters) | 14 GB |
+| **Total model cache** | **46 GB** |
+| FLEURS, 23 languages test split | not yet fetched |
 
 Everything lives under `$CODECS_ROOT` on shared scratch storage. Nothing is
 written to a home share or to a node-local `/tmp`.

@@ -15,7 +15,11 @@ import sys
 
 from huggingface_hub import snapshot_download
 
-WEIGHTS = ["*.safetensors", "*.pt", "*.bin", "*.json", "*.txt", "*.model", "*.yaml"]
+# .ckpt matters: WavTokenizer ships checkpoints under that extension, and
+# omitting it makes snapshot_download "succeed" having downloaded nothing.
+WEIGHTS = ["*.safetensors", "*.pt", "*.ckpt", "*.bin", "*.json", "*.txt",
+           "*.model", "*.yaml"]
+WEIGHT_EXT = (".safetensors", ".pt", ".ckpt", ".bin")
 # Whisper and MMS repos carry several formats of the same weights. Pulling one
 # format is the difference between ~3 GB and ~18 GB.
 ONE_FORMAT = ["*.safetensors", "*.json", "*.txt", "*.model"]
@@ -31,6 +35,7 @@ MANIFEST = [
     ("hubertsiuzdak/snac_44khz", WEIGHTS, "SNAC 44k, extra codec", "T2"),
     ("novateur/WavTokenizer", WEIGHTS, "WavTokenizer, cited in related work", "T2"),
     ("novateur/WavTokenizer-large-unify-40token", WEIGHTS, "WavTokenizer large", "T2"),
+    ("novateur/WavTokenizer-large-speech-75token", WEIGHTS, "WavTokenizer large speech", "T2"),
     ("HKUSTAudio/xcodec2", WEIGHTS, "X-Codec 2.0, extra codec", "T2"),
     ("Alethia/BigCodec", WEIGHTS, "BigCodec, cited in related work", "T2"),
 ]
@@ -43,10 +48,24 @@ def main() -> int:
         print(f"--- [{tier}] {repo}\n    {why}", flush=True)
         try:
             p = snapshot_download(repo_id=repo, allow_patterns=patterns)
-            sz = sum(os.path.getsize(os.path.join(r, f))
-                     for r, _, fs in os.walk(p) for f in fs
-                     if not os.path.islink(os.path.join(r, f)))
-            print(f"    OK  {sz/1e6:.0f} MB\n", flush=True)
+            # snapshot_download returns success when allow_patterns matched
+            # NOTHING, so "ok" on its own is not evidence that weights arrived.
+            # Follow symlinks: the HF cache stores blobs and links snapshots to
+            # them, so a naive walk that skips links reports 0 bytes for a
+            # complete download.
+            weights, sz = [], 0
+            for r, _, fs in os.walk(p):
+                for f in fs:
+                    full = os.path.join(r, f)
+                    sz += os.path.getsize(os.path.realpath(full))
+                    if f.endswith(WEIGHT_EXT):
+                        weights.append(f)
+            if not weights:
+                raise RuntimeError(
+                    f"no weight files matched; repo may use another extension. "
+                    f"patterns={patterns}")
+            print(f"    OK  {sz/1e6:.0f} MB, {len(weights)} weight file(s)\n",
+                  flush=True)
             ok.append(repo)
         except Exception as e:
             msg = str(e).split("\n")[0][:160]
