@@ -1,0 +1,191 @@
+"""Generate RESULTS.md from the result files. Never hand-write that document.
+
+    python scripts/make_results.py
+
+Every number in RESULTS.md is computed here from a CSV in results/. There is no
+path by which a value that was not measured can appear in it. Experiments that
+have not run show as "not yet measured" rather than as a plausible placeholder,
+because a placeholder that looks like a result is how a draft ends up asserting
+things nobody measured.
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "experiments"))
+
+import numpy as np  # noqa: E402
+
+from analyze_sweep import (  # noqa: E402
+    DISAGREE_CENTS, grid, load, summarise,
+)
+
+# Every experiment the programme defines, so what is missing is as visible as
+# what is present. Keys match EXPERIMENTS.md.
+PROGRAMME = [
+    ("E0.1", "Estimator noise floor", "test_estimator.py"),
+    ("E0.2", "Identity control (no codec)", "identity"),
+    ("E0.3", "Resample-only control", None),
+    ("E0.4", "Pilot gate", "encodec"),
+    ("E1.1", "Detuning sweep, phase vs reference offset", None),
+    ("E1.2", "Quantiser bypass", None),
+    ("E1.3", "Direct codebook probing", None),
+    ("E1.4", "Per-RVQ-level decomposition", None),
+    ("E1.5", "Random-codebook control", None),
+    ("E1.6", "Causal: RVQ trained on controlled pitch distributions", None),
+    ("E2.1", "Codec breadth", None),
+    ("E2.2", "Training-distribution contrast", None),
+    ("E2.3", "Rate sweep in bits per latent dimension", None),
+    ("E2.4", "Stimulus ablations", None),
+    ("E3.1", "Speech-shaped pitch stimuli", None),
+    ("E3.2", "Retuned instrument samples", None),
+    ("E3.3", "Makam validation", None),
+    ("E3.4", "Token-level probe", None),
+    ("E3.5", "Phonological survival (FLEURS)", None),
+    ("E3.6", "Downstream ASR", None),
+]
+
+HEADER = """# Results
+
+<!-- GENERATED FILE. Do not edit by hand.
+     Regenerate with:  python scripts/make_results.py
+     Every number below is computed from a CSV in results/. Nothing here is a
+     prediction, a placeholder, or a value typed by a human. -->
+
+Every figure and table here is derived from a file in `results/`. Experiments
+that have not run are listed as not yet measured rather than shown with
+placeholder values.
+
+"""
+
+
+def fmt(v, nd=3, dash="--"):
+    if v is None or (isinstance(v, float) and not np.isfinite(v)):
+        return dash
+    if v != 0 and abs(v) < 10 ** (-nd):
+        return f"{v:.1e}"
+    return f"{v:.{nd}f}"
+
+
+def ratio_or_na(off, on, floor):
+    """The off/on ratio is only meaningful once the effect clears the estimator.
+
+    Dividing two numbers that are both at the noise floor produces a
+    plausible-looking multiple out of pure noise, which is precisely the failure
+    this file exists to prevent. The caption promises that nothing below the
+    floor means anything; this enforces it.
+    """
+    if not (np.isfinite(off) and np.isfinite(on)) or on == 0:
+        return None, "--"
+    if off < 3 * max(floor, 1e-9):
+        return None, "n/a, below floor"
+    return off / on, None
+
+
+def summarise_csv(path: Path):
+    d = load(path)
+    if not d or "theta_cents" not in d:
+        return None
+    theta = d["theta_cents"]
+    r_coded, r_unc = d["residual_coded_cents"], d["residual_uncoded_cents"]
+    labels = d["reference_label"]
+
+    dis = np.maximum(
+        np.abs(d.get("disagreement_f1_cents", np.zeros_like(theta))),
+        np.abs(d.get("disagreement_f2_cents", np.zeros_like(theta))),
+    )
+    keep = np.nan_to_num(dis, nan=1e9) <= DISAGREE_CENTS
+    if "octave_flag" in d:
+        keep &= d["octave_flag"] < 0.5
+
+    meta_path = path.with_suffix(".meta.json")
+    meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
+
+    rows = []
+    for label in sorted(set(labels.tolist())):
+        m = labels == label
+        rows.append(summarise(theta[m], r_coded[m], r_unc[m], keep[m], label))
+    return meta, rows
+
+
+def main() -> int:
+    results_dir = ROOT / "results"
+    csvs = sorted(p for p in results_dir.glob("*.csv"))
+
+    out = [HEADER]
+    measured_keys = set()
+
+    if not csvs:
+        out.append("## No runs yet\n\nNothing in `results/`.\n")
+    else:
+        out.append("## Pitch transfer function\n")
+        out.append(
+            "| run | codec | rate | reference | n | floor (c) | on-grid (c) | "
+            "off-grid (c) | ratio | grid bias (c) | 95% CI | sine R2 | saw R2 | better |\n"
+            "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        )
+        for csv in csvs:
+            got = summarise_csv(csv)
+            if not got:
+                continue
+            meta, rows = got
+            codec = meta.get("codec", "?")
+            rate = meta.get("rate_label", "?")
+            measured_keys.add(codec)
+            for s in rows:
+                ratio, ratio_note = ratio_or_na(s["off_grid"], s["on_grid"], s["floor"])
+                # The shape comparison is equally meaningless on a null run.
+                if s["bias"] < 3 * max(s["floor"], 1e-9):
+                    better = "n/a, below floor"
+                else:
+                    better = "sawtooth" if s["saw_r2"] > s["sin_r2"] else "sinusoid"
+                lo, hi = s["bias_ci"]
+                out.append(
+                    f"| `{csv.stem}` | {codec} | {rate} | {s['label']} | {s['n']} | "
+                    f"{fmt(s['floor'])} | {fmt(s['on_grid'])} | {fmt(s['off_grid'])} | "
+                    f"{ratio_note or fmt(ratio, 2)} | {fmt(s['bias'])} | "
+                    f"[{fmt(lo,2)}, {fmt(hi,2)}] | {fmt(s['sin_r2'],2)} | "
+                    f"{fmt(s['saw_r2'],2)} | {better} |\n"
+                )
+        out.append(
+            "\n**Reading this table.** `floor` is the estimator's own error on "
+            "uncoded stimuli in the same run: no effect below it means anything. "
+            "`grid bias` is positive when the codec moved an interval *toward* "
+            "the Western semitone grid, which is the directional claim; a "
+            "symmetric residual of the same magnitude is ordinary degradation. "
+            "`sine R2` against `saw R2` discriminates the two candidate "
+            "mechanisms: a density correction predicts a sinusoid, coarse cell "
+            "assignment predicts a sawtooth, and they scale differently with "
+            "rate.\n\n"
+        )
+
+    figs = sorted(p for p in (ROOT / "figures").glob("*.png"))
+    out.append("## Figures\n\n")
+    if figs:
+        for f in figs:
+            out.append(f"### `{f.name}`\n\n![{f.stem}](figures/{f.name})\n\n")
+    else:
+        out.append("None generated yet.\n\n")
+
+    out.append("## Programme status\n\n| id | experiment | status |\n|---|---|---|\n")
+    for eid, name, tag in PROGRAMME:
+        done = tag is not None and tag in measured_keys
+        if eid == "E0.1":
+            done = False
+        out.append(f"| {eid} | {name} | {'measured' if done else 'not yet measured'} |\n")
+    out.append(
+        "\nSee [EXPERIMENTS.md](EXPERIMENTS.md) for what each of these tests and "
+        "why it is in the programme.\n"
+    )
+
+    (ROOT / "RESULTS.md").write_text("".join(out))
+    print(f"wrote RESULTS.md from {len(csvs)} result file(s)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
