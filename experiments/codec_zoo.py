@@ -22,6 +22,10 @@ REAL rate ranges, which differ from the ones currently in the paper's Table 2:
   dac_24khz        up to 24 kbps            (75 Hz frames, 32 codebooks)
   mimi             1.1 kbps at Q=8          (12.5 Hz frames, 2048 codes)
   speechtokenizer  up to 4 kbps             (50 Hz frames, 8 codebooks)
+
+SpeechTokenizer is the negative control for the whole thesis: LibriSpeech-only
+training means it saw no music, so a training-distribution mechanism predicts no
+12-TET structure in it at all.
 """
 
 from __future__ import annotations
@@ -128,6 +132,37 @@ def _identity_spec(sample_rate: int = 24000) -> Codec:
     return identity(int(sample_rate))
 
 
+def speechtokenizer(n_quantizers: int = 8, model_id: str = "fnlp/SpeechTokenizer") -> Codec:
+    """SpeechTokenizer does not go through transformers; it ships its own class
+    and loads from a config/checkpoint pair inside the repo.
+
+    Scientifically this is the most important codec in the set. It was trained
+    on LibriSpeech alone, which is English audiobooks and contains no music at
+    all. Under the training-distribution hypothesis it is therefore the negative
+    control: it should show no 12-TET phase lock, because there was no 12-TET
+    music in its training data for a codebook to absorb. A grid effect here
+    would be evidence against the mechanism the paper argues for.
+    """
+    import torch
+    from huggingface_hub import hf_hub_download
+    from speechtokenizer import SpeechTokenizer
+
+    device = _device()
+    cfg = hf_hub_download(model_id, "speechtokenizer_hubert_avg/config.json")
+    ckpt = hf_hub_download(model_id, "speechtokenizer_hubert_avg/SpeechTokenizer.pt")
+    model = SpeechTokenizer.load_from_checkpoint(cfg, ckpt).to(device).eval()
+    sr = int(model.sample_rate)
+
+    @torch.no_grad()
+    def fn(x: np.ndarray) -> np.ndarray:
+        wav = torch.from_numpy(x)[None, None, :].to(device)
+        codes = model.encode(wav)                    # (n_q, B, T)
+        codes = codes[: int(n_quantizers)]           # rate = dropping RVQ levels
+        return model.decode(codes).squeeze().cpu().numpy()
+
+    return Codec("speechtokenizer", sr, f"Q{n_quantizers}", fn)
+
+
 REGISTRY = {
     # The null control: same stimuli, same estimator, same analysis, no codec.
     # Every effect must be shown against a run of this at the same sample rate.
@@ -137,6 +172,7 @@ REGISTRY = {
     "dac": dac,
     "dac24": lambda **kw: dac(model_id="descript/dac_24khz", **kw),
     "mimi": mimi,
+    "speechtokenizer": speechtokenizer,
 }
 
 
