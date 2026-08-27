@@ -1,0 +1,59 @@
+"""Pre-fetch codec checkpoints into the shared HF cache.
+
+Run on a LOGIN node: outbound traffic goes through a proxy that only login
+shells export, and compute nodes may not share that egress. Once this has run,
+jobs can set HF_HUB_OFFLINE=1 and never touch the network.
+
+This only downloads files. It does not instantiate a model, so it stays light
+enough for a login node under the no-heavy-processes policy.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+
+from huggingface_hub import snapshot_download
+
+# Weight formats only. These repos are small, but pulling every format would
+# duplicate safetensors and bin for no benefit.
+ALLOW = ["*.safetensors", "*.pt", "*.json", "*.txt", "*.model", "*.py"]
+
+REPOS = [
+    ("facebook/encodec_24khz", "EnCodec 24 kHz, the workhorse, 1.5-24 kbps"),
+    ("facebook/encodec_48khz", "EnCodec 48 kHz, the MUSIC-trained checkpoint"),
+    ("descript/dac_44khz", "DAC 44.1 kHz, highest fidelity, tops out near 8 kbps"),
+    ("descript/dac_24khz", "DAC 24 kHz, the one that actually reaches 24 kbps"),
+    ("descript/dac_16khz", "DAC 16 kHz, third frame-rate point for the C3 fit"),
+    ("kyutai/mimi", "Mimi, 12.5 Hz frames, extreme low rate"),
+    # SpeechTokenizer ships a .pt rather than safetensors, and it is the
+    # scientifically important one: trained on LibriSpeech alone, it saw no
+    # music at all, so under the training-distribution hypothesis it is the
+    # negative control that should show no 12-TET structure.
+    ("fnlp/SpeechTokenizer", "SpeechTokenizer, LibriSpeech only, NO MUSIC: the negative control"),
+]
+
+
+def main() -> int:
+    cache = os.environ.get("HF_HUB_CACHE", "<unset>")
+    print(f"cache: {cache}\n")
+    failed = []
+    for repo, why in REPOS:
+        print(f"--- {repo}\n    {why}", flush=True)
+        try:
+            path = snapshot_download(repo_id=repo, allow_patterns=ALLOW)
+            n = sum(len(f) for _, _, f in os.walk(path))
+            print(f"    ok, {n} files\n", flush=True)
+        except Exception as e:
+            print(f"    FAILED {type(e).__name__}: {e}\n", flush=True)
+            failed.append(repo)
+
+    if failed:
+        print(f"FAILED: {failed}")
+        return 1
+    print("all checkpoints cached")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
