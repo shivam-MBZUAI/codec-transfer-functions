@@ -116,15 +116,50 @@ def make_batch(dist: str, batch: int, sr: int, dur: float,
 # A minimal residual vector quantiser with EMA codebook updates.
 # --------------------------------------------------------------------------
 class VQ(nn.Module):
+    """EMA vector quantiser with data-dependent init and dead-code restart.
+
+    Both matter here. A codebook initialised from random noise sits at a
+    different scale from the encoder's output, so every vector maps to a handful
+    of entries, the rest die, and the decoder collapses to predicting silence.
+    That is exactly what the first training run did: output RMS 0.007 against an
+    input of 0.373, with the loss flat from step 3500.
+    """
+
     def __init__(self, dim: int, size: int, decay: float = 0.99, eps: float = 1e-5):
         super().__init__()
         self.decay, self.eps = decay, eps
         self.register_buffer("embed", torch.randn(size, dim) * 0.1)
         self.register_buffer("cluster_size", torch.zeros(size))
         self.register_buffer("embed_avg", self.embed.clone())
+        self.register_buffer("inited", torch.zeros(1))
+
+    @torch.no_grad()
+    def _init_from(self, flat: torch.Tensor) -> None:
+        """Seed the codebook from real encoder outputs."""
+        n, k = flat.shape[0], self.embed.shape[0]
+        idx = torch.randint(0, n, (k,), device=flat.device) if n < k \
+            else torch.randperm(n, device=flat.device)[:k]
+        self.embed.copy_(flat[idx])
+        self.embed_avg.copy_(self.embed)
+        self.cluster_size.fill_(1.0)
+        self.inited.fill_(1.0)
+
+    @torch.no_grad()
+    def _restart_dead(self, flat: torch.Tensor, threshold: float = 1.0) -> None:
+        """Re-seed entries nothing is using, so capacity is not silently lost."""
+        dead = self.cluster_size < threshold
+        n_dead = int(dead.sum())
+        if n_dead == 0:
+            return
+        idx = torch.randint(0, flat.shape[0], (n_dead,), device=flat.device)
+        self.embed[dead] = flat[idx]
+        self.embed_avg[dead] = flat[idx]
+        self.cluster_size[dead] = 1.0
 
     def forward(self, x):                      # x: (B, T, D)
         flat = x.reshape(-1, x.shape[-1])
+        if self.training and self.inited.item() == 0:
+            self._init_from(flat.detach())
         d = (flat.pow(2).sum(1, keepdim=True)
              - 2 * flat @ self.embed.t()
              + self.embed.pow(2).sum(1))
@@ -142,6 +177,7 @@ class VQ(nn.Module):
                 cs = ((self.cluster_size + self.eps)
                       / (n + self.embed.shape[0] * self.eps) * n)
                 self.embed.copy_(self.embed_avg / cs.unsqueeze(1))
+                self._restart_dead(flat.detach())
 
         # straight-through: gradients flow to the encoder unchanged
         return x + (q - x).detach(), idx.view(x.shape[:-1]), F.mse_loss(q.detach(), x)
@@ -164,19 +200,19 @@ class RVQ(nn.Module):
 
 
 class Codec(nn.Module):
-    def __init__(self, dim=64, width=32, codebook=256, n_q=4, ratios=(4, 4, 4, 4)):
+    def __init__(self, dim=128, width=64, codebook=512, n_q=4, ratios=(4, 4, 4, 4)):
         super().__init__()
         enc, ch = [], 1
         for r in ratios:
             enc += [nn.Conv1d(ch, width, 2 * r, stride=r, padding=r // 2), nn.ELU()]
             ch = width
-            width = min(width * 2, 128)
+            width = min(width * 2, 256)
         enc += [nn.Conv1d(ch, dim, 3, padding=1)]
         self.encoder = nn.Sequential(*enc)
 
         dec, ch = [nn.Conv1d(dim, ch, 3, padding=1), nn.ELU()], ch
         for r in reversed(ratios):
-            nxt = max(ch // 2, 32)
+            nxt = max(ch // 2, 64)
             dec += [nn.ConvTranspose1d(ch, nxt, 2 * r, stride=r, padding=r // 2),
                     nn.ELU()]
             ch = nxt
@@ -203,16 +239,32 @@ class Codec(nn.Module):
         return self.decoder(q.transpose(1, 2))[..., :length], codes, commit
 
 
-def stft_loss(a, b, sizes=(512, 1024, 2048)):
-    """Multi-resolution magnitude loss. Waveform MSE alone is a poor objective
-    for pitch: it is dominated by phase, which we do not care about and the
-    estimator ignores."""
+def stft_loss(pred, target, sizes=(512, 1024, 2048)):
+    """Multi-resolution STFT loss: spectral convergence plus log-magnitude L1.
+
+    The spectral-convergence term is load-bearing and its absence caused a
+    silent failure. A harmonic tone's spectrum is sparse: eight bins out of
+    roughly a thousand carry energy. Under log-magnitude L1 alone, matching the
+    near-empty bins dominates the objective, and a decoder that outputs silence
+    matches them perfectly. The model duly collapsed to near-silence with a
+    healthy codebook and a plateaued loss, which looked like convergence.
+
+    Spectral convergence, ||target - pred||_F / ||target||_F, is relative to the
+    target's own energy: it costs exactly 1.0 for silence and 0 for a perfect
+    match, so it cannot be gamed that way.
+    """
     total = 0.0
     for n in sizes:
-        w = torch.hann_window(n, device=a.device)
-        A = torch.stft(a.squeeze(1), n, n // 4, window=w, return_complex=True).abs()
-        B = torch.stft(b.squeeze(1), n, n // 4, window=w, return_complex=True).abs()
-        total = total + F.l1_loss(torch.log(A + 1e-5), torch.log(B + 1e-5))
+        w = torch.hann_window(n, device=pred.device)
+        # .abs() on a complex tensor has an unstable gradient near zero, which
+        # is exactly where a collapsing decoder sits. Add epsilon inside.
+        Pc = torch.stft(pred.squeeze(1), n, n // 4, window=w, return_complex=True)
+        Tc = torch.stft(target.squeeze(1), n, n // 4, window=w, return_complex=True)
+        P = (Pc.real ** 2 + Pc.imag ** 2 + 1e-9).sqrt()
+        T = (Tc.real ** 2 + Tc.imag ** 2 + 1e-9).sqrt()
+        sc = torch.linalg.norm(T - P) / (torch.linalg.norm(T) + 1e-8)
+        mag = F.l1_loss(torch.log(P + 1e-5), torch.log(T + 1e-5))
+        total = total + sc + mag
     return total / len(sizes)
 
 
@@ -225,9 +277,11 @@ def main() -> int:
     p.add_argument("--batch", type=int, default=32)
     p.add_argument("--sr", type=int, default=24000)
     p.add_argument("--dur", type=float, default=0.5)
-    p.add_argument("--codebook", type=int, default=256)
+    p.add_argument("--codebook", type=int, default=512)
     p.add_argument("--n-quantizers", type=int, default=4)
-    p.add_argument("--lr", type=float, default=3e-4)
+    p.add_argument("--lr", type=float, default=1e-3)
+    p.add_argument("--wave-weight", type=float, default=10.0,
+                   help="weight on waveform L1; below ~1 the model collapses to silence")
     p.add_argument("--jitter", type=float, default=12.0)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--out", required=True, type=Path)
@@ -250,13 +304,28 @@ def main() -> int:
         x = make_batch(args.distribution, args.batch, args.sr, args.dur, rng,
                        device=dev)
         y, _, commit = model(x)
-        loss = stft_loss(y, x) + F.mse_loss(y, x) + 0.25 * commit
+        # The waveform term is load-bearing and its WEIGHT is what matters.
+        # Spectral loss alone collapses to silence: a harmonic tone's spectrum
+        # is sparse, so matching the near-empty bins dominates and silence
+        # matches them perfectly. An unweighted MSE (~0.12 against a spectral
+        # loss of ~1.2) is too small to prevent that. Measured on a single-batch
+        # overfit: spectral only reaches an output/input RMS ratio of 0.01,
+        # adding weighted waveform L1 reaches 0.81.
+        loss = stft_loss(y, x) + args.wave_weight * F.l1_loss(y, x) + 0.25 * commit
         opt.zero_grad(set_to_none=True)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         opt.step()
-        if step % 500 == 0 or step == 1:
-            print(f"  step {step:6d}/{args.steps}  loss {loss.item():.4f}", flush=True)
+        if step % 1000 == 0 or step == 1:
+            with torch.no_grad():
+                rms_in, rms_out = float(x.pow(2).mean().sqrt()), float(y.pow(2).mean().sqrt())
+                used = sum(int((l.cluster_size > 1).sum()) for l in model.quantizer.layers)
+            print(f"  step {step:6d}/{args.steps}  loss {loss.item():.4f}  "
+                  f"rms in/out {rms_in:.3f}/{rms_out:.3f}  codes used {used}", flush=True)
+            if step > 2000 and rms_out < 0.1 * rms_in:
+                raise SystemExit(
+                    "ABORT: decoder collapsed to near-silence. A model that "
+                    "reconstructs nothing has no transfer function to measure.")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     torch.save({"state_dict": model.state_dict(), "args": vars(args),

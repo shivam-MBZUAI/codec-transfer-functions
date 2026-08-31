@@ -108,8 +108,10 @@ def summarise_csv(path: Path):
     rows = []
     for label in sorted(set(labels.tolist())):
         m = labels == label
+        if int((m & keep & np.isfinite(r_coded)).sum()) < 20:
+            continue        # too few surviving trials to summarise honestly
         rows.append(summarise(theta[m], r_coded[m], r_unc[m], keep[m], label))
-    return meta, rows
+    return (meta, rows) if rows else None
 
 
 def main() -> int:
@@ -128,9 +130,17 @@ def main() -> int:
             "off-grid (c) | ratio | grid bias (c) | 95% CI | sine R2 | saw R2 | better |\n"
             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
         )
+        skipped = []
         for csv in csvs:
-            got = summarise_csv(csv)
+            # Sweeps may still be writing, and a run that failed early leaves a
+            # header-only file. Neither should take down the whole report.
+            try:
+                got = summarise_csv(csv)
+            except Exception as e:
+                skipped.append((csv.stem, f"{type(e).__name__}: {e}"))
+                continue
             if not got:
+                skipped.append((csv.stem, "no usable rows"))
                 continue
             meta, rows = got
             codec = meta.get("codec", "?")
@@ -151,6 +161,9 @@ def main() -> int:
                     f"[{fmt(lo,2)}, {fmt(hi,2)}] | {fmt(s['sin_r2'],2)} | "
                     f"{fmt(s['saw_r2'],2)} | {better} |\n"
                 )
+        if skipped:
+            out.append("\n**Skipped:** " + ", ".join(
+                f"`{n}` ({why})" for n, why in skipped) + "\n")
         out.append(
             "\n**Reading this table.** `floor` is the estimator's own error on "
             "uncoded stimuli in the same run: no effect below it means anything. "
