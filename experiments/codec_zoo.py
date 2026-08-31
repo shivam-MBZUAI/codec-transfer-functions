@@ -128,6 +128,116 @@ def mimi(n_quantizers: int = 8, model_id: str = "kyutai/mimi") -> Codec:
     return Codec("mimi", sr, f"Q{n_quantizers}", fn)
 
 
+def encodec_bypass(model_id: str = "facebook/encodec_24khz") -> Codec:
+    """Encoder to decoder with the quantiser REMOVED.
+
+    This is the cleanest mechanism control available. The paper's claim is that
+    the residual vector quantiser's codebooks absorbed the pitch statistics of
+    training audio. If a grid-locked residual survives with no quantisation at
+    all, that claim is false and the effect belongs to the convolutional
+    encoder/decoder instead.
+
+    Costs one forward pass per trial and can falsify the central hypothesis
+    outright, which is a better ratio than anything else in the programme.
+    """
+    import torch
+    from transformers import EncodecModel
+
+    device = _device()
+    model = EncodecModel.from_pretrained(model_id).to(device).eval()
+    sr = model.config.sampling_rate
+    n_ch = int(getattr(model.config, "audio_channels", 1))
+
+    @torch.no_grad()
+    def fn(x: np.ndarray) -> np.ndarray:
+        wav = torch.from_numpy(x)[None, None, :].repeat(1, n_ch, 1).to(device)
+        # The continuous latent, never passed through model.quantizer.
+        emb = model.encoder(wav)
+        dec = model.decoder(emb).squeeze(0)
+        return (dec[0] if dec.ndim == 2 else dec).cpu().numpy()
+
+    return Codec("encodec_bypass", sr, "no-quantiser", fn)
+
+
+def encodec_shuffled(bandwidth_kbps: float = 3.0,
+                     model_id: str = "facebook/encodec_24khz",
+                     seed: int = 0) -> Codec:
+    """Codebook entries replaced by random vectors of matched mean and scale.
+
+    Quantisation still happens, at the same rate, with the same architecture.
+    Only the *learned* codebook is destroyed. If the grid effect is carried by
+    what the codebook learned, it must vanish here while ordinary quantisation
+    distortion remains. This separates "a quantiser did it" from "a quantiser
+    that learned Western pitch statistics did it", which is the paper's actual
+    claim and one no other control isolates.
+    """
+    import torch
+    from transformers import EncodecModel
+
+    device = _device()
+    model = EncodecModel.from_pretrained(model_id).to(device).eval()
+    sr = model.config.sampling_rate
+    n_ch = int(getattr(model.config, "audio_channels", 1))
+
+    g = torch.Generator(device="cpu").manual_seed(int(seed))
+    n_replaced = 0
+    with torch.no_grad():
+        for name, buf in list(model.named_buffers()) + list(model.named_parameters()):
+            # RVQ codebooks appear as `embed`/`embed_avg` buffers of shape
+            # (codebook_size, dim) inside each quantiser layer.
+            if name.endswith(("embed", "embed_avg")) and buf.dim() == 2:
+                rand = torch.randn(buf.shape, generator=g).to(buf.device)
+                buf.copy_(rand * buf.std() + buf.mean())
+                n_replaced += 1
+    if n_replaced == 0:
+        raise RuntimeError(
+            "no codebook buffers matched; inspect model.named_buffers() before "
+            "trusting this control")
+
+    @torch.no_grad()
+    def fn(x: np.ndarray) -> np.ndarray:
+        wav = torch.from_numpy(x)[None, None, :].repeat(1, n_ch, 1).to(device)
+        enc = model.encode(wav, bandwidth=float(bandwidth_kbps))
+        dec = model.decode(enc.audio_codes, enc.audio_scales,
+                           last_frame_pad_length=enc.last_frame_pad_length).audio_values
+        dec = dec.squeeze(0)
+        return (dec[0] if dec.ndim == 2 else dec).cpu().numpy()
+
+    return Codec("encodec_shuffled", sr, f"{bandwidth_kbps}kbps-random-cb", fn)
+
+
+def trained(checkpoint: str, n_quantizers: int | None = None,
+            bypass: bool = False) -> Codec:
+    """A codec we trained ourselves, from train_rvq.py.
+
+    Loading it behind the same interface as the released codecs means the sweep,
+    the estimator, the controls and the analysis all apply unchanged. The causal
+    result is therefore produced by exactly the same measurement path as the
+    observational one, which removes "you measured them differently" as an
+    explanation for any difference between them.
+    """
+    import torch
+
+    from train_rvq import Codec as TrainedCodec
+
+    device = _device()
+    ckpt = torch.load(checkpoint, map_location="cpu", weights_only=False)
+    model = TrainedCodec(codebook=ckpt["codebook"], n_q=ckpt["n_quantizers"])
+    model.load_state_dict(ckpt["state_dict"])
+    model = model.to(device).eval()
+    sr = int(ckpt["sample_rate"])
+    dist = ckpt.get("args", {}).get("distribution", "?")
+
+    @torch.no_grad()
+    def fn(x: np.ndarray) -> np.ndarray:
+        wav = torch.from_numpy(x)[None, None, :].to(device)
+        y, _, _ = model(wav, n_q=n_quantizers, bypass=bypass)
+        return y.squeeze().cpu().numpy()
+
+    tag = f"{dist}" + ("-bypass" if bypass else f"-Q{n_quantizers or ckpt['n_quantizers']}")
+    return Codec(f"trained_{dist}", sr, tag, fn)
+
+
 def _identity_spec(sample_rate: int = 24000) -> Codec:
     return identity(int(sample_rate))
 
@@ -174,6 +284,11 @@ REGISTRY = {
     "dac16": lambda **kw: dac(model_id="descript/dac_16khz", **kw),
     "mimi": mimi,
     "speechtokenizer": speechtokenizer,
+    # Mechanism controls. Both answer "was it the learned codebook?" directly.
+    "encodec_bypass": lambda **kw: encodec_bypass(),
+    "encodec_shuffled": encodec_shuffled,
+    # Codecs we trained ourselves: build("trained:/path/to/rvq_12tet.pt")
+    "trained": trained,
 }
 
 
@@ -186,6 +301,12 @@ def build(spec: str) -> Codec:
         return REGISTRY[name]()
     if name == "identity":
         key, val = "sample_rate", int(arg)
+    elif name == "encodec_bypass":
+        return REGISTRY[name]()
+    elif name == "encodec_shuffled":
+        key, val = "bandwidth_kbps", float(arg)
+    elif name == "trained":
+        return trained(arg)
     elif name.startswith("encodec"):
         key, val = "bandwidth_kbps", float(arg)
     else:
