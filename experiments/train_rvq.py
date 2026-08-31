@@ -42,7 +42,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 sys.path.insert(0, str(Path(__file__).parent))
-from stimuli import harmonic_tone  # noqa: E402
+from stimuli import harmonic_tone  # noqa: E402,F401  (CPU reference generator)
 
 CENTS_PER_OCTAVE = 1200.0
 
@@ -69,13 +69,47 @@ def sample_pitch_cents(dist: str, n: int, rng: np.random.Generator,
 
 
 def make_batch(dist: str, batch: int, sr: int, dur: float,
-               rng: np.random.Generator, f_ref: float = 110.0) -> torch.Tensor:
-    cents = sample_pitch_cents(dist, batch, rng)
-    out = []
-    for c in cents:
-        f0 = f_ref * 2.0 ** (c / CENTS_PER_OCTAVE)
-        out.append(harmonic_tone(f0, dur, sr, rng, n_partials=8, ramp_s=0.02))
-    return torch.from_numpy(np.stack(out)).float().unsqueeze(1)
+               rng: np.random.Generator, f_ref: float = 110.0,
+               device: str = "cpu", n_partials: int = 8,
+               ramp_s: float = 0.02) -> torch.Tensor:
+    """Synthesise a batch of harmonic tones directly on the target device.
+
+    The obvious loop over batch items in numpy made training CPU-bound: 11
+    minutes of CPU for 41 seconds of wall clock, with the GPU mostly idle and
+    the sweeps on the same machine starved of cores. The synthesis is a pure
+    outer product, so it belongs on the device the training is on.
+
+    Matches the CPU generator in stimuli.py: partial amplitudes fall as 1/n,
+    onset phase is random per partial, gain is jittered per item, partials above
+    Nyquist are dropped rather than aliased, and a raised-cosine ramp keeps the
+    onset from smearing energy across the spectrum.
+    """
+    cents = torch.from_numpy(sample_pitch_cents(dist, batch, rng)).float().to(device)
+    f0 = f_ref * torch.pow(2.0, cents / CENTS_PER_OCTAVE)          # (B,)
+
+    n = int(round(dur * sr))
+    t = torch.arange(n, device=device, dtype=torch.float32) / sr    # (T,)
+    ks = torch.arange(1, n_partials + 1, device=device, dtype=torch.float32)
+
+    freqs = f0[:, None] * ks[None, :]                               # (B, K)
+    below_nyquist = (freqs < 0.95 * (sr / 2)).float()
+    amps = (1.0 / ks)[None, :] * below_nyquist                      # (B, K)
+    phase = torch.rand(batch, n_partials, device=device) * 2 * math.pi
+
+    x = (amps[:, :, None]
+         * torch.sin(2 * math.pi * freqs[:, :, None] * t[None, None, :]
+                     + phase[:, :, None])).sum(dim=1)               # (B, T)
+
+    peak = x.abs().amax(dim=1, keepdim=True).clamp_min(1e-12)
+    gain = torch.empty(batch, 1, device=device).uniform_(0.55, 0.85)
+    x = x * gain / peak
+
+    n_ramp = int(round(ramp_s * sr))
+    if 2 * n_ramp < n:
+        w = 0.5 * (1 - torch.cos(torch.linspace(0, math.pi, n_ramp, device=device)))
+        x[:, :n_ramp] *= w
+        x[:, -n_ramp:] *= w.flip(0)
+    return x.unsqueeze(1)
 
 
 # --------------------------------------------------------------------------
@@ -152,11 +186,21 @@ class Codec(nn.Module):
         self.hop = int(np.prod(ratios))
 
     def forward(self, x, n_q=None, bypass=False):
+        # The strided conv stack only round-trips exactly when the input length
+        # is a multiple of the total hop. Without this, a 12000-sample input
+        # decodes to 11776 and every loss term silently compares misaligned
+        # signals, or fails on a shape mismatch as this did.
+        length = x.shape[-1]
+        pad = (-length) % self.hop
+        if pad:
+            x = F.pad(x, (0, pad))
+
         z = self.encoder(x).transpose(1, 2)
         if bypass:
-            return self.decoder(z.transpose(1, 2)), None, torch.zeros((), device=x.device)
+            y = self.decoder(z.transpose(1, 2))
+            return y[..., :length], None, torch.zeros((), device=x.device)
         q, codes, commit = self.quantizer(z, n_q)
-        return self.decoder(q.transpose(1, 2)), codes, commit
+        return self.decoder(q.transpose(1, 2))[..., :length], codes, commit
 
 
 def stft_loss(a, b, sizes=(512, 1024, 2048)):
@@ -203,9 +247,9 @@ def main() -> int:
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr)
     model.train()
     for step in range(1, args.steps + 1):
-        x = make_batch(args.distribution, args.batch, args.sr, args.dur, rng).to(dev)
+        x = make_batch(args.distribution, args.batch, args.sr, args.dur, rng,
+                       device=dev)
         y, _, commit = model(x)
-        y = y[..., : x.shape[-1]]
         loss = stft_loss(y, x) + F.mse_loss(y, x) + 0.25 * commit
         opt.zero_grad(set_to_none=True)
         loss.backward()
