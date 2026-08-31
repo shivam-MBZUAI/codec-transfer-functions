@@ -171,6 +171,7 @@ REGISTRY = {
     "encodec48": lambda **kw: encodec(model_id="facebook/encodec_48khz", **kw),
     "dac": dac,
     "dac24": lambda **kw: dac(model_id="descript/dac_24khz", **kw),
+    "dac16": lambda **kw: dac(model_id="descript/dac_16khz", **kw),
     "mimi": mimi,
     "speechtokenizer": speechtokenizer,
 }
