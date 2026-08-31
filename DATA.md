@@ -124,7 +124,18 @@ Fix the grouping before deriving any number from it.
 
 ## 4. Ecological validity — one automatic route, one blocked
 
-### 4a. Instrument samples — automatic, recommended
+### 4a. Instrument samples — cached
+
+Real instrument recordings pitch-shifted off-grid. This answers the reviewer
+objection that synthetic stimuli do not transfer, without any restricted
+corpus, and is entirely under your control.
+
+**Cached:** NSynth test split, 350 MB, via [confit/nsynth](https://huggingface.co/datasets/confit/nsynth).
+Isolated instrument notes with pitch labels, which is exactly the shape this
+experiment needs. Its canonical home is a Google Storage bucket that this
+cluster's proxy blocks; the HuggingFace mirror works.
+
+### 4a-old. Other instrument sources
 
 Real instrument recordings pitch-shifted off-grid. This answers the reviewer
 objection that synthetic stimuli do not transfer, without any restricted
@@ -151,7 +162,29 @@ request. Turnaround is not under our control, so file the request early.
 4. Store the token outside any repository, readable only by you. **Never commit
    it, and never paste it into a chat transcript.**
 
-**Open alternatives that need no request:**
+**Cached already, no request needed:**
+
+| Archive | Zenodo | Contents |
+|---|---|---|
+| OTMM makam recognition dataset | [4883680](https://zenodo.org/records/4883680) | 101 MB, 2040 entries, **0 audio**, ~2000 JSON annotations |
+| Turkish makam audio-score alignment | [1284501](https://zenodo.org/records/1284501) | 17 MB, 459 entries, **0 audio**, aligned note annotations |
+
+Both are in `data/makam/`. **Neither contains audio**, which was expected from
+their size. They carry pitch annotations, tonic annotations and aligned notes,
+referenced to MusicBrainz IDs.
+
+That splits the makam problem cleanly in two:
+
+- **Scale-degree offsets: solved.** These annotations are a defensible measured
+  source for how far each degree sits from the nearest 12-TET pitch, replacing
+  the Arel-Ezgi-Uzdilek comma-table values the draft currently uses.
+- **Audio to push through a codec: still blocked.** Needs Dunya, or the
+  instrument-retuning route in 4a.
+
+Zenodo *file* downloads are 403 through this cluster's proxy even though its
+API responds. These were fetched on a laptop and pushed across.
+
+**Further open resources:**
 
 | Resource | Where | What it gives |
 |---|---|---|
@@ -191,7 +224,10 @@ Verified 2026-08-26 on the cluster cache:
 | Whisper large-v3 | 8.7 GB |
 | MMS-1B-all (1199 language adapters) | 14 GB |
 | **Total model cache** | **46 GB** |
-| FLEURS, 23 languages test split | not yet fetched |
+| FLEURS, 23 languages test split | 9.8 GB |
+| MMS forced aligner | 1.3 GB |
+| NSynth test split | 350 MB |
+| Makam annotations | 118 MB |
 
 Everything lives under `$CODECS_ROOT` on shared scratch storage. Nothing is
 written to a home share or to a node-local `/tmp`.
@@ -204,6 +240,24 @@ Outbound traffic goes through an authenticated proxy exported **only by login
 shells**. A plain non-login `ssh host "cmd"` has no proxy, and downloads fail
 with a connect timeout that looks like a firewall block. Always `bash -lc`.
 
-GitHub *releases* are blocked even through the proxy, while PyPI and
-HuggingFace are reachable. Fetch checkpoints on a login node, then jobs can run
+**Reachable:** PyPI, files.pythonhosted.org, huggingface.co (models and
+datasets), zenodo.org **API**.
+
+**Blocked, 403 through the proxy:**
+
+| Host | What it costs you |
+|---|---|
+| GitHub *releases* | `uv` cannot fetch a standalone interpreter |
+| `download.pytorch.org` | the CUDA-specific wheel index |
+| `dl.fbaipublicfiles.com` | `torchaudio.pipelines.MMS_FA` weights |
+| `storage.googleapis.com` | NSynth's canonical home |
+| zenodo.org *file* downloads | the makam annotation archives |
+
+**The workaround that always applies:** almost everything is mirrored on
+HuggingFace, which is reachable. Where it is not, fetch on a laptop and push
+across with `tar | tsh ssh`. Fetch everything on a login node, then jobs can run
 with `HF_HUB_OFFLINE=1` and never touch the network.
+
+**A trap worth repeating:** `snapshot_download` returns success when
+`allow_patterns` matched nothing. Always verify a file count after downloading,
+which is what every fetcher in `cluster/` now does.

@@ -47,12 +47,19 @@ def main() -> int:
         print(f"=== {group}")
         for lang in members:
             try:
-                snapshot_download(
+                path = snapshot_download(
                     repo_id=REPO, repo_type="dataset",
                     allow_patterns=[f"data/{lang}/test.tsv",
                                     f"data/{lang}/audio/test.tar.gz"],
                 )
-                print(f"    OK      {lang}", flush=True)
+                # snapshot_download reports success when allow_patterns matched
+                # nothing at all, so verify the archive is actually on disk.
+                tar = os.path.join(path, "data", lang, "audio", "test.tar.gz")
+                tsv = os.path.join(path, "data", lang, "test.tsv")
+                if not (os.path.exists(tar) and os.path.exists(tsv)):
+                    raise RuntimeError("expected files absent after download")
+                mb = os.path.getsize(os.path.realpath(tar)) / 1e6
+                print(f"    OK      {lang:14} {mb:7.0f} MB", flush=True)
                 ok.append(lang)
             except Exception as e:
                 msg = str(e).split("\n")[0][:140]
