@@ -2,7 +2,7 @@
 #SBATCH --job-name=codec-sweep
 #SBATCH --partition=defq
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=32G
 #SBATCH --time=04:00:00
 #SBATCH --output=/scratch/shivam.chauhan/codecs/slurm/%x-%A_%a.out
@@ -11,6 +11,11 @@
 # One array task per codec/rate configuration. Ask for one GPU and a slice of a
 # node, not a whole node: 8 GPUs per node means --gres=gpu:1 queues far sooner
 # on a busy cluster, and this workload does not scale past one device.
+#
+# NOTE ON GPUs: this job is largely CPU-bound. The codec forward pass wants a
+# GPU, but F0 estimation is numpy and runs at ~100 trials/s per core. For the
+# identity and analysis-only runs, drop --gres entirely; CPU-only jobs queue
+# noticeably sooner than GPU jobs on a busy partition.
 #
 # The outbound proxy comes from the login profile and is deliberately NOT set
 # here: it carries a shared credential and must never be written into a file

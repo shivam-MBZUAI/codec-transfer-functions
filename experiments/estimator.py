@@ -138,22 +138,27 @@ def estimate_f0_harmonic_sum(
 
     cands = np.geomspace(fmin, min(fmax, nyq / 2), n_candidates)
 
-    best_score, best = -np.inf, float("nan")
-    for c in cands:
-        score, used = 0.0, 0
-        for k in range(1, n_partials + 1):
-            f = k * c
-            if f >= 0.95 * nyq:
-                break
-            idx = int(round(f / df))
-            if 1 <= idx < len(logmag) - 1:
-                score += float(logmag[idx - 1 : idx + 2].max())
-                used += 1
-        if used >= 2:
-            score /= used
-            if score > best_score:
-                best_score, best = score, float(c)
-    return best
+    # Vectorised over candidates. The obvious loop here costs ~27 ms per tone
+    # and dominates the whole pipeline: at four tones per trial it caps a sweep
+    # at ~16 trials/s, which is 20 minutes per configuration on one core and is
+    # CPU-bound, so no amount of GPU helps. Scoring all candidates at once with
+    # a gather is the same computation.
+    ks = np.arange(1, n_partials + 1)
+    freqs = np.outer(cands, ks)                     # (n_cand, n_partials)
+    valid = freqs < 0.95 * nyq
+    idx = np.clip(np.rint(freqs / df).astype(np.int64), 1, len(logmag) - 2)
+
+    # Take the local max over a 3-bin window, matching the loop's behaviour of
+    # tolerating a peak landing between bins.
+    peak = np.maximum(np.maximum(logmag[idx - 1], logmag[idx]), logmag[idx + 1])
+    peak = np.where(valid, peak, 0.0)
+    used = valid.sum(axis=1)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        score = np.where(used >= 2, peak.sum(axis=1) / np.maximum(used, 1), -np.inf)
+
+    if not np.any(np.isfinite(score)):
+        return float("nan")
+    return float(cands[int(np.argmax(score))])
 
 
 def estimate_f0_refined(
