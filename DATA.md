@@ -212,6 +212,37 @@ other side, which is not a coherent measurement.
 
 ---
 
+## 5. Training-density estimation — cached
+
+Proposition 1 predicts the residual from `p(theta)`, the pitch density of the
+codec's training audio. No released codec publishes that audio, which is why the
+draft treats the proposition as qualitative. But the corpora are **named** even
+where the mixtures are not, and F0 histograms converge on a few thousand clips,
+so bounded samples are enough.
+
+| Sample | Repo | Size | Role |
+|---|---|---|---|
+| LibriSpeech dev-clean | [openslr/librispeech_asr](https://huggingface.co/datasets/openslr/librispeech_asr) | 342 MB | **SpeechTokenizer's entire training set.** `p` is knowable exactly |
+| GTZAN | [marsyas/gtzan](https://huggingface.co/datasets/marsyas/gtzan) | 1.2 GB | Western music, grid-peaked F0 reference |
+| MusicGen small | [facebook/musicgen-small](https://huggingface.co/facebook/musicgen-small) | 2.4 GB | codec-token music model for the propagation test |
+
+SpeechTokenizer is the clean case. It was trained on LibriSpeech and nothing
+else, so `p` can be computed rather than estimated, and speech F0 is smooth
+rather than grid-peaked. Proposition 1 therefore predicts **no 12-TET structure
+in it at all**, which turns the negative control from a qualitative expectation
+into a quantitative prediction on a released codec.
+
+GTZAN serves two purposes: a stand-in for the music fraction of EnCodec's and
+DAC's named mixtures, and the comparison target for recovering a codec's implied
+pitch prior from its codebook. Classical quantisation theory gives reconstruction
+point density `lambda(theta)` proportional to `p(theta)^(1/3)`, so measuring
+where the transfer function steps yields an estimate of `p` without ever seeing
+the training data. Whether that recovered prior resembles Western music
+statistics is then a falsifiable comparison.
+
+**Genuinely unavailable:** Mimi's training data (~7M hours, undisclosed). For
+Mimi the proposition stays qualitative.
+
 ## Disk footprint
 
 Verified 2026-08-26 on the cluster cache:
