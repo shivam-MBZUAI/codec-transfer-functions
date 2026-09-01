@@ -43,8 +43,14 @@ from train_rvq import make_batch, stft_loss  # noqa: E402
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--distribution", required=True,
-                   choices=["12tet", "uniform", "53tet"])
+    p.add_argument("--distribution", default=None,
+                   choices=["12tet", "uniform", "53tet"],
+                   help="synthetic tone distribution (the confounded design)")
+    p.add_argument("--audio-root", type=Path, default=None,
+                   help="fine-tune on REAL audio from this directory instead. "
+                        "This is the design that works: broad audio means the "
+                        "codec cannot overfit the stimulus family, so the "
+                        "training pitch density is the only thing that varies.")
     p.add_argument("--steps", type=int, default=3000)
     p.add_argument("--batch", type=int, default=16)
     p.add_argument("--lr", type=float, default=1e-5)
@@ -52,6 +58,9 @@ def main() -> int:
     p.add_argument("--wave-weight", type=float, default=10.0)
     p.add_argument("--out", required=True, type=Path)
     args = p.parse_args()
+
+    if (args.distribution is None) == (args.audio_root is None):
+        raise SystemExit("give exactly one of --distribution or --audio-root")
 
     from transformers import EncodecModel
     dev = "cuda" if torch.cuda.is_available() else "cpu"
@@ -61,11 +70,50 @@ def main() -> int:
 
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr)
     rng = np.random.default_rng(0)
-    print(f"fine-tuning EnCodec on '{args.distribution}' pitches, "
-          f"{args.steps} steps at lr {args.lr}", flush=True)
+
+    clips = None
+    if args.audio_root is not None:
+        import soundfile as sf
+        import scipy.signal as sps
+        paths = sorted(q for ext in ("*.wav", "*.au", "*.flac")
+                       for q in args.audio_root.rglob(ext))
+        if not paths:
+            raise SystemExit(f"no audio under {args.audio_root}")
+        clips = []
+        for q in paths:
+            try:
+                x, file_sr = sf.read(str(q), dtype="float64", always_2d=False)
+            except Exception:
+                continue
+            if x.ndim > 1:
+                x = x.mean(axis=1)
+            if file_sr != sr:
+                x = sps.resample_poly(x, sr, file_sr)
+            if len(x) > sr:
+                clips.append(x.astype(np.float32))
+        print(f"loaded {len(clips)} clips from {args.audio_root}", flush=True)
+
+    label = args.distribution or str(args.audio_root)
+    print(f"fine-tuning EnCodec on '{label}', {args.steps} steps at lr {args.lr}",
+          flush=True)
+
+    def next_batch():
+        if clips is None:
+            return make_batch(args.distribution, args.batch, sr, 0.5, rng, device=dev)
+        n = int(0.5 * sr)
+        out = np.empty((args.batch, 1, n), dtype=np.float32)
+        for i in range(args.batch):
+            c = clips[rng.integers(len(clips))]
+            j = int(rng.integers(0, max(1, len(c) - n)))
+            seg = c[j:j + n]
+            if len(seg) < n:
+                seg = np.pad(seg, (0, n - len(seg)))
+            peak = float(np.abs(seg).max())
+            out[i, 0] = seg / peak * 0.7 if peak > 1e-6 else seg
+        return torch.from_numpy(out).to(dev)
 
     for step in range(1, args.steps + 1):
-        x = make_batch(args.distribution, args.batch, sr, 0.5, rng, device=dev)
+        x = next_batch()
         enc = model.encode(x, bandwidth=args.bandwidth)
         y = model.decode(enc.audio_codes, enc.audio_scales,
                          last_frame_pad_length=enc.last_frame_pad_length).audio_values
