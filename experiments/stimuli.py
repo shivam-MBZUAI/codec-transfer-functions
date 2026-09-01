@@ -60,6 +60,9 @@ def harmonic_tone(
     n_partials: int = 8,
     ramp_s: float = 0.02,
     sinusoid: bool = False,
+    vibrato_cents: float = 0.0,
+    vibrato_hz: float = 5.5,
+    noise_db: float | None = None,
 ) -> np.ndarray:
     """One tone. Onset phase per partial and overall gain are randomised from
     `rng`, so no result can depend on a fixed phase relationship and the codec
@@ -70,11 +73,30 @@ def harmonic_tone(
 
     n_partials = 1 if sinusoid else n_partials
     nyquist = 0.5 * sr
+
+    # Vibrato as instantaneous-phase modulation. This is the feature most likely
+    # to explain why the grid effect vanishes on real recordings: a residual
+    # periodic in pitch with an amplitude of ~14 cents cannot survive being
+    # swept back and forth across the grid by a comparable amount. Real
+    # instruments carry 10 to 50 cents of it; our stimuli carry none.
+    if vibrato_cents > 0:
+        dev = (2.0 ** (vibrato_cents / 1200.0) - 1.0)
+        inst = 1.0 + dev * np.sin(2.0 * np.pi * vibrato_hz * t)
+        phase_scale = np.cumsum(inst) / sr
+    else:
+        phase_scale = t
+
     for k in range(1, n_partials + 1):
         fk = k * f0
         if fk >= 0.95 * nyquist:
             break
-        x += (1.0 / k) * np.sin(2.0 * np.pi * fk * t + rng.uniform(0.0, 2.0 * np.pi))
+        x += (1.0 / k) * np.sin(2.0 * np.pi * fk * phase_scale
+                                + rng.uniform(0.0, 2.0 * np.pi))
+
+    if noise_db is not None:
+        sig = float(np.sqrt((x ** 2).mean()))
+        if sig > 0:
+            x = x + rng.normal(0.0, sig * 10 ** (-noise_db / 20.0), size=n)
 
     peak = float(np.abs(x).max())
     if peak > 0.0:
@@ -158,13 +180,16 @@ def interval_stimulus(
     n_partials: int = 8,
     sinusoid: bool = False,
     vowel: bool = False,
+    vibrato_cents: float = 0.0,
+    noise_db: float | None = None,
 ) -> Stimulus:
     f2 = f1 * cents_to_ratio(theta_cents)
     if vowel:
         t1 = vowel_tone(f1, tone_s, sr, rng, ramp_s=ramp_s)
         t2 = vowel_tone(f2, tone_s, sr, rng, ramp_s=ramp_s)
     else:
-        kw = dict(n_partials=n_partials, ramp_s=ramp_s, sinusoid=sinusoid)
+        kw = dict(n_partials=n_partials, ramp_s=ramp_s, sinusoid=sinusoid,
+                  vibrato_cents=vibrato_cents, noise_db=noise_db)
         t1 = harmonic_tone(f1, tone_s, sr, rng, **kw)
         t2 = harmonic_tone(f2, tone_s, sr, rng, **kw)
     gap = np.zeros(int(round(gap_s * sr)), dtype=np.float64)
@@ -181,7 +206,8 @@ def interval_stimulus(
         tone1_slice=slice(n_ramp, n_t1 - n_ramp),
         tone2_slice=slice(n_t1 + n_gap + n_ramp, len(audio) - n_ramp),
         meta=dict(tone_s=tone_s, gap_s=gap_s, n_partials=n_partials,
-                  sinusoid=sinusoid, vowel=vowel, sr=sr),
+                  sinusoid=sinusoid, vowel=vowel, sr=sr,
+                  vibrato_cents=vibrato_cents, noise_db=noise_db),
     )
 
 

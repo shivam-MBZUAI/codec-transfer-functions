@@ -185,6 +185,70 @@ and Amharic lost the Ge'ez pharyngeals and carries ejectives instead. Amharic
 being counted twice is also where the draft's phantom 24th language came from.
 Corrected: 20 languages in four groups, with Arabic reported individually.
 
+## 11. The MMS cross-check confirms the downstream null
+
+The draft promises a second recogniser, and it is load-bearing once Experiment 3
+returns a null: a disparity under one system but not the other implicates the
+recogniser. Whisper is a weak instrument here, failing outright on Amharic,
+Georgian and Yoruba with baseline error 1.0, and having no setting at all for
+Igbo, Oromo, Zulu or Xhosa.
+
+MMS covers all 21 languages. Both recognisers agree:
+
+| Group | Whisper | MMS |
+|---|---|---|
+| control | 54.0% | 45.8% |
+| tone | 25.1% (0.47×) | 30.7% (0.67×) |
+| ejective | not measurable | 43.4% (0.95×) |
+| click | not measurable | **59.7% (1.30×)** |
+
+**P6 is falsified under both recognisers.** It predicted tone languages at 31%
+against English at 9%, requiring at least 1.5×; measured 0.47× and 0.67×, the
+opposite direction.
+
+MMS also rescues four languages Whisper cannot handle. Amharic goes from a
+baseline of 1.000 to 0.271, Yoruba from 1.000 to 0.487. The click group, absent
+from the Whisper run entirely, is the only group above the control at 1.30×,
+which with two languages is worth a sentence and not a claim.
+
+## 12. Vibrato AMPLIFIES the effect, refuting the out-of-distribution account
+
+We hypothesised that real recordings show no effect because they carry vibrato
+that smears a residual periodic in pitch. Measured, vibrato does the opposite:
+
+| Vibrato depth | Coded grid bias | Uncoded bias | Uncoded noise |
+|---|---|---|---|
+| 0c | 9.06 | 0.000 | 0.000 |
+| 10c | 9.86 | 0.000 | 1.036 |
+| 20c | 12.72 | 0.000 | 2.420 |
+| 40c | **16.03** | 0.000 | 3.308 |
+
+A 77% increase at 40 cents of vibrato. The uncoded control shows exactly zero
+grid-aligned bias at every level, so this is the codec and not the estimator,
+though estimator noise does grow.
+
+This weakens the out-of-distribution explanation for the ecological null:
+vibrato makes a stimulus more like real music, and the effect gets stronger.
+
+## 13. The ecological null survives a protocol control
+
+The obvious remaining suspect was our own protocol. Running it on synthetic
+tones, where the interval sweep puts the effect at 13.7 cents:
+
+| Protocol run on | Displacement | 95% CI |
+|---|---|---|
+| Synthetic tones | **+6.600c** | [+4.237, +9.840] |
+| Real instrument notes, EnCodec | +0.011c | [−0.199, +0.265] |
+| Real instrument notes, DAC | +0.010c | [−0.019, +0.036] |
+
+The protocol detects the effect where it exists and finds nothing on real
+recordings. The null is a property of the audio, and the interval bounds the
+effect at **at least 24 times smaller** on real instruments than on synthetic
+tones.
+
+We therefore report it as an unexplained boundary rather than attributing it to
+out-of-distribution inputs, which finding 12 argues against.
+
 ---
 
 ## What failed, and why it is worth reporting

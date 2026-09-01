@@ -78,6 +78,10 @@ def main() -> None:
     p.add_argument("--theta-stop", type=float, default=1200.0)
     p.add_argument("--partials", type=int, default=8)
     p.add_argument("--sinusoid", action="store_true", help="pure-tone control")
+    p.add_argument("--vibrato-cents", type=float, default=0.0,
+                   help="peak pitch deviation of an added 5.5 Hz vibrato")
+    p.add_argument("--noise-db", type=float, default=None,
+                   help="additive noise at this SNR in dB")
     p.add_argument("--vowel", action="store_true",
                    help="speech-shaped stimulus: harmonic source through formants. "
                         "Speech codecs treat isolated tones as out of distribution")
@@ -121,6 +125,8 @@ def main() -> None:
             n_partials=args.partials,
             sinusoid=args.sinusoid,
             vowel=args.vowel,
+            vibrato_cents=args.vibrato_cents,
+            noise_db=args.noise_db,
         )
 
         for i, stim in enumerate(trials):
