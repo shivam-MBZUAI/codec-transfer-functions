@@ -56,10 +56,15 @@ FIELDS = [
 
 
 def reference_label(f1: float, grid_ref: float = 440.0) -> str:
-    """How far this reference sits from the 12-TET grid anchored at A440."""
-    cents = ratio_to_cents(f1 / grid_ref) % 100.0
-    off = min(cents, 100.0 - cents)
-    return f"{f1:.4g}Hz_{off:+.0f}c" if off > 1.0 else f"{f1:.4g}Hz_ongrid"
+    """How far this reference sits from the 12-TET grid anchored at A440.
+
+    Reports the signed offset within the semitone, 0 to 100 cents, NOT folded to
+    the nearer grid point. Folding made +60 and +40 share a label, which is
+    exactly wrong for a detuning sweep where the whole point is that phase
+    advances monotonically across a full semitone.
+    """
+    off = ratio_to_cents(f1 / grid_ref) % 100.0
+    return f"{f1:.4g}Hz_{off:+05.1f}c" if off > 0.5 else f"{f1:.4g}Hz_ongrid"
 
 
 def main() -> None:

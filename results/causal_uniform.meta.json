@@ -1,0 +1,25 @@
+{
+  "args": {
+    "codec": "trained:../checkpoints/rvq_uniform.pt",
+    "references": [
+      440.0,
+      452.8929
+    ],
+    "reps": 5,
+    "theta_step": 5.0,
+    "theta_stop": 1200.0,
+    "partials": 8,
+    "sinusoid": false,
+    "seed": 20260826,
+    "out": "../results/causal_uniform.csv"
+  },
+  "codec": "trained_uniform",
+  "rate_label": "uniform-Q4",
+  "sample_rate": 24000,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1"
+  }
+}
