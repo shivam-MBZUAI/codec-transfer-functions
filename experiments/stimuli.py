@@ -82,6 +82,55 @@ def harmonic_tone(
     return _raised_cosine_ramp(x, sr, ramp_s)
 
 
+def vowel_tone(
+    f0: float,
+    duration: float,
+    sr: int,
+    rng: np.random.Generator,
+    *,
+    formants: tuple[tuple[float, float], ...] = ((730, 80), (1090, 90), (2440, 120)),
+    n_partials: int = 40,
+    ramp_s: float = 0.02,
+) -> np.ndarray:
+    """A synthetic vowel: harmonic source shaped by formant resonances.
+
+    Speech codecs treat an isolated harmonic complex as far out of distribution.
+    SpeechTokenizer, fed the tone stimuli, produced errors around 100 cents and
+    the two estimators disagreed on 97% of trials, so nothing could be measured.
+    A source-filter vowel is in distribution for a speech codec while still
+    carrying a single controllable F0, which is what the measurement needs.
+
+    Default formants are those of a neutral /a/. The source is a harmonic series
+    with a -12 dB/octave roll-off, which is the usual approximation to glottal
+    flow, rather than the 1/n series used for the musical stimuli.
+    """
+    n = int(round(duration * sr))
+    t = np.arange(n, dtype=np.float64) / sr
+    nyquist = 0.5 * sr
+
+    source = np.zeros(n, dtype=np.float64)
+    for k in range(1, n_partials + 1):
+        fk = k * f0
+        if fk >= 0.95 * nyquist:
+            break
+        source += (1.0 / (k ** 2)) * np.sin(
+            2.0 * np.pi * fk * t + rng.uniform(0.0, 2.0 * np.pi))
+
+    # Shape the source in the frequency domain with the formant envelope, which
+    # avoids the stability problems of cascading narrow IIR resonators.
+    spec = np.fft.rfft(source)
+    freqs = np.fft.rfftfreq(n, 1.0 / sr)
+    envelope = np.full_like(freqs, 0.02)
+    for centre, bandwidth in formants:
+        envelope += 1.0 / (1.0 + ((freqs - centre) / (bandwidth / 2.0)) ** 2)
+    x = np.fft.irfft(spec * envelope, n)
+
+    peak = float(np.abs(x).max())
+    if peak > 0.0:
+        x *= rng.uniform(0.55, 0.85) / peak
+    return _raised_cosine_ramp(x, sr, ramp_s)
+
+
 @dataclass
 class Stimulus:
     """One trial. `tone1_slice` / `tone2_slice` mark the steady portion of each
@@ -108,11 +157,16 @@ def interval_stimulus(
     ramp_s: float = 0.02,
     n_partials: int = 8,
     sinusoid: bool = False,
+    vowel: bool = False,
 ) -> Stimulus:
     f2 = f1 * cents_to_ratio(theta_cents)
-    kw = dict(n_partials=n_partials, ramp_s=ramp_s, sinusoid=sinusoid)
-    t1 = harmonic_tone(f1, tone_s, sr, rng, **kw)
-    t2 = harmonic_tone(f2, tone_s, sr, rng, **kw)
+    if vowel:
+        t1 = vowel_tone(f1, tone_s, sr, rng, ramp_s=ramp_s)
+        t2 = vowel_tone(f2, tone_s, sr, rng, ramp_s=ramp_s)
+    else:
+        kw = dict(n_partials=n_partials, ramp_s=ramp_s, sinusoid=sinusoid)
+        t1 = harmonic_tone(f1, tone_s, sr, rng, **kw)
+        t2 = harmonic_tone(f2, tone_s, sr, rng, **kw)
     gap = np.zeros(int(round(gap_s * sr)), dtype=np.float64)
 
     audio = np.concatenate([t1, gap, t2])
@@ -127,7 +181,7 @@ def interval_stimulus(
         tone1_slice=slice(n_ramp, n_t1 - n_ramp),
         tone2_slice=slice(n_t1 + n_gap + n_ramp, len(audio) - n_ramp),
         meta=dict(tone_s=tone_s, gap_s=gap_s, n_partials=n_partials,
-                  sinusoid=sinusoid, sr=sr),
+                  sinusoid=sinusoid, vowel=vowel, sr=sr),
     )
 
 

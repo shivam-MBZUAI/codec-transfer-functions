@@ -78,6 +78,9 @@ def main() -> None:
     p.add_argument("--theta-stop", type=float, default=1200.0)
     p.add_argument("--partials", type=int, default=8)
     p.add_argument("--sinusoid", action="store_true", help="pure-tone control")
+    p.add_argument("--vowel", action="store_true",
+                   help="speech-shaped stimulus: harmonic source through formants. "
+                        "Speech codecs treat isolated tones as out of distribution")
     p.add_argument("--seed", type=int, default=20260826)
     p.add_argument("--out", required=True, type=Path)
     args = p.parse_args()
@@ -117,12 +120,13 @@ def main() -> None:
             seed=args.seed,
             n_partials=args.partials,
             sinusoid=args.sinusoid,
+            vowel=args.vowel,
         )
 
         for i, stim in enumerate(trials):
             coded = codec(stim.audio)
 
-            n_est = 1 if args.sinusoid else args.partials
+            n_est = 1 if args.sinusoid else (12 if args.vowel else args.partials)
             f1_c, f1_x = estimate_f0(coded[stim.tone1_slice], sr, n_partials=n_est)
             f2_c, f2_x = estimate_f0(coded[stim.tone2_slice], sr, n_partials=n_est)
             f1_u, _ = estimate_f0(stim.audio[stim.tone1_slice], sr, n_partials=n_est)

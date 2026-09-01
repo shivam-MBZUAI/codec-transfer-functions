@@ -31,6 +31,7 @@ training means it saw no music, so a training-distribution mechanism predicts no
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable
 
 import numpy as np
@@ -327,6 +328,8 @@ REGISTRY = {
     # Mechanism controls. Both answer "was it the learned codebook?" directly.
     "encodec_bypass": lambda **kw: encodec_bypass(),
     "encodec_untrained": lambda **kw: encodec_untrained(),
+    # A fine-tuned EnCodec: build("encodec_ft:/path/to/dir@3.0")
+    "encodec_ft": None,
     "encodec_shuffled": encodec_shuffled,
     # Codecs we trained ourselves: build("trained:/path/to/rvq_12tet.pt")
     "trained": trained,
@@ -344,6 +347,11 @@ def build(spec: str) -> Codec:
         key, val = "sample_rate", int(arg)
     elif name in ("encodec_bypass", "encodec_untrained"):
         return REGISTRY[name]()
+    elif name == "encodec_ft":
+        path, _, bw = arg.partition("@")
+        c = encodec(bandwidth_kbps=float(bw or 3.0), model_id=path)
+        return Codec(f"encodec_ft_{Path(path).name}", c.sample_rate,
+                     c.rate_label, c.fn)
     elif name == "encodec_shuffled":
         key, val = "bandwidth_kbps", float(arg)
     elif name == "trained":
