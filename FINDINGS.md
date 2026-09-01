@@ -157,6 +157,34 @@ That last possibility is the most important one for the paper, because it
 changes what the phenomenon means. It is testable: measure the effect as a
 function of how far the stimulus sits from the training distribution.
 
+## 10. Experiment 2: no phonological disparity, and P4 is falsified
+
+Ratios against the non-tonal control, 150 utterances per language, bootstrap
+over languages:
+
+| Codec | Group | Metric | Ratio | 95% CI |
+|---|---|---|---|---|
+| EnCodec | tone (6) | F₀ | 1.048 | [0.86, 1.25] |
+| EnCodec | ejective (3) | LSD | 1.080 | [0.91, 1.15] |
+| EnCodec | click (2) | LSD | 1.077 | [0.97, 1.11] |
+| Mimi | tone (6) | F₀ | 0.921 | [0.73, 1.20] |
+| Mimi | ejective (3) | LSD | 1.044 | [0.94, 1.16] |
+
+Every interval includes 1, under two codecs with very different frame rates. The
+tone ratio sits on opposite sides of unity across codecs. **P4 registered 1.6
+with falsification below 1.1; measured 1.048 and 0.921, so it is falsified**, not
+merely unsupported.
+
+The null is well determined rather than underpowered: it holds at 150 utterances
+per language and the intervals exclude the registered effect size.
+
+**Contrast groups corrected.** The draft grouped Arabic, Hebrew, Amharic and
+Maltese under pharyngealisation. Only Arabic carries it unambiguously: Modern
+Israeli Hebrew has largely lost the pharyngeals, Maltese `għ` is generally silent,
+and Amharic lost the Ge'ez pharyngeals and carries ejectives instead. Amharic
+being counted twice is also where the draft's phantom 24th language came from.
+Corrected: 20 languages in four groups, with Arabic reported individually.
+
 ---
 
 ## What failed, and why it is worth reporting

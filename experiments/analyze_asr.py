@@ -16,7 +16,11 @@ from languages import LANG_NAMES  # noqa: E402
 def main() -> int:
     rows = list(csv.DictReader(Path(sys.argv[1]).open()))
     per_lang = defaultdict(lambda: {"o": [], "c": [], "g": ""})
+    dropped = set()
     for r in rows:
+        if r.get("recogniser_failed", "0") == "1":
+            dropped.add(r["lang"])
+            continue
         try:
             o, c = float(r["wer_original"]), float(r["wer_coded"])
         except ValueError:
@@ -27,6 +31,9 @@ def main() -> int:
         per_lang[r["lang"]]["c"].append(c)
         per_lang[r["lang"]]["g"] = r["group"]
 
+    if dropped:
+        print(f"  excluded, recogniser fails before coding: "
+              f"{', '.join(sorted(dropped))}\n")
     print(f"  {'language':<12}{'group':<12}{'baseline':>10}{'coded':>9}"
           f"{'relative':>11}{'n':>5}")
     lang_rel = {}

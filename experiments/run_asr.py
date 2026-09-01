@@ -95,6 +95,13 @@ def main() -> int:
                            max_new_tokens=200)
         return proc.batch_decode(ids, skip_special_tokens=True)[0]
 
+    # Languages where the recogniser fails BEFORE any codec is applied cannot
+    # measure codec damage: a baseline error rate near 1.0 leaves no headroom
+    # and any "relative increase" is noise over noise. These are reported as
+    # recogniser failures, not as codec results, and are exactly the case the
+    # second recogniser exists for.
+    BASELINE_FLOOR = 0.8
+
     rows = []
     for li, lang in enumerate(langs):
         wl = WHISPER_LANG.get(lang)
@@ -107,12 +114,23 @@ def main() -> int:
             ref = meta.get("transcription", "")
             if not ref.strip():
                 continue
-            y = sps.resample_poly(x, csr, sr) if sr != csr else x
+            # Normalise level before coding. FLEURS utterance levels span a
+            # factor of ~100 (RMS 0.0008 to 0.08). A codec at 3 kbps cannot
+            # represent near-silent input, and Whisper then emits its
+            # silence hallucination ("Thank you."), which reads as catastrophic
+            # codec damage when it is really an out-of-distribution input level.
+            # Both conditions use the SAME normalised signal so the comparison
+            # is of the codec and nothing else.
+            peak = float(np.abs(x).max())
+            if peak < 1e-6:
+                continue
+            xn = x / peak * 0.7
+            y = sps.resample_poly(xn, csr, sr) if sr != csr else xn
             back = codec(y)
             back = sps.resample_poly(back, sr, csr) if sr != csr else back
             try:
-                h_orig = transcribe(x, sr, wl)
-                h_code = transcribe(back[: len(x)], sr, wl)
+                h_orig = transcribe(xn, sr, wl)
+                h_code = transcribe(back[: len(xn)], sr, wl)
             except Exception as e:
                 print(f"      {name}: {type(e).__name__}", flush=True)
                 continue
@@ -128,7 +146,14 @@ def main() -> int:
         done = [r for r in rows if r["lang"] == lang]
         m0 = np.nanmedian([r["wer_original"] for r in done]) if done else float("nan")
         m1 = np.nanmedian([r["wer_coded"] for r in done]) if done else float("nan")
-        print(f"  [{li+1}/{len(langs)}] {lang}: n={n}  ER {m0:.3f} -> {m1:.3f}",
+        note = ""
+        if np.isfinite(m0) and m0 >= BASELINE_FLOOR:
+            note = "   RECOGNISER FAILS ON THIS LANGUAGE (baseline near 1.0)"
+            for r in done:
+                r["recogniser_failed"] = 1
+        for r in done:
+            r.setdefault("recogniser_failed", 0)
+        print(f"  [{li+1}/{len(langs)}] {lang}: n={n}  ER {m0:.3f} -> {m1:.3f}{note}",
               flush=True)
 
     if not rows:
