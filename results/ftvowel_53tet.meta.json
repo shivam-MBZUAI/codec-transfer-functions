@@ -1,0 +1,26 @@
+{
+  "args": {
+    "codec": "encodec_ft:checkpoints/encodec_ft_53tet@3.0",
+    "references": [
+      220.0,
+      226.4
+    ],
+    "reps": 5,
+    "theta_step": 5.0,
+    "theta_stop": 1200.0,
+    "partials": 8,
+    "sinusoid": false,
+    "vowel": true,
+    "seed": 20260826,
+    "out": "results/ftvowel_53tet.csv"
+  },
+  "codec": "encodec_ft_encodec_ft_53tet",
+  "rate_label": "3.0kbps",
+  "sample_rate": 24000,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1"
+  }
+}

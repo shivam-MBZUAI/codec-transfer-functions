@@ -146,6 +146,11 @@ def main() -> None:
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("csv", type=Path)
     p.add_argument("--fig", type=Path, default=None)
+    p.add_argument("--exclusion", choices=["full", "gate", "none"], default="full",
+                   help="full: octave gate AND estimator cross-check (default). "
+                        "gate: octave gate only, for codecs where one coarse "
+                        "estimator fails systematically while the reported "
+                        "estimate stays accurate. none: no exclusions.")
     args = p.parse_args()
 
     d = load(args.csv)
@@ -158,9 +163,14 @@ def main() -> None:
     # applied here, and reported rather than silently dropped.
     disagree = np.maximum(np.abs(d.get("disagreement_f1_cents", np.zeros_like(theta))),
                           np.abs(d.get("disagreement_f2_cents", np.zeros_like(theta))))
-    keep = (np.nan_to_num(disagree, nan=1e9) <= DISAGREE_CENTS)
-    if "octave_flag" in d:
+    keep = np.ones_like(theta, dtype=bool)
+    if args.exclusion in ("full", "gate") and "octave_flag" in d:
         keep &= d["octave_flag"] < 0.5
+    if args.exclusion == "full":
+        keep &= np.nan_to_num(disagree, nan=1e9) <= DISAGREE_CENTS
+    if args.exclusion != "full":
+        print(f"  [exclusion scheme: {args.exclusion}] "
+              f"{100 * (1 - keep.mean()):.1f}% of trials dropped")
 
     results = []
     for label in sorted(set(labels.tolist())):
