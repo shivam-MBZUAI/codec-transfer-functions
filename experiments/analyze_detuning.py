@@ -22,6 +22,19 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).parent))
 from analyze_sweep import DISAGREE_CENTS, fit_sinusoid, load  # noqa: E402
 
+# Guards on whether a phase regression means anything.
+#
+# Per-condition sinusoid R2 is NOT the right test: a genuine small-amplitude
+# effect has low R2 against trial noise while still giving a precise phase from
+# a thousand trials. SNAC 44 kHz sits at R2 0.03 to 0.06 with amplitude 0.48
+# cents and regresses at R2 0.997.
+#
+# Two things do discriminate. The theory predicts the amplitude is FLAT across
+# detuning, so an amplitude that swings wildly means the model does not hold.
+# And a condition retaining almost no trials has no phase to speak of.
+MAX_AMP_CV = 0.35        # sd/mean of amplitude across conditions
+MIN_RETENTION = 0.25     # fraction of trials surviving exclusions
+
 
 def main() -> int:
     # Optional second positional: exclusion scheme. Some codecs alter harmonic
@@ -60,6 +73,31 @@ def main() -> int:
         amp, phase, r2 = fit_sinusoid(theta[m], rc[m])
         rows.append((offset, amp, phase, r2, int(m.sum())))
     rows.sort()
+
+    # A phase regression is only meaningful if each per-condition sinusoid fit
+    # actually found a sinusoid. Fitting a line through phases that came from
+    # noise produces a confident slope from nothing: SNAC 24 kHz gave slope
+    # -0.92 at R2 0.61 this way, from per-condition fits whose own R2 was 0.00
+    # to 0.08 with 90% of trials excluded.
+    amps = np.array([r[1] for r in rows])
+    cv = float(amps.std() / amps.mean()) if amps.mean() else float("inf")
+    total = int(np.sum(keep)) + int(np.sum(~keep))
+    retention = float(np.median([r[4] for r in rows])) / max(total / len(rows), 1)
+    if cv > MAX_AMP_CV or retention < MIN_RETENTION:
+        print(f"  REFUSING TO FIT.")
+        if cv > MAX_AMP_CV:
+            print(f"    amplitude varies across conditions at cv={cv:.2f} "
+                  f"(limit {MAX_AMP_CV}); the theory predicts it is flat, so the "
+                  f"model does not hold here")
+        if retention < MIN_RETENTION:
+            print(f"    only {100*retention:.0f}% of trials survive exclusions "
+                  f"(limit {100*MIN_RETENTION:.0f}%); the estimator is failing on "
+                  f"this codec, not measuring it")
+        print("  A slope fitted through these phases would be a confident number "
+              "from noise.")
+        for off, amp, ph, r2, n in rows:
+            print(f"    detune {off:5.1f}  n={n:5d}  amp {amp:7.2f}  R2 {r2:.3f}")
+        return 1
 
     offsets = np.array([r[0] for r in rows])
     phases = np.unwrap(np.radians([r[2] for r in rows]))

@@ -279,6 +279,63 @@ def encodec_untrained(model_id: str = "facebook/encodec_24khz", seed: int = 0) -
     return Codec("encodec_untrained", sr, "random-init-no-quant", fn)
 
 
+def snac(model_id: str = "hubertsiuzdak/snac_24khz") -> Codec:
+    """SNAC: a multi-scale RVQ where the levels run at different frame rates.
+
+    Architecturally distinct from the other codecs here, which use a single
+    frame rate across quantiser levels. If the grid lock is a property of
+    learned pitch statistics rather than of one architecture family, it should
+    appear here too.
+    """
+    import torch
+    from snac import SNAC as _SNAC
+
+    device = _device()
+    model = _SNAC.from_pretrained(model_id).to(device).eval()
+    sr = int(model.sampling_rate)
+
+    @torch.no_grad()
+    def fn(x: np.ndarray) -> np.ndarray:
+        wav = torch.from_numpy(x)[None, None, :].to(device)
+        # SNAC's hop is the product of its strides; pad so the round trip is
+        # length-exact rather than silently truncated.
+        codes = model.encode(wav)
+        return model.decode(codes).squeeze().cpu().numpy()
+
+    return Codec("snac", sr, model_id.split("_")[-1], fn)
+
+
+def bigcodec(model_id: str = "Alethia/BigCodec") -> Codec:
+    """BigCodec: NOT USABLE as released, retained to document why.
+
+    The released repository contains weights and nothing else: no config, no
+    architecture description. Its from_pretrained requires ten positional
+    hyperparameters (ngf, up_ratios, dilations, codebook_size and so on) that
+    cannot be recovered from the checkpoint, so instantiating it means guessing
+    the architecture. We record the attempt rather than report a codec we
+    reconstructed by guesswork.
+    """
+    raise SystemExit(
+        "BigCodec ships weights without a config; its architecture cannot be "
+        "recovered from the released artefacts. See the docstring.")
+    import torch
+    from bigcodec import BigCodec as _BigCodec
+
+    device = _device()
+    model = _BigCodec.from_pretrained(model_id).to(device).eval()
+    sr = 16000
+
+    @torch.no_grad()
+    def fn(x: np.ndarray) -> np.ndarray:
+        wav = torch.from_numpy(x)[None, None, :].to(device)
+        y = model(wav)
+        if isinstance(y, (tuple, list)):
+            y = y[0]
+        return y.squeeze().cpu().numpy()
+
+    return Codec("bigcodec", sr, "single-vq", fn)
+
+
 def _identity_spec(sample_rate: int = 24000) -> Codec:
     return identity(int(sample_rate))
 
@@ -333,6 +390,10 @@ REGISTRY = {
     "encodec_shuffled": encodec_shuffled,
     # Codecs we trained ourselves: build("trained:/path/to/rvq_12tet.pt")
     "trained": trained,
+    "snac": snac,
+    "snac32": lambda **kw: snac("hubertsiuzdak/snac_32khz"),
+    "snac44": lambda **kw: snac("hubertsiuzdak/snac_44khz"),
+    "bigcodec": bigcodec,
 }
 
 
@@ -356,6 +417,8 @@ def build(spec: str) -> Codec:
         key, val = "bandwidth_kbps", float(arg)
     elif name == "trained":
         return trained(arg)
+    elif name.startswith("snac") or name == "bigcodec":
+        return REGISTRY[name]()
     elif name.startswith("encodec"):
         key, val = "bandwidth_kbps", float(arg)
     else:
