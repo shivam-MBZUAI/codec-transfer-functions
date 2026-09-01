@@ -130,6 +130,33 @@ Pure sinusoids show **0.002 cents** of grid bias against 9.43 for harmonic
 complexes through the same codec at the same rate. Whatever produces the lock
 operates on spectral pattern, not on pitch as such.
 
+## 9. The effect does NOT appear on real instrument recordings
+
+Real instrument notes from NSynth, resampled to sit a controlled distance from
+the nearest 12-TET pitch and pushed through a codec, show no detectable pull
+toward the grid.
+
+| Codec | Usable | Displacement, between grid points minus near | 95% CI |
+|---|---|---|---|
+| EnCodec 3 kbps | 884 / 3455 | +0.011c | [−0.199, +0.265] |
+| DAC 16k | 932 / 3443 | +0.010c | [−0.019, +0.036] |
+
+Both intervals include zero, against 13.7 cents for synthetic tone pairs through
+the same codec. This is a hard constraint on the ecological claim and must be
+reported.
+
+Three candidate explanations, none yet tested. Real notes carry vibrato,
+inharmonicity and attack transients that smear a periodic residual. Only about a
+quarter of measurements were usable, so the instrument is much noisier here.
+And real instrument audio is *in distribution* for a codec trained on music,
+whereas the synthetic stimuli are not: the effect may be largest precisely where
+the input is unusual, which would make it a statement about extrapolation rather
+than about everyday reconstruction.
+
+That last possibility is the most important one for the paper, because it
+changes what the phenomenon means. It is testable: measure the effect as a
+function of how far the stimulus sits from the training distribution.
+
 ---
 
 ## What failed, and why it is worth reporting

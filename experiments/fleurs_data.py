@@ -38,8 +38,11 @@ def metadata(lang: str) -> dict[str, dict]:
     if not tsv.exists():
         return {}
     out = {}
+    # QUOTE_NONE matters: transcriptions contain apostrophes and quotation
+    # marks, and the default dialect silently merges fields around them, which
+    # made every lookup miss.
     with tsv.open(encoding="utf-8") as fh:
-        for parts in csv.reader(fh, delimiter="\t"):
+        for parts in csv.reader(fh, delimiter="\t", quoting=csv.QUOTE_NONE):
             if len(parts) < 3:
                 continue
             out[parts[1]] = {
