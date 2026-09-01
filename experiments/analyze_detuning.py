@@ -24,14 +24,25 @@ from analyze_sweep import DISAGREE_CENTS, fit_sinusoid, load  # noqa: E402
 
 
 def main() -> int:
-    d = load(Path(sys.argv[1]))
+    # Optional second positional: exclusion scheme. Some codecs alter harmonic
+    # balance enough that the harmonic-sum coarse estimator locks to a
+    # subharmonic while the reported estimate stays accurate, which drops almost
+    # every trial for reasons unrelated to what is being measured.
+    scheme = "full"
+    argv = [a for a in sys.argv[1:] if not a.startswith("--")]
+    for a in sys.argv[1:]:
+        if a.startswith("--exclusion="):
+            scheme = a.split("=", 1)[1]
+    d = load(Path(argv[0]))
     theta, rc = d["theta_cents"], d["residual_coded_cents"]
     labels = d["reference_label"]
     dis = np.maximum(np.abs(d.get("disagreement_f1_cents", np.zeros_like(theta))),
                      np.abs(d.get("disagreement_f2_cents", np.zeros_like(theta))))
-    keep = (np.nan_to_num(dis, nan=1e9) <= DISAGREE_CENTS)
-    if "octave_flag" in d:
+    keep = np.ones_like(theta, dtype=bool)
+    if scheme in ("full", "gate") and "octave_flag" in d:
         keep &= d["octave_flag"] < 0.5
+    if scheme == "full":
+        keep &= np.nan_to_num(dis, nan=1e9) <= DISAGREE_CENTS
 
     # Derive the detuning from the reference FREQUENCY, not from the label.
     # Older runs wrote labels folded to the nearer grid point, so +60 and +40
@@ -76,7 +87,7 @@ def main() -> int:
     print(f"  amplitude        {np.mean([r[1] for r in rows]):.2f} +/- "
           f"{np.std([r[1] for r in rows]):.2f} cents (should be flat: only phase moves)")
 
-    if len(sys.argv) > 2:
+    if len(argv) > 1:
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
@@ -98,8 +109,8 @@ def main() -> int:
         ax2.set_ylim(0, max(r[1] for r in rows) * 1.35)
         ax2.set_title("amplitude is flat: only the phase moves", fontsize=9)
         ax2.grid(alpha=0.25)
-        fig.tight_layout(); fig.savefig(sys.argv[2], dpi=180)
-        print(f"  wrote {sys.argv[2]}")
+        fig.tight_layout(); fig.savefig(argv[1], dpi=180)
+        print(f"  wrote {argv[1]}")
     return 0
 
 
