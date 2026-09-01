@@ -1,0 +1,177 @@
+# Findings
+
+Every number here is measured and traceable to a file in `results/`. Where a
+result contradicts the paper draft, that is stated.
+
+---
+
+## 1. The central result: the residual is locked to an absolute learned grid
+
+Detuning the reference pitch across a full semitone shifts the residual's phase
+with **unit slope**, while its amplitude stays constant.
+
+| Codec | Stimulus | Amplitude | Relative slope | 95% CI | R² |
+|---|---|---|---|---|---|
+| EnCodec 24k | tones | 13.72c | **1.0010** | [0.9935, 1.0085] | 0.99988 |
+| Mimi | tones | 4.97c | 0.9576 | [0.9336, 0.9816] | 0.99869 |
+| DAC 16k | tones | 1.78c | **1.0199** | [0.9665, 1.0733] | 0.99432 |
+| SpeechTokenizer | vowels | 2.98c | 0.8559 | [0.8288, 0.8830] | 0.99792 |
+| EnCodec 24k | vowels | 0.87c | **1.0109** | [0.9929, 1.0289] | 0.99934 |
+
+A residual locked to the *interval*, or produced by the analysis, gives slope 0.
+The interval account is excluded by roughly 250 standard errors for EnCodec.
+
+Two points to report honestly:
+
+- **The exclusion scheme matters for the noisier codecs.** EnCodec and DAC give
+  slope 1.0 under either scheme. Mimi and SpeechTokenizer reach 1.0 under the
+  stricter estimator cross-check and fall below it under the octave gate alone.
+- **The effect is 16x weaker on speech than on music** for the same codec
+  (0.87c against 13.72c). This bears directly on what can be claimed about speech.
+
+## 2. It is universal across codecs, and the bias median misses it
+
+DAC and SpeechTokenizer both read as **null** on the median grid bias (0.000
+cents) and both show an unambiguous unit-slope lock. Anyone repeating this with
+aggregate error statistics would wrongly conclude that high-fidelity and
+speech-only codecs are unaffected. The phase regression is the instrument.
+
+## 3. It is not architectural
+
+A 100-cent-period sinusoid fits at **every octave**:
+
+| Reference | 110 Hz | 220 Hz | 440 Hz | 880 Hz |
+|---|---|---|---|---|
+| Amplitude | 2.95c | 9.63c | 13.65c | 13.70c |
+| Phase | 168.5° | 161.5° | 155.8° | 132.0° |
+
+Structure arising from convolutional strides or frame rate is periodic in
+**linear** frequency, so its period in cents would halve every octave and these
+fits would fail. They do not. Amplitude varies strongly with register,
+saturating above 440 Hz.
+
+## 4. It is NOT in the codebook. This contradicts the draft.
+
+The draft's Section 3.4 states: *"Nothing in a convolutional encoder favours
+twelve tones, and we do not claim otherwise. The hypothesis concerns the
+quantiser rather than the architecture."* Two measurements contradict this.
+
+**Quantiser bypass.** Running encoder to decoder with no quantisation at all
+still gives **5.74 cents** of grid bias against 9.26 with the quantiser. The
+bypass reconstructs *better* overall (2.22c on-grid against 4.04c), exactly as
+skipping quantisation should, so it is working correctly.
+
+**Codebook probe.** Sweeping pitch at 2-cent resolution and recording which code
+index dominates each RVQ level gives 2341 assignment boundaries. Their positions
+within the semitone are **uniform**: mean distance to the nearest grid point
+25.09 cents against a uniform expectation of 25.0, resultant length 0.008,
+Rayleigh p = 0.86.
+
+The grid lock lives in the trained encoder and decoder, not the discretisation.
+
+## 5. Proposition 1 is right about the part it describes
+
+Fitting log2(bias) against bits per latent dimension discriminates the two
+candidate mechanisms: coarse cell assignment predicts slope −1, the Bennett
+density term −2.
+
+| Fit | Slope | 95% CI | vs −1 | vs −2 |
+|---|---|---|---|---|
+| Raw bias | −0.328 | [−0.601, −0.055] | 4.8σ | 12.0σ |
+| **Bypass floor subtracted** | **−2.434** | [−3.336, −1.533] | 3.1σ | **0.9σ** |
+
+The rate sweep plateaus at exactly the bypass value, so the effect decomposes
+into a rate-independent architecture component and a rate-dependent quantiser
+component that scales as Δ² precisely as the proposition says.
+
+| Rate | 1.5 | 3 | 6 | 12 | 24 | bypass |
+|---|---|---|---|---|---|---|
+| Bias (c) | 10.59 | 9.26 | 6.68 | 6.00 | 5.84 | **5.74** |
+
+**The proposition is correct. The draft is wrong that it accounts for the whole
+effect.**
+
+## 6. The premise holds: music is grid-peaked, speech is not
+
+Within-semitone F₀ density, peak/mean, where flat is 1.0:
+
+| Corpus | Estimates | Peak/mean |
+|---|---|---|
+| GTZAN (Western music) | 180,859 | **1.788** |
+| GTZAN randomly detuned | 175,552 | 1.073 |
+| LibriSpeech (speech) | 53,678 | **1.113** |
+
+As far as we can establish this has been assumed throughout the literature and
+never measured in the frame that matters. LibriSpeech is SpeechTokenizer's
+entire training set.
+
+## 7. Causal: flattening the training grid weakens the lock
+
+Two corpora identical in timbre, instrumentation, production and note density,
+differing only in whether the tuning grid exists. EnCodec fine-tuned on each,
+4000 steps:
+
+| Fine-tuned on | Training peak/mean | Amplitude | Slope |
+|---|---|---|---|
+| grid-peaked music | 1.788 | **4.44 ± 0.09c** | 0.9991 |
+| flat music | 1.073 | **3.76 ± 0.08c** | 0.9975 |
+
+An **18% reduction** from flattening the training density alone, the difference
+about eight times the spread across ten detuning conditions. Both retain unit
+slope at R² 0.9999, so the lock is weakened rather than moved or destroyed.
+
+**This is a lower bound.** Four thousand steps on two hundred clips cannot undo
+pretraining on thousands of hours, and fine-tuning on GTZAN alone already drops
+amplitude from 13.72 to about 4 in both arms.
+
+## 8. The effect requires harmonic structure
+
+Pure sinusoids show **0.002 cents** of grid bias against 9.43 for harmonic
+complexes through the same codec at the same rate. Whatever produces the lock
+operates on spectral pattern, not on pitch as such.
+
+---
+
+## What failed, and why it is worth reporting
+
+**The from-scratch causal experiment.** A small RVQ trained on these stimuli
+either collapses to silence or reproduces only the fundamental: h2/h1 falls from
+0.500 to 0.003. Since EnCodec shows no grid effect on pure sinusoids either, a
+codec that outputs near-sinusoids cannot exhibit the phenomenon whatever it was
+trained on.
+
+**Fine-tuning on synthetic tones.** Cuts reconstruction error 18-fold and grid
+bias 40-fold regardless of pitch density, including on held-out vowel stimuli
+the codec never saw. The 12-TET arm retains about twice the residual of uniform
+and 53-TET in both evaluations, which is the predicted direction, but at 0.1
+cents with R² near 0.03 there is no structure left to build on.
+
+Both fail for one reason: **any training on narrow synthetic stimuli makes the
+codec too good at them and removes the quantisation pressure the effect lives
+in.** Training on broad real audio is what made the causal experiment work.
+
+**The random-codebook control.** Replacing codebook entries with random vectors
+of matched scale destroys the representation entirely, 785-cent errors, every
+trial excluded. Too destructive to be informative.
+
+**The untrained-network control.** A randomly initialised convolutional
+autoencoder outputs noise, 405-cent errors, no pitch to measure. Replaced by the
+octave test in section 3, which answers the same question.
+
+**SpeechTokenizer on musical tones.** 100-cent errors, estimators disagreeing on
+97% of trials, 28 of 2410 surviving. A 16 kHz speech codec treats an isolated
+harmonic complex as far out of distribution. The source-filter vowel fixed this:
+0.65-cent errors on the same codec.
+
+---
+
+## Consequences for the draft
+
+| Draft claim | Status |
+|---|---|
+| Effect exists and is grid-locked | **confirmed**, far more strongly than claimed |
+| "The hypothesis concerns the quantiser rather than the architecture" | **contradicted** |
+| Effect ordered by codec fidelity | not supported; ordering is not by fidelity |
+| Music-trained checkpoint shows most | **contradicted**: EnCodec 48k shows less than 24k |
+| Makam validation | audio still blocked; NSynth retuning is the unblocked route |
+| Every reported number | all placeholders; replace from `RESULTS.md` |
