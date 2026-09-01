@@ -74,6 +74,26 @@ placeholder values.
 | `ft_12tet` | encodec_ft_encodec_ft_12tet | 3.0kbps | 440Hz_ongrid | 348 | 4.9e-06 | 0.244 | 0.904 | 3.71 | 0.267 | [0.20, 0.36] | 0.44 | 0.39 | sinusoid |
 | `ft_53tet` | encodec_ft_encodec_ft_53tet | 3.0kbps | 440Hz_ongrid | 233 | 4.9e-06 | 0.245 | 0.821 | 3.35 | 0.310 | [0.23, 0.39] | 0.52 | 0.49 | sinusoid |
 | `ft_uniform` | encodec_ft_encodec_ft_uniform | 3.0kbps | 440Hz_ongrid | 252 | 4.9e-06 | 0.269 | 0.908 | 3.38 | 0.299 | [0.22, 0.37] | 0.54 | 0.49 | sinusoid |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 440Hz_ongrid | 1116 | 4.9e-06 | 1.297 | 2.833 | 2.18 | 2.014 | [1.83, 2.21] | 0.59 | 0.49 | sinusoid |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 442.5Hz_+09.8c | 1091 | 4.5e-06 | 1.067 | 3.100 | 2.91 | 2.186 | [1.99, 2.36] | 0.62 | 0.50 | sinusoid |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 445.1Hz_+20.0c | 1123 | 7.0e-06 | 1.248 | 4.301 | 3.45 | 1.845 | [1.58, 2.02] | 0.60 | 0.49 | sinusoid |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 447.7Hz_+30.0c | 976 | 1.2e-05 | 1.542 | 5.901 | 3.83 | 0.994 | [0.66, 1.60] | 0.58 | 0.47 | sinusoid |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 450.3Hz_+40.1c | 910 | 5.4e-06 | 1.993 | 5.534 | 2.78 | -0.009 | [-0.50, 0.00] | 0.44 | 0.37 | n/a, below floor |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 452.9Hz_+50.0c | 1020 | 4.8e-06 | 1.837 | 3.164 | 1.72 | -1.725 | [-1.99, -1.28] | 0.56 | 0.46 | n/a, below floor |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 455.5Hz_+59.9c | 1084 | 4.5e-06 | 2.108 | 1.608 | 0.76 | -2.146 | [-2.28, -1.98] | 0.59 | 0.46 | n/a, below floor |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 458.2Hz_+70.2c | 1100 | 5.0e-06 | 2.339 | 3.013 | 1.29 | -1.523 | [-1.75, -1.19] | 0.55 | 0.45 | n/a, below floor |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 460.8Hz_+80.0c | 1089 | 4.5e-06 | 1.327 | 5.026 | 3.79 | 0.236 | [0.00, 0.80] | 0.57 | 0.47 | sinusoid |
+| `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 463.5Hz_+90.1c | 1093 | 4.7e-06 | 1.096 | 4.706 | 4.29 | 1.500 | [1.28, 1.74] | 0.58 | 0.48 | sinusoid |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 440Hz_ongrid | 1108 | 4.9e-06 | 1.355 | 3.488 | 2.57 | 2.348 | [2.12, 2.60] | 0.61 | 0.52 | sinusoid |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 442.5Hz_+09.8c | 1103 | 4.5e-06 | 1.138 | 4.010 | 3.52 | 2.560 | [2.37, 2.80] | 0.62 | 0.52 | sinusoid |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 445.1Hz_+20.0c | 1113 | 7.0e-06 | 1.405 | 5.230 | 3.72 | 2.202 | [1.86, 2.52] | 0.62 | 0.52 | sinusoid |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 447.7Hz_+30.0c | 1010 | 1.2e-05 | 1.765 | 7.267 | 4.12 | 1.554 | [1.14, 2.04] | 0.60 | 0.53 | sinusoid |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 450.3Hz_+40.1c | 779 | 5.4e-06 | 2.583 | 7.386 | 2.86 | 0.000 | [-0.32, 0.10] | 0.43 | 0.37 | n/a, below floor |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 452.9Hz_+50.0c | 997 | 4.8e-06 | 2.638 | 4.492 | 1.70 | -1.865 | [-2.64, -1.15] | 0.57 | 0.48 | n/a, below floor |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 455.5Hz_+59.9c | 1077 | 4.5e-06 | 3.016 | 1.766 | 0.59 | -2.508 | [-2.70, -2.30] | 0.60 | 0.52 | n/a, below floor |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 458.2Hz_+70.2c | 1100 | 5.0e-06 | 2.941 | 3.729 | 1.27 | -1.562 | [-1.87, -1.19] | 0.56 | 0.49 | n/a, below floor |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 460.8Hz_+80.0c | 1087 | 4.5e-06 | 1.504 | 6.006 | 3.99 | 0.859 | [0.30, 1.29] | 0.59 | 0.52 | sinusoid |
+| `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 463.5Hz_+90.1c | 1076 | 4.7e-06 | 1.294 | 5.624 | 4.35 | 1.980 | [1.70, 2.31] | 0.61 | 0.53 | sinusoid |
 | `mech_bypass` | encodec_bypass | no-quantiser | 440Hz_ongrid | 1159 | 4.9e-06 | 2.574 | 8.723 | 3.39 | 5.744 | [5.38, 6.14] | 0.70 | 0.65 | sinusoid |
 | `mech_bypass` | encodec_bypass | no-quantiser | 452.9Hz_+50c | 1151 | 5.2e-06 | 5.241 | 7.416 | 1.42 | -4.681 | [-5.87, -3.67] | 0.70 | 0.64 | n/a, below floor |
 | `octaves_encodec3` | encodec | 3.0kbps | 110Hz_ongrid | 1436 | 2.6e-05 | 0.725 | 1.480 | 2.04 | 0.720 | [0.57, 0.84] | 0.33 | 0.24 | sinusoid |
@@ -101,7 +121,7 @@ placeholder values.
 | `vowel_speechtok` | speechtokenizer | Q8 | 220Hz_ongrid | 643 | 3.6e-05 | 0.654 | 0.729 | 1.12 | 0.000 | [-0.04, 9.7e-04] | 0.02 | 0.01 | n/a, below floor |
 | `vowel_speechtok` | speechtokenizer | Q8 | 226.4Hz_+49.6c | 661 | 3.4e-05 | 0.952 | 0.836 | 0.88 | 0.033 | [0.00, 0.15] | 0.06 | 0.07 | sawtooth |
 
-**Skipped:** `causal_12tet` (no usable rows), `causal_53tet` (no usable rows), `causal_uniform` (no usable rows), `ftvowel_12tet` (no usable rows), `ftvowel_53tet` (no usable rows), `ftvowel_uniform` (no usable rows), `hist_gtzan` (no usable rows), `hist_librispeech` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `probe_encodec3` (no usable rows), `vowel_encodec3` (no usable rows)
+**Skipped:** `causal_12tet` (no usable rows), `causal_53tet` (no usable rows), `causal_uniform` (no usable rows), `ftvowel_12tet` (no usable rows), `ftvowel_53tet` (no usable rows), `ftvowel_uniform` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `probe_encodec3` (no usable rows), `retune_encodec3` (no usable rows), `vowel_encodec3` (no usable rows)
 
 **Reading this table.** `floor` is the estimator's own error on uncoded stimuli in the same run: no effect below it means anything. `grid bias` is positive when the codec moved an interval *toward* the Western semitone grid, which is the directional claim; a symmetric residual of the same magnitude is ordinary degradation. `sine R2` against `saw R2` discriminates the two candidate mechanisms: a density correction predicts a sinusoid, coarse cell assignment predicts a sawtooth, and they scale differently with rate.
 
@@ -111,6 +131,10 @@ placeholder values.
 
 ![detuning_regression](figures/detuning_regression.png)
 
+### `octaves.png`
+
+![octaves](figures/octaves.png)
+
 ### `pilot_encodec3.png`
 
 ![pilot_encodec3](figures/pilot_encodec3.png)
@@ -118,6 +142,14 @@ placeholder values.
 ### `pitch_histograms.png`
 
 ![pitch_histograms](figures/pitch_histograms.png)
+
+### `rate_scaling.png`
+
+![rate_scaling](figures/rate_scaling.png)
+
+### `residual_shape.png`
+
+![residual_shape](figures/residual_shape.png)
 
 ### `selftest.png`
 
