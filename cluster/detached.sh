@@ -25,6 +25,8 @@ case "${1:-}" in
 esac
 
 name=$1; shift
-tmux new-session -d -s "$name" \
-  "cd /workspace/codecs && export HF_HOME=/workspace/.hf && { $*; } 2>&1 | tee logs/${name}.log"
+# Wrap in an explicit bash -c: tmux runs the command through its default shell,
+# and a bare pipeline there exited immediately and wrote no log.
+tmux new-session -d -s "$name" bash -c \
+  "cd /workspace/codecs && export HF_HOME=/workspace/.hf && $* > logs/${name}.log 2>&1"
 echo "launched '$name' detached; check with: ./cluster/detached.sh status"
