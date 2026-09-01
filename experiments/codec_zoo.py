@@ -238,6 +238,46 @@ def trained(checkpoint: str, n_quantizers: int | None = None,
     return Codec(f"trained_{dist}", sr, tag, fn)
 
 
+def encodec_untrained(model_id: str = "facebook/encodec_24khz", seed: int = 0) -> Codec:
+    """EnCodec with the SAME architecture but randomly initialised weights.
+
+    This is the experiment the other controls set up. The quantiser bypass showed
+    that most of the grid bias survives with no quantisation at all, and the
+    codebook probe showed code-assignment boundaries are uniform in pitch. So the
+    grid lock lives in the convolutional encoder and decoder. The question that
+    remains is whether it is LEARNED or merely architectural.
+
+    An untrained network has the identical architecture, receptive fields, stride
+    pattern and frame rate, but has seen no audio. If it shows the same
+    grid-locked residual, the effect is a property of the architecture and has
+    nothing to do with training data, and the paper's thesis is wrong. If it
+    shows none, the grid lock is learned from the training distribution, which is
+    the thesis, just located in the whole autoencoder rather than in the codebook.
+
+    Reconstruction from an untrained autoencoder is poor, so the comparison that
+    matters is the SHAPE of the residual and its phase relative to the grid, not
+    its magnitude.
+    """
+    import torch
+    from transformers import EncodecModel
+
+    device = _device()
+    cfg = EncodecModel.from_pretrained(model_id).config
+    torch.manual_seed(seed)
+    model = EncodecModel(cfg).to(device).eval()      # random init, same shape
+    sr = cfg.sampling_rate
+    n_ch = int(getattr(cfg, "audio_channels", 1))
+
+    @torch.no_grad()
+    def fn(x: np.ndarray) -> np.ndarray:
+        wav = torch.from_numpy(x)[None, None, :].repeat(1, n_ch, 1).to(device)
+        emb = model.encoder(wav)
+        dec = model.decoder(emb).squeeze(0)
+        return (dec[0] if dec.ndim == 2 else dec).cpu().numpy()
+
+    return Codec("encodec_untrained", sr, "random-init-no-quant", fn)
+
+
 def _identity_spec(sample_rate: int = 24000) -> Codec:
     return identity(int(sample_rate))
 
@@ -286,6 +326,7 @@ REGISTRY = {
     "speechtokenizer": speechtokenizer,
     # Mechanism controls. Both answer "was it the learned codebook?" directly.
     "encodec_bypass": lambda **kw: encodec_bypass(),
+    "encodec_untrained": lambda **kw: encodec_untrained(),
     "encodec_shuffled": encodec_shuffled,
     # Codecs we trained ourselves: build("trained:/path/to/rvq_12tet.pt")
     "trained": trained,
@@ -301,7 +342,7 @@ def build(spec: str) -> Codec:
         return REGISTRY[name]()
     if name == "identity":
         key, val = "sample_rate", int(arg)
-    elif name == "encodec_bypass":
+    elif name in ("encodec_bypass", "encodec_untrained"):
         return REGISTRY[name]()
     elif name == "encodec_shuffled":
         key, val = "bandwidth_kbps", float(arg)
