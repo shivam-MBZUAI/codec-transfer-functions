@@ -1,0 +1,28 @@
+{
+  "args": {
+    "codec": "encodec:3",
+    "references": [
+      110.0,
+      220.0,
+      440.0,
+      880.0
+    ],
+    "reps": 6,
+    "theta_step": 5.0,
+    "theta_stop": 1200.0,
+    "partials": 8,
+    "sinusoid": false,
+    "vowel": false,
+    "seed": 20260826,
+    "out": "results/octaves_encodec3.csv"
+  },
+  "codec": "encodec",
+  "rate_label": "3.0kbps",
+  "sample_rate": 24000,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1"
+  }
+}

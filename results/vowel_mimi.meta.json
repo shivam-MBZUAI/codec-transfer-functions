@@ -1,0 +1,26 @@
+{
+  "args": {
+    "codec": "mimi:8",
+    "references": [
+      220.0,
+      226.4
+    ],
+    "reps": 4,
+    "theta_step": 5.0,
+    "theta_stop": 1200.0,
+    "partials": 8,
+    "sinusoid": false,
+    "vowel": true,
+    "seed": 20260826,
+    "out": "results/vowel_mimi.csv"
+  },
+  "codec": "mimi",
+  "rate_label": "Q8",
+  "sample_rate": 24000,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1"
+  }
+}

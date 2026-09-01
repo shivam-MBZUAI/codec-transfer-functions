@@ -1,0 +1,33 @@
+{
+  "args": {
+    "codec": "dac16:6",
+    "references": [
+      440.0,
+      442.5,
+      445.1,
+      447.7,
+      450.3,
+      452.9,
+      455.5,
+      458.2,
+      460.8,
+      463.5
+    ],
+    "reps": 4,
+    "theta_step": 5.0,
+    "theta_stop": 1200.0,
+    "partials": 8,
+    "sinusoid": false,
+    "seed": 20260826,
+    "out": "results/detune_dac16.csv"
+  },
+  "codec": "dac",
+  "rate_label": "Q6",
+  "sample_rate": 16000,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1"
+  }
+}

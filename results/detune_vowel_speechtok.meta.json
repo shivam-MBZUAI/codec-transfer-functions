@@ -1,0 +1,34 @@
+{
+  "args": {
+    "codec": "speechtokenizer:8",
+    "references": [
+      220.0,
+      221.27,
+      222.55,
+      223.83,
+      225.13,
+      226.43,
+      227.75,
+      229.07,
+      230.4,
+      231.74
+    ],
+    "reps": 4,
+    "theta_step": 5.0,
+    "theta_stop": 1200.0,
+    "partials": 8,
+    "sinusoid": false,
+    "vowel": true,
+    "seed": 20260826,
+    "out": "results/detune_vowel_speechtok.csv"
+  },
+  "codec": "speechtokenizer",
+  "rate_label": "Q8",
+  "sample_rate": 16000,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1"
+  }
+}
