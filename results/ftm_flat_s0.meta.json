@@ -1,0 +1,37 @@
+{
+  "args": {
+    "codec": "encodec_ft:checkpoints/encodec_ftm_flat_s0@3.0",
+    "references": [
+      440.0,
+      442.5489,
+      445.1126,
+      447.6911,
+      450.2845,
+      452.893,
+      455.5166,
+      458.1553,
+      460.8094,
+      463.4789,
+      466.1638
+    ],
+    "reps": 5,
+    "theta_step": 5.0,
+    "theta_stop": 1200.0,
+    "partials": 8,
+    "sinusoid": false,
+    "vibrato_cents": 0.0,
+    "noise_db": null,
+    "vowel": false,
+    "seed": 20260826,
+    "out": "results/ftm_flat_s0.csv"
+  },
+  "codec": "encodec_ft_encodec_ftm_flat_s0",
+  "rate_label": "3.0kbps",
+  "sample_rate": 24000,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1"
+  }
+}

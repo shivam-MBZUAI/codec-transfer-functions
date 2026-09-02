@@ -41,6 +41,12 @@ from train_rvq import make_batch, stft_loss  # noqa: E402
 
 
 def main() -> int:
+    # WHAT THIS TRAINS. The forward pass is encode() -> integer codes ->
+    # decode(). The code assignment is an argmin, so no gradient reaches the
+    # encoder or the codebooks: comparing a fine-tuned checkpoint with the
+    # stock one shows the encoder and quantiser bit-identical and only the
+    # decoder changed (results/swap_*.csv). The causal experiment is therefore a
+    # DECODER-ONLY fine-tune, which is stated as such in the paper.
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--distribution", default=None,

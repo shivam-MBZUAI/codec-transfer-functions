@@ -363,7 +363,7 @@ def fig_mechanism():
     ax.axhline(1, color="0.6", ls=":", lw=1)
     ax.set_xlim(0, 100); ax.set_ylim(0, 2.0); ax.set_xlabel("cents from nearest 12-TET pitch", fontsize=6.4)
     ax.set_ylabel("relative density", fontsize=6.4)
-    ax.set_title("(d) fine-tuning corpora (4.44 vs 3.76c)", fontsize=6.6)
+    ax.set_title("(d) fine-tuning corpora (4.45 vs 3.73c)", fontsize=6.6)
     ax.legend(fontsize=5.2, frameon=False, loc="upper center"); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
     fig.tight_layout(w_pad=0.6); fig.savefig(FIG / "mechanism.png", dpi=200)
     print("  mechanism.png")
