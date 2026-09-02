@@ -38,6 +38,36 @@ placeholder values.
 | `detune_dac16` | dac | Q6 | 458.2Hz_+70.2c | 463 | 1.6e-05 | 1.386 | 1.496 | 1.08 | -0.367 | [-0.68, -0.11] | 0.12 | 0.11 | n/a, below floor |
 | `detune_dac16` | dac | Q6 | 460.8Hz_+80.0c | 385 | 1.1e-05 | 1.765 | 2.010 | 1.14 | -0.672 | [-1.14, -0.26] | 0.20 | 0.17 | n/a, below floor |
 | `detune_dac16` | dac | Q6 | 463.5Hz_+90.1c | 542 | 9.1e-06 | 1.954 | 2.777 | 1.42 | -1.251 | [-1.78, -0.02] | 0.19 | 0.14 | n/a, below floor |
+| `detune_dac24` | dac | Q8 | 440Hz_ongrid | 956 | 4.9e-06 | 0.434 | 0.853 | 1.97 | 0.033 | [0.00, 0.11] | 0.09 | 0.09 | sinusoid |
+| `detune_dac24` | dac | Q8 | 442.5Hz_+09.8c | 960 | 4.5e-06 | 0.439 | 0.902 | 2.06 | 0.131 | [0.05, 0.19] | 0.09 | 0.08 | sinusoid |
+| `detune_dac24` | dac | Q8 | 445.1Hz_+20.0c | 959 | 7.0e-06 | 0.935 | 1.077 | 1.15 | 0.248 | [0.06, 0.37] | 0.10 | 0.10 | sawtooth |
+| `detune_dac24` | dac | Q8 | 447.7Hz_+30.0c | 959 | 1.2e-05 | 1.126 | 0.871 | 0.77 | 0.165 | [0.03, 0.33] | 0.09 | 0.09 | sawtooth |
+| `detune_dac24` | dac | Q8 | 450.3Hz_+40.1c | 949 | 5.4e-06 | 0.846 | 0.742 | 0.88 | 0.119 | [0.04, 0.20] | 0.09 | 0.08 | sinusoid |
+| `detune_dac24` | dac | Q8 | 452.9Hz_+50.0c | 953 | 4.8e-06 | 1.015 | 1.601 | 1.58 | -0.057 | [-0.43, 0.00] | 0.10 | 0.10 | n/a, below floor |
+| `detune_dac24` | dac | Q8 | 455.5Hz_+59.9c | 954 | 4.5e-06 | 1.344 | 1.558 | 1.16 | -0.652 | [-0.85, -0.46] | 0.09 | 0.11 | n/a, below floor |
+| `detune_dac24` | dac | Q8 | 458.2Hz_+70.2c | 952 | 5.0e-06 | 0.890 | 0.611 | 0.69 | -0.241 | [-0.33, -0.17] | 0.10 | 0.10 | n/a, below floor |
+| `detune_dac24` | dac | Q8 | 460.8Hz_+80.0c | 955 | 4.5e-06 | 0.881 | 0.864 | 0.98 | -0.204 | [-0.29, -0.09] | 0.09 | 0.11 | n/a, below floor |
+| `detune_dac24` | dac | Q8 | 463.5Hz_+90.1c | 949 | 4.7e-06 | 0.617 | 1.014 | 1.64 | 0.000 | [-0.01, 0.01] | 0.10 | 0.11 | n/a, below floor |
+| `detune_dac44` | dac | Q4 | 440Hz_ongrid | 879 | 2.9e-06 | 0.211 | 0.378 | 1.79 | 0.000 | [0.00, 0.02] | 3.6e-03 | 0.02 | n/a, below floor |
+| `detune_dac44` | dac | Q4 | 442.5Hz_+09.8c | 883 | 3.6e-06 | 0.281 | 0.341 | 1.21 | 0.000 | [-3.8e-04, 9.0e-03] | 4.6e-03 | 0.02 | n/a, below floor |
+| `detune_dac44` | dac | Q4 | 445.1Hz_+20.0c | 883 | 6.9e-06 | 0.361 | 0.376 | 1.04 | 0.000 | [0.00, 0.02] | 6.5e-03 | 0.02 | n/a, below floor |
+| `detune_dac44` | dac | Q4 | 447.7Hz_+30.0c | 888 | 4.0e-06 | 0.508 | 0.364 | 0.72 | 0.004 | [0.00, 0.05] | 3.3e-04 | 7.5e-03 | sawtooth |
+| `detune_dac44` | dac | Q4 | 450.3Hz_+40.1c | 888 | 4.7e-06 | 0.534 | 0.320 | 0.60 | 0.000 | [0.00, 0.01] | 1.3e-03 | 8.5e-03 | n/a, below floor |
+| `detune_dac44` | dac | Q4 | 452.9Hz_+50.0c | 886 | 6.3e-06 | 0.511 | 0.358 | 0.70 | -0.005 | [-0.05, 0.00] | 1.1e-03 | 7.6e-03 | n/a, below floor |
+| `detune_dac44` | dac | Q4 | 455.5Hz_+59.9c | 888 | 4.2e-06 | 0.562 | 0.422 | 0.75 | 0.000 | [-0.03, 0.00] | 5.4e-03 | 0.01 | n/a, below floor |
+| `detune_dac44` | dac | Q4 | 458.2Hz_+70.2c | 877 | 3.9e-06 | 0.447 | 0.431 | 0.96 | 0.000 | [-0.01, 0.02] | 6.6e-03 | 9.1e-03 | n/a, below floor |
+| `detune_dac44` | dac | Q4 | 460.8Hz_+80.0c | 888 | 5.0e-06 | 0.442 | 0.536 | 1.21 | -0.034 | [-0.07, 0.00] | 0.01 | 0.01 | n/a, below floor |
+| `detune_dac44` | dac | Q4 | 463.5Hz_+90.1c | 881 | 5.1e-06 | 0.316 | 0.596 | 1.89 | 0.011 | [0.00, 0.05] | 0.01 | 0.02 | sawtooth |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 440Hz_ongrid | 927 | 4.9e-06 | 2.607 | 8.860 | 3.40 | 5.796 | [5.30, 6.30] | 0.71 | 0.65 | sinusoid |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 442.5Hz_+09.8c | 928 | 4.5e-06 | 2.208 | 9.986 | 4.52 | 6.142 | [5.71, 6.64] | 0.70 | 0.66 | sinusoid |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 445.1Hz_+20.0c | 927 | 7.0e-06 | 2.457 | 11.558 | 4.70 | 4.813 | [4.29, 5.37] | 0.70 | 0.61 | sinusoid |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 447.7Hz_+30.0c | 924 | 1.2e-05 | 2.761 | 13.940 | 5.05 | 2.924 | [2.22, 3.61] | 0.70 | 0.65 | sinusoid |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 450.3Hz_+40.1c | 936 | 5.4e-06 | 4.509 | 11.678 | 2.59 | 0.000 | [-0.55, 0.00] | 0.64 | 0.60 | n/a, below floor |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 452.9Hz_+50.0c | 929 | 4.8e-06 | 5.021 | 7.943 | 1.58 | -4.238 | [-5.63, -3.17] | 0.68 | 0.61 | n/a, below floor |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 455.5Hz_+59.9c | 929 | 4.5e-06 | 8.369 | 4.555 | 0.54 | -5.901 | [-6.48, -5.45] | 0.69 | 0.62 | n/a, below floor |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 458.2Hz_+70.2c | 928 | 5.0e-06 | 6.516 | 7.754 | 1.19 | -3.709 | [-4.65, -2.96] | 0.68 | 0.63 | n/a, below floor |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 460.8Hz_+80.0c | 920 | 4.5e-06 | 2.631 | 13.102 | 4.98 | 1.506 | [0.37, 2.47] | 0.68 | 0.64 | sinusoid |
+| `detune_encodec24kbps` | encodec | 24.0kbps | 463.5Hz_+90.1c | 926 | 4.7e-06 | 2.571 | 13.241 | 5.15 | 4.727 | [4.14, 5.18] | 0.71 | 0.67 | sinusoid |
 | `detune_encodec3` | encodec | 3.0kbps | 440Hz_ongrid | 1119 | 4.9e-06 | 4.199 | 14.626 | 3.48 | 9.257 | [8.40, 9.84] | 0.68 | 0.67 | sinusoid |
 | `detune_encodec3` | encodec | 3.0kbps | 442.5Hz_+10c | 1110 | 8.2e-06 | 3.811 | 16.736 | 4.39 | 9.506 | [8.96, 10.28] | 0.67 | 0.67 | sinusoid |
 | `detune_encodec3` | encodec | 3.0kbps | 445.1Hz_+20c | 1127 | 8.3e-06 | 3.899 | 19.724 | 5.06 | 7.462 | [6.83, 8.57] | 0.68 | 0.69 | sawtooth |
@@ -49,6 +79,16 @@ placeholder values.
 | `detune_encodec3` | encodec | 3.0kbps | 460.8Hz_+20c | 1118 | 4.5e-06 | 3.466 | 22.337 | 6.44 | 4.010 | [3.05, 4.88] | 0.67 | 0.70 | sawtooth |
 | `detune_encodec3` | encodec | 3.0kbps | 463.5Hz_+10c | 1123 | 7.2e-06 | 3.862 | 21.669 | 5.61 | 6.941 | [5.89, 7.81] | 0.67 | 0.68 | sawtooth |
 | `detune_encodec3` | encodec | 3.0kbps | 466.2Hz_ongrid | 1115 | 6.4e-06 | 4.607 | 17.593 | 3.82 | 8.992 | [8.31, 9.63] | 0.67 | 0.71 | sawtooth |
+| `detune_encodec48` | encodec | 6.0kbps | 440Hz_ongrid | 853 | 4.9e-06 | 1.221 | 7.168 | 5.87 | 3.841 | [3.38, 4.21] | 0.55 | 0.59 | sawtooth |
+| `detune_encodec48` | encodec | 6.0kbps | 442.5Hz_+09.8c | 854 | 4.5e-06 | 1.085 | 7.203 | 6.64 | 3.482 | [3.11, 3.89] | 0.54 | 0.60 | sawtooth |
+| `detune_encodec48` | encodec | 6.0kbps | 445.1Hz_+20.0c | 849 | 7.0e-06 | 1.630 | 6.918 | 4.24 | 2.299 | [1.99, 2.62] | 0.54 | 0.60 | sawtooth |
+| `detune_encodec48` | encodec | 6.0kbps | 447.7Hz_+30.0c | 856 | 1.2e-05 | 2.531 | 9.084 | 3.59 | 2.157 | [1.50, 2.76] | 0.54 | 0.59 | sawtooth |
+| `detune_encodec48` | encodec | 6.0kbps | 450.3Hz_+40.1c | 593 | 5.4e-06 | 4.042 | 7.370 | 1.82 | -1.230 | [-2.80, -0.23] | 0.46 | 0.51 | n/a, below floor |
+| `detune_encodec48` | encodec | 6.0kbps | 452.9Hz_+50.0c | 148 | 4.8e-06 | 7.344 | 3.080 | 0.42 | -4.334 | [-5.45, -2.77] | 0.47 | 0.50 | n/a, below floor |
+| `detune_encodec48` | encodec | 6.0kbps | 455.5Hz_+59.9c | 170 | 4.5e-06 | 8.104 | 17.667 | 2.18 | -0.542 | [-12.20, 1.97] | 0.51 | 0.46 | n/a, below floor |
+| `detune_encodec48` | encodec | 6.0kbps | 458.2Hz_+70.2c | 859 | 5.0e-06 | 6.452 | 17.466 | 2.71 | 4.981 | [1.32, 6.88] | 0.44 | 0.50 | sawtooth |
+| `detune_encodec48` | encodec | 6.0kbps | 460.8Hz_+80.0c | 854 | 4.5e-06 | 4.496 | 13.529 | 3.01 | 5.169 | [4.12, 5.96] | 0.46 | 0.47 | sawtooth |
+| `detune_encodec48` | encodec | 6.0kbps | 463.5Hz_+90.1c | 845 | 4.7e-06 | 3.429 | 11.181 | 3.26 | 5.215 | [4.75, 5.69] | 0.49 | 0.58 | sawtooth |
 | `detune_mimi` | mimi | Q8 | 440Hz_ongrid | 556 | 4.9e-06 | 6.067 | 8.954 | 1.48 | 3.423 | [2.30, 4.42] | 0.20 | 0.14 | sinusoid |
 | `detune_mimi` | mimi | Q8 | 442.5Hz_+09.8c | 567 | 4.5e-06 | 7.324 | 13.613 | 1.86 | 4.137 | [2.95, 5.35] | 0.17 | 0.12 | sinusoid |
 | `detune_mimi` | mimi | Q8 | 445.1Hz_+20.0c | 563 | 7.0e-06 | 8.847 | 19.863 | 2.25 | 7.302 | [4.31, 8.76] | 0.13 | 0.09 | sinusoid |
@@ -59,6 +99,16 @@ placeholder values.
 | `detune_mimi` | mimi | Q8 | 458.2Hz_+70.2c | 33 | 5.0e-06 | 26.834 | 15.466 | 0.58 | 0.518 | [-2.97, 11.04] | 0.17 | 0.33 | sawtooth |
 | `detune_mimi` | mimi | Q8 | 460.8Hz_+80.0c | 200 | 4.5e-06 | 6.411 | 15.410 | 2.40 | 2.537 | [0.00, 4.88] | 0.23 | 0.23 | sinusoid |
 | `detune_mimi` | mimi | Q8 | 463.5Hz_+90.1c | 548 | 4.7e-06 | 4.958 | 13.434 | 2.71 | 3.581 | [2.19, 4.95] | 0.21 | 0.17 | sinusoid |
+| `detune_snac44` | snac | 44khz | 440Hz_ongrid | 960 | 2.9e-06 | 0.430 | 0.787 | 1.83 | 0.037 | [0.00, 0.10] | 0.03 | 0.04 | sawtooth |
+| `detune_snac44` | snac | 44khz | 442.5Hz_+09.8c | 959 | 3.6e-06 | 0.345 | 0.880 | 2.55 | 0.000 | [0.00, 0.04] | 0.03 | 0.04 | n/a, below floor |
+| `detune_snac44` | snac | 44khz | 445.1Hz_+20.0c | 959 | 6.9e-06 | 0.658 | 0.908 | 1.38 | 0.000 | [-0.07, 0.00] | 0.03 | 0.04 | n/a, below floor |
+| `detune_snac44` | snac | 44khz | 447.7Hz_+30.0c | 960 | 4.0e-06 | 0.603 | 0.827 | 1.37 | -0.118 | [-0.17, -0.03] | 0.05 | 0.06 | n/a, below floor |
+| `detune_snac44` | snac | 44khz | 450.3Hz_+40.1c | 953 | 4.7e-06 | 0.816 | 0.788 | 0.97 | -0.163 | [-0.26, -0.07] | 0.04 | 0.05 | n/a, below floor |
+| `detune_snac44` | snac | 44khz | 452.9Hz_+50.0c | 957 | 6.3e-06 | 1.015 | 0.662 | 0.65 | -0.157 | [-0.25, -0.09] | 0.04 | 0.05 | n/a, below floor |
+| `detune_snac44` | snac | 44khz | 455.5Hz_+59.9c | 957 | 4.2e-06 | 1.401 | 1.266 | 0.90 | 0.000 | [-0.06, 0.00] | 0.03 | 0.04 | n/a, below floor |
+| `detune_snac44` | snac | 44khz | 458.2Hz_+70.2c | 783 | 3.9e-06 | 2.051 | 2.134 | 1.04 | 0.223 | [0.00, 0.59] | 0.06 | 0.05 | sinusoid |
+| `detune_snac44` | snac | 44khz | 460.8Hz_+80.0c | 832 | 5.0e-06 | 1.849 | 1.566 | 0.85 | 0.000 | [0.00, 0.13] | 0.04 | 0.05 | n/a, below floor |
+| `detune_snac44` | snac | 44khz | 463.5Hz_+90.1c | 963 | 5.1e-06 | 0.773 | 0.916 | 1.19 | 0.086 | [0.00, 0.16] | 0.06 | 0.05 | sinusoid |
 | `detune_vowel_encodec` | encodec | 3.0kbps | 221.3Hz_+10.0c | 35 | 1.8e-05 | 0.364 | 3.647 | 10.01 | 0.295 | [0.01, 0.50] | 0.62 | 0.62 | sinusoid |
 | `detune_vowel_encodec` | encodec | 3.0kbps | 222.6Hz_+20.0c | 26 | 1.8e-05 | 0.410 | -- | -- | 0.515 | [0.36, 0.68] | 0.57 | 0.60 | sawtooth |
 | `detune_vowel_speechtok` | speechtokenizer | Q8 | 220Hz_ongrid | 643 | 3.6e-05 | 0.654 | 0.729 | 1.12 | 0.000 | [-0.04, 9.7e-04] | 0.02 | 0.01 | n/a, below floor |
@@ -116,12 +166,22 @@ placeholder values.
 | `rate_encodec_6` | encodec | 6.0kbps | 452.9Hz_+50c | 1135 | 5.2e-06 | 5.430 | 11.004 | 2.03 | -3.855 | [-5.81, -2.90] | 0.69 | 0.66 | n/a, below floor |
 | `selftest_identity` | identity | uncoded | 440Hz_ongrid | 98 | 5.0e-06 | 2.9e-06 | 7.6e-06 | n/a, below floor | 0.000 | [0.00, 0.00] | 0.04 | 0.10 | n/a, below floor |
 | `selftest_identity` | identity | uncoded | 452.9Hz_+50c | 98 | 4.3e-06 | 8.8e-07 | 5.2e-06 | n/a, below floor | 0.000 | [0.00, 0.00] | 0.02 | 0.03 | n/a, below floor |
+| `vib_0` | encodec | 3.0kbps | 440Hz_ongrid | 896 | 4.9e-06 | 4.179 | 14.671 | 3.51 | 9.316 | [8.51, 9.96] | 0.67 | 0.67 | sawtooth |
+| `vib_0` | encodec | 3.0kbps | 452.9Hz_+50.0c | 881 | 5.2e-06 | 8.848 | 15.472 | 1.75 | -5.776 | [-8.25, -3.31] | 0.63 | 0.63 | n/a, below floor |
+| `vib_10` | encodec | 3.0kbps | 440Hz_ongrid | 889 | 1.036 | 4.767 | 15.936 | 3.34 | 10.228 | [9.56, 10.98] | 0.72 | 0.74 | sawtooth |
+| `vib_10` | encodec | 3.0kbps | 452.9Hz_+50.0c | 879 | 0.314 | 9.882 | 16.972 | 1.72 | -6.539 | [-8.98, -3.92] | 0.59 | 0.62 | n/a, below floor |
+| `vib_20` | encodec | 3.0kbps | 440Hz_ongrid | 855 | 2.420 | 5.316 | 20.825 | 3.92 | 13.018 | [12.38, 14.04] | 0.73 | 0.75 | sawtooth |
+| `vib_20` | encodec | 3.0kbps | 452.9Hz_+50.0c | 715 | 2.258 | 9.624 | 22.873 | 2.38 | -7.860 | [-12.29, -4.25] | 0.66 | 0.75 | n/a, below floor |
+| `vib_40` | encodec | 3.0kbps | 440Hz_ongrid | 725 | 3.308 | 7.618 | 29.079 | 3.82 | 17.204 | [16.43, 18.25] | 0.78 | 0.85 | sawtooth |
+| `vib_40` | encodec | 3.0kbps | 452.9Hz_+50.0c | 331 | 2.208 | 5.908 | 36.946 | 6.25 | 2.767 | [-24.69, 8.13] | 0.78 | 0.88 | n/a, below floor |
+| `vib_5` | encodec | 3.0kbps | 440Hz_ongrid | 900 | 0.422 | 4.715 | 15.030 | 3.19 | 9.641 | [8.78, 10.25] | 0.70 | 0.71 | sawtooth |
+| `vib_5` | encodec | 3.0kbps | 452.9Hz_+50.0c | 890 | 0.206 | 7.523 | 15.929 | 2.12 | -4.991 | [-7.25, -2.75] | 0.60 | 0.62 | n/a, below floor |
 | `vowel_mimi` | mimi | Q8 | 220Hz_ongrid | 480 | 1.6e-05 | 0.708 | 0.879 | 1.24 | 0.000 | [-0.07, 1.9e-04] | 1.5e-03 | 5.4e-03 | n/a, below floor |
 | `vowel_mimi` | mimi | Q8 | 226.4Hz_+49.6c | 486 | 2.7e-05 | 0.515 | 0.604 | 1.17 | 0.000 | [-0.05, 9.9e-03] | 1.0e-03 | 3.9e-03 | n/a, below floor |
 | `vowel_speechtok` | speechtokenizer | Q8 | 220Hz_ongrid | 643 | 3.6e-05 | 0.654 | 0.729 | 1.12 | 0.000 | [-0.04, 9.7e-04] | 0.02 | 0.01 | n/a, below floor |
 | `vowel_speechtok` | speechtokenizer | Q8 | 226.4Hz_+49.6c | 661 | 3.4e-05 | 0.952 | 0.836 | 0.88 | 0.033 | [0.00, 0.15] | 0.06 | 0.07 | sawtooth |
 
-**Skipped:** `causal_12tet` (no usable rows), `causal_53tet` (no usable rows), `causal_uniform` (no usable rows), `ftvowel_12tet` (no usable rows), `ftvowel_53tet` (no usable rows), `ftvowel_uniform` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `probe_encodec3` (no usable rows), `retune_encodec3` (no usable rows), `vowel_encodec3` (no usable rows)
+**Skipped:** `asr_encodec3` (no usable rows), `asr_encodec3_v2` (no usable rows), `asr_mms_encodec3` (no usable rows), `causal_12tet` (no usable rows), `causal_53tet` (no usable rows), `causal_uniform` (no usable rows), `detune_snac` (no usable rows), `ftvowel_12tet` (no usable rows), `ftvowel_53tet` (no usable rows), `ftvowel_uniform` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `phon_encodec3` (no usable rows), `phon_encodec3_big` (no usable rows), `phon_mimi` (no usable rows), `probe_encodec3` (no usable rows), `retune_dac16` (no usable rows), `retune_encodec3` (no usable rows), `retune_encodec3_big` (no usable rows), `retune_synthetic` (no usable rows), `vowel_encodec3` (no usable rows)
 
 **Reading this table.** `floor` is the estimator's own error on uncoded stimuli in the same run: no effect below it means anything. `grid bias` is positive when the codec moved an interval *toward* the Western semitone grid, which is the directional claim; a symmetric residual of the same magnitude is ordinary degradation. `sine R2` against `saw R2` discriminates the two candidate mechanisms: a density correction predicts a sinusoid, coarse cell assignment predicts a sawtooth, and they scale differently with rate.
 

@@ -80,6 +80,7 @@ The pipeline is built around the ways this measurement can lie to you.
 
 | Control | What it rules out |
 |---|---|
+| Amplitude-stability guard | a confident slope fitted through noise phases |
 | `identity` codec | any effect produced by the stimuli, estimator or analysis |
 | Detuned reference | an effect locked to the interval rather than to absolute pitch |
 | Per-sample-rate noise floor | estimator error masquerading as codec error |

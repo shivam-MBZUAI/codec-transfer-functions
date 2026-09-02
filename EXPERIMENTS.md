@@ -1,14 +1,31 @@
 # Experimental programme
 
-Ordered so that each stage can kill the next one cheaply. Nothing here is a
-result; this is the plan and the reasoning behind it.
+**This document is the plan. [FINDINGS.md](FINDINGS.md) is what happened.**
+Read that first; this is kept for the reasoning behind each design and for the
+items still outstanding.
 
-The design goal is not "strong results". It is that **no reviewer can name an
-uncontrolled angle**, and that the paper is publishable under either outcome. A
-null on the headline effect still leaves a measurement paper with a novel
-instrument and a set of negative results about a widely assumed mechanism.
+## Status against the original plan
+
+| | |
+|---|---|
+| Tier 0, gate and controls | done |
+| Tier 1, mechanism | done, and it moved the conclusion: the prior is not in the codebook |
+| Tier 2, codec breadth | done, nine measurable conditions across four families |
+| Tier 3, ecological and downstream | done, all three returned nulls with validated controls |
+
+## Outstanding
+
+- **Makam audio.** Dunya account is active and the API token works for metadata
+  and SymbTr scores, but `/document/` audio endpoints use session authentication
+  and return 401 with token auth. Audio needs a separate CompMusic agreement.
+- **WavTokenizer, XCodec2.** Not installable from PyPI in usable form.
+- **BigCodec.** Released as weights with no config; its architecture cannot be
+  recovered from the artefact. Documented in `codec_zoo.py`.
+- **Per-level RVQ decomposition.** Not attempted.
+- **MusicGen propagation.** Gated on makam audio.
 
 ---
+
 
 ## Tier 0. The gate
 

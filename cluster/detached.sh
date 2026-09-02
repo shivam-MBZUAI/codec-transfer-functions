@@ -28,5 +28,5 @@ name=$1; shift
 # Wrap in an explicit bash -c: tmux runs the command through its default shell,
 # and a bare pipeline there exited immediately and wrote no log.
 tmux new-session -d -s "$name" bash -c \
-  "cd /workspace/codecs && export HF_HOME=/workspace/.hf && $* > logs/${name}.log 2>&1"
+  "cd /workspace/codecs && export HF_HOME=/workspace/.hf && PYTHONUNBUFFERED=1 $* > logs/${name}.log 2>&1"
 echo "launched '$name' detached; check with: ./cluster/detached.sh status"
