@@ -383,6 +383,36 @@ def ffmpeg_codec(kind: str = "opus", bitrate_kbps: float = 12.0, sample_rate: in
     return Codec(kind, sample_rate, f"{bitrate_kbps:g}kbps", fn)
 
 
+def encodec_swap(encoder_id: str, decoder_id: str, bandwidth_kbps: float = 3.0) -> Codec:
+    """Encoder from one EnCodec checkpoint, quantiser and decoder from another.
+
+    The causal experiment changes the pull by fine-tuning; this asks which half
+    of the network carries the change. With the stock encoder and a fine-tuned
+    quantiser+decoder, any difference from stock is in the decoder side, and
+    vice versa. Checkpoint ids may be HF repos or local directories saved by
+    finetune_encodec.py.
+    """
+    import torch
+    from transformers import EncodecModel
+
+    device = _device()
+    enc_model = EncodecModel.from_pretrained(encoder_id).to(device).eval()
+    dec_model = EncodecModel.from_pretrained(decoder_id).to(device).eval()
+    sr = dec_model.config.sampling_rate
+
+    @torch.no_grad()
+    def fn(x: np.ndarray) -> np.ndarray:
+        wav = torch.from_numpy(x)[None, None, :].to(device)
+        emb = enc_model.encoder(wav)
+        codes = dec_model.quantizer.encode(emb, float(bandwidth_kbps))
+        quant = dec_model.quantizer.decode(codes)
+        dec = dec_model.decoder(quant).squeeze(0)
+        return (dec[0] if dec.ndim == 2 else dec).cpu().numpy()
+
+    tag = f"{Path(encoder_id).name}|{Path(decoder_id).name}"
+    return Codec(f"encodec_swap_{tag}", sr, f"{bandwidth_kbps}kbps", fn)
+
+
 def _identity_spec(sample_rate: int = 24000) -> Codec:
     return identity(int(sample_rate))
 
@@ -444,6 +474,8 @@ REGISTRY = {
     # Classical codecs with no learned component: the control for "learned".
     # build("opus:12") or build("mp3:32"), bitrate in kbps.
     "opus": lambda **kw: ffmpeg_codec("opus", **kw),
+    # build("encodec_swap:<encoder ckpt>|<decoder ckpt>@3.0")
+    "encodec_swap": None,
     "mp3": lambda **kw: ffmpeg_codec("mp3", **kw),
 }
 
@@ -459,6 +491,10 @@ def build(spec: str) -> Codec:
         key, val = "sample_rate", int(arg)
     elif name in ("encodec_bypass", "encodec_untrained"):
         return REGISTRY[name]()
+    elif name == "encodec_swap":
+        ids, _, bw = arg.partition("@")
+        enc_id, _, dec_id = ids.partition("|")
+        return encodec_swap(enc_id, dec_id, float(bw or 3.0))
     elif name == "encodec_ft":
         path, _, bw = arg.partition("@")
         c = encodec(bandwidth_kbps=float(bw or 3.0), model_id=path)

@@ -71,6 +71,54 @@ asr)
     echo "== $f"; python3 analysis/analyze_asr.py "results/$f.csv" | tail -25
   done
   ;;
+causal3)
+  # Three arms, three seeds. grid: original clips. flat: every clip resampled by
+  # a random offset within the semitone. gridres: every clip resampled by
+  # exactly one semitone, the control for the resampling itself.
+  R=$(refs 440)
+  [ -d corpora/gtzan_gridres ] || python3 experiments/make_detuned_corpus.py --src corpora/gtzan \
+      --dst corpora/gtzan_gridres --max-files 400 --whole-semitones
+  for seed in 0 1 2; do
+    for arm in grid:gtzan flat:gtzan_detuned gridres:gtzan_gridres; do
+      name=${arm%%:*}; src=${arm#*:}; tag="ftm_${name}_s${seed}"
+      if [ ! -f "checkpoints/encodec_${tag}/config.json" ]; then
+        python3 experiments/finetune_encodec.py --audio-root "corpora/${src}" --steps 4000 \
+            --seed $seed --out "checkpoints/encodec_${tag}" > "logs/${tag}_train.log" 2>&1
+      fi
+      python3 experiments/run_sweep.py --codec "encodec_ft:checkpoints/encodec_${tag}@3.0" \
+          --reps 5 --references $R --out "results/${tag}.csv" > "logs/${tag}.log" 2>&1 &
+    done
+  done
+  wait
+  for f in results/ftm_*_s?.csv; do echo "== $f"; python3 analysis/analyze_detuning.py "$f" | tail -n 5; done
+  ;;
+saraga)
+  python3 - <<'PY'
+import mirdata
+d = mirdata.initialize("saraga_carnatic", data_home="corpora/saraga_carnatic")
+d.download(partial_download=None, cleanup=True)
+print(d.validate())
+PY
+  for c in encodec:3 dac16:6 opus:12; do
+    tag="corpus_pull_saraga_${c/:/}"
+    python3 experiments/corpus_pull.py --audio-root corpora/saraga_carnatic --codec "$c" \
+        --max-files 200 --out "results/${tag}.csv" > "logs/${tag}.log" 2>&1
+    echo "== $c"; python3 analysis/analyze_corpus_pull.py "results/${tag}.csv"
+  done
+  ;;
+swap)
+  R=$(refs 440)
+  S="facebook/encodec_24khz"
+  for arm in grid flat; do
+    F="checkpoints/encodec_ftm_${arm}_s0"
+    python3 experiments/run_sweep.py --codec "encodec_swap:${S}|${F}@3.0" --reps 5 --references $R \
+        --out "results/swap_stockenc_${arm}dec.csv" > "logs/swap_stockenc_${arm}dec.log" 2>&1 &
+    python3 experiments/run_sweep.py --codec "encodec_swap:${F}|${S}@3.0" --reps 5 --references $R \
+        --out "results/swap_${arm}enc_stockdec.csv" > "logs/swap_${arm}enc_stockdec.log" 2>&1 &
+  done
+  wait
+  for f in results/swap_*.csv; do echo "== $f"; python3 analysis/analyze_detuning.py "$f" | tail -n 5; done
+  ;;
 *)
-  echo "usage: $0 {setup|classical|registers|corpus|asr}"; exit 1 ;;
+  echo "usage: $0 {setup|classical|registers|corpus|asr|causal3|saraga|swap}"; exit 1 ;;
 esac

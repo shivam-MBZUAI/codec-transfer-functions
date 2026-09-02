@@ -34,6 +34,12 @@ def main() -> int:
     p.add_argument("--dst", required=True, type=Path)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--max-files", type=int, default=400)
+    p.add_argument("--whole-semitones", action="store_true",
+                   help="CONTROL for the resampling itself: shift every clip by "
+                        "exactly one semitone (100 cents) with the same "
+                        "interpolation, so the tempo change and interpolation "
+                        "artefacts of the flat arm are present but the tuning "
+                        "grid stays exactly as peaked as the original.")
     args = p.parse_args()
 
     rng = np.random.default_rng(args.seed)
@@ -53,7 +59,7 @@ def main() -> int:
             x = x.mean(axis=1)
         # Offset uniform over the full semitone: individually a normal tuning
         # reference, in aggregate a flat within-semitone density.
-        offset = float(rng.uniform(0.0, 100.0))
+        offset = 100.0 if args.whole_semitones else float(rng.uniform(0.0, 100.0))
         ratio = 2.0 ** (offset / 1200.0)
         idx = np.arange(0, len(x) - 1, ratio)
         lo = idx.astype(int)

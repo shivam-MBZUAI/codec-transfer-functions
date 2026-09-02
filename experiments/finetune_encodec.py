@@ -56,8 +56,12 @@ def main() -> int:
     p.add_argument("--lr", type=float, default=1e-5)
     p.add_argument("--bandwidth", type=float, default=3.0)
     p.add_argument("--wave-weight", type=float, default=10.0)
+    p.add_argument("--seed", type=int, default=0,
+                   help="seeds torch and the batch sampler; replicate seeds are "
+                        "what gives the causal contrast a run-to-run variance")
     p.add_argument("--out", required=True, type=Path)
     args = p.parse_args()
+    torch.manual_seed(args.seed)
 
     if (args.distribution is None) == (args.audio_root is None):
         raise SystemExit("give exactly one of --distribution or --audio-root")
@@ -69,7 +73,7 @@ def main() -> int:
     model.train()
 
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr)
-    rng = np.random.default_rng(0)
+    rng = np.random.default_rng(args.seed)
 
     clips = None
     if args.audio_root is not None:
