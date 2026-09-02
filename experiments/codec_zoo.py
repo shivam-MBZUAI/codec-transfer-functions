@@ -336,6 +336,53 @@ def bigcodec(model_id: str = "Alethia/BigCodec") -> Codec:
     return Codec("bigcodec", sr, "single-vq", fn)
 
 
+def ffmpeg_codec(kind: str = "opus", bitrate_kbps: float = 12.0, sample_rate: int = 24000) -> Codec:
+    """A classical, non-learned codec through ffmpeg: the control for the claim
+    that the grid pull is LEARNED. Opus and MP3 contain no trained component,
+    so under the paper's account they must show no registration to the grid
+    (slope 0 or a refusal) and no grid bias above the floor. If they did, the
+    pull would be a property of lossy audio coding in general, not of learned
+    codecs, and the paper's central claim would be wrong.
+
+    Each call writes the clip to a temporary WAV, encodes and decodes with
+    ffmpeg, and reads the result back at the codec's sample rate. Opus runs
+    internally at 48 kHz and MP3 supports 24 kHz directly; ffmpeg handles the
+    resampling and the encoder pre-skip, so the returned clip is time-aligned to
+    within a few samples, far below the 100 ms gap between the two tones.
+    """
+    import shutil
+    import subprocess
+    import tempfile
+
+    import soundfile as sf
+
+    if shutil.which("ffmpeg") is None:
+        raise SystemExit("ffmpeg not found on PATH; apt-get install ffmpeg")
+    if kind == "opus":
+        enc = ["-c:a", "libopus", "-b:a", f"{bitrate_kbps:g}k", "-vbr", "off",
+               "-application", "audio", "-ar", "48000"]
+        ext = "opus"
+    elif kind == "mp3":
+        enc = ["-c:a", "libmp3lame", "-b:a", f"{bitrate_kbps:g}k", "-ar", str(sample_rate)]
+        ext = "mp3"
+    else:
+        raise SystemExit(f"unknown ffmpeg codec {kind!r}")
+
+    def fn(x: np.ndarray) -> np.ndarray:
+        with tempfile.TemporaryDirectory() as d:
+            src, mid, dst = f"{d}/in.wav", f"{d}/mid.{ext}", f"{d}/out.wav"
+            sf.write(src, np.asarray(x, dtype=np.float32), sample_rate, subtype="FLOAT")
+            base = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y"]
+            subprocess.run(base + ["-i", src] + enc + [mid], check=True)
+            subprocess.run(base + ["-i", mid, "-ar", str(sample_rate), "-ac", "1",
+                                   "-c:a", "pcm_f32le", dst], check=True)
+            y, sr = sf.read(dst, dtype="float32")
+        assert sr == sample_rate
+        return y
+
+    return Codec(kind, sample_rate, f"{bitrate_kbps:g}kbps", fn)
+
+
 def _identity_spec(sample_rate: int = 24000) -> Codec:
     return identity(int(sample_rate))
 
@@ -394,6 +441,10 @@ REGISTRY = {
     "snac32": lambda **kw: snac("hubertsiuzdak/snac_32khz"),
     "snac44": lambda **kw: snac("hubertsiuzdak/snac_44khz"),
     "bigcodec": bigcodec,
+    # Classical codecs with no learned component: the control for "learned".
+    # build("opus:12") or build("mp3:32"), bitrate in kbps.
+    "opus": lambda **kw: ffmpeg_codec("opus", **kw),
+    "mp3": lambda **kw: ffmpeg_codec("mp3", **kw),
 }
 
 
@@ -415,6 +466,8 @@ def build(spec: str) -> Codec:
                      c.rate_label, c.fn)
     elif name == "encodec_shuffled":
         key, val = "bandwidth_kbps", float(arg)
+    elif name in ("opus", "mp3"):
+        key, val = "bitrate_kbps", float(arg)
     elif name == "trained":
         return trained(arg)
     elif name.startswith("snac") or name == "bigcodec":

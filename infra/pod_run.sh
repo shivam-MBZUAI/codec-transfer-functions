@@ -1,0 +1,73 @@
+#!/bin/bash
+# Runbook for the additional experiments on a single-GPU pod.
+#
+#   bash infra/pod_run.sh setup        # system deps, python deps, checkpoints, corpora
+#   bash infra/pod_run.sh classical    # Opus and MP3 through the detuning sweep (CPU)
+#   bash infra/pod_run.sh registers    # EnCodec registration at 220 and 880 Hz (CPU)
+#   bash infra/pod_run.sh corpus       # transfer function on real polyphonic music
+#   bash infra/pod_run.sh asr          # Whisper and MMS at 100 utterances per language (GPU)
+#
+# Every step writes to results/ with a .meta.json sidecar and can be re-run.
+set -euo pipefail
+ROOT="${CODECS_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+cd "$ROOT"
+export HF_HOME="${HF_HOME:-$ROOT/.hf}"
+export PYTHONUNBUFFERED=1
+mkdir -p results logs corpora
+
+# Eleven reference pitches, 0 to 100 cents above the base in 10-cent steps.
+refs () { python3 -c "print(' '.join(f'{$1*2**(d/1200):.4f}' for d in range(0,101,10)))"; }
+
+case "${1:-}" in
+setup)
+  apt-get update -qq && apt-get install -y -qq ffmpeg tmux > /dev/null
+  pip install -q -r requirements.txt
+  pip install -q jiwer transformers[torch] accelerate
+  python3 data/fetch_checkpoints.py
+  python3 data/fetch_pod_corpora.py
+  python3 experiments/make_detuned_corpus.py --src corpora/gtzan --dst corpora/gtzan_detuned --max-files 400
+  python3 data/get_fleurs_pod.py
+  echo "setup complete"
+  ;;
+classical)
+  R=$(refs 440)
+  for c in opus:6 opus:12 mp3:16 mp3:32; do
+    tag="detune_${c/:/}"
+    python3 experiments/run_sweep.py --codec "$c" --reps 5 --references $R \
+        --out "results/${tag}.csv" > "logs/${tag}.log" 2>&1 &
+  done
+  wait
+  for c in opus6 opus12 mp316 mp332; do
+    echo "== $c"; python3 analysis/analyze_detuning.py "results/detune_${c}.csv" | tail -6
+  done
+  ;;
+registers)
+  for base in 220 880; do
+    R=$(refs $base)
+    python3 experiments/run_sweep.py --codec encodec:3 --reps 5 --references $R \
+        --out "results/detune_encodec3_${base}.csv" > "logs/detune_encodec3_${base}.log" 2>&1 &
+  done
+  wait
+  for base in 220 880; do
+    echo "== $base Hz"; python3 analysis/analyze_detuning.py "results/detune_encodec3_${base}.csv" | tail -6
+  done
+  ;;
+corpus)
+  for c in encodec:3 dac16:6 opus:12; do
+    tag="corpus_pull_${c/:/}"
+    python3 experiments/corpus_pull.py --audio-root corpora/gtzan_detuned --codec "$c" \
+        --max-files 200 --out "results/${tag}.csv" > "logs/${tag}.log" 2>&1
+    echo "== $c"; python3 analysis/analyze_corpus_pull.py "results/${tag}.csv"
+  done
+  ;;
+asr)
+  python3 experiments/run_asr.py --codec encodec:3 --per-language 100 --out results/asr_encodec3_n100.csv
+  python3 experiments/run_asr_mms.py --codec encodec:3 --per-language 100 --out results/asr_mms_encodec3_n100.csv
+  python3 experiments/run_asr_mms.py --codec mimi:8 --per-language 100 --out results/asr_mms_mimi_n100.csv
+  for f in asr_encodec3_n100 asr_mms_encodec3_n100 asr_mms_mimi_n100; do
+    echo "== $f"; python3 analysis/analyze_asr.py "results/$f.csv" | tail -25
+  done
+  ;;
+*)
+  echo "usage: $0 {setup|classical|registers|corpus|asr}"; exit 1 ;;
+esac
