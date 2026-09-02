@@ -156,6 +156,37 @@ mean anything.
 
 ---
 
+## Supporting runs
+
+These produce results the paper discusses but that are not headline figures.
+
+```bash
+# Does vibrato destroy the effect? It amplifies it, refuting the
+# out-of-distribution account. check_vibrato confirms the trend is the codec and
+# not the estimator, by running the same statistic on the UNCODED signal.
+for v in 0 5 10 20 40; do
+  python experiments/run_sweep.py --codec encodec:3 --reps 4 --vibrato-cents $v \
+      --references 440 452.8929 --out results/vib_${v}.csv
+done
+python analysis/check_vibrato.py
+
+# The failed designs, retained because the paper discusses why they failed.
+python experiments/train_rvq.py --distribution 12tet --steps 30000 \
+    --out checkpoints/rvq_12tet.pt          # collapses or keeps only the fundamental
+python experiments/tune_loss.py 6000        # the loss sweep that showed why
+
+# Corpus and model acquisition beyond the core checkpoints.
+python data/fetch_aux.py            # forced aligner and NSynth, via HF mirrors
+python data/fetch_pod_corpora.py    # GTZAN and LibriSpeech samples
+python data/extract_librispeech.py  # LibriSpeech ships as parquet; decode a sample
+python data/fetch_makam.py          # open makam annotations from Zenodo (no audio)
+```
+
+**Makam audio is not obtainable through this repository.** A Dunya API token
+gives metadata and SymbTr scores; the `/document/` audio endpoints use session
+authentication and return 401 under token auth, including through the official
+`pycompmusic` client. Audio requires a separate CompMusic agreement.
+
 ## Regenerating everything derived
 
 ```bash

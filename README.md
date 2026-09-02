@@ -85,7 +85,9 @@ analysis/        every derived number and figure
 
 data/            corpus and checkpoint acquisition
 infra/           Slurm and detached-session tooling
-results/         64 result files, each with a .meta.json provenance sidecar
+results/         raw per-trial CSVs, each with a .meta.json provenance
+                 sidecar. See results/README.md for what each family is,
+                 including the ones retained but deliberately not reported
 figures/         generated; never hand-edited
 docs/            DATA.md, EXPERIMENTS.md, CLUSTER.md, PIPELINE.md
 ```
