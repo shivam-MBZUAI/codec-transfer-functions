@@ -37,7 +37,7 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import codec_zoo
 from estimator import OCTAVE_GATE_CENTS, cents_between, estimate_f0  # noqa: E402

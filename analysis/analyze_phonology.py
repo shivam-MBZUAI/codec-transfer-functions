@@ -18,8 +18,16 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).parent))
 from languages import LANG_NAMES  # noqa: E402
+
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parent.parent
+for _p in (_ROOT / "experiments", _ROOT / "analysis"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
 
 
 def boot_ratio(vals: list[float], ctrl: list[float], n_boot: int = 4000,

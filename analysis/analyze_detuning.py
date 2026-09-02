@@ -19,8 +19,16 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).parent))
 from analyze_sweep import DISAGREE_CENTS, fit_sinusoid, load  # noqa: E402
+
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parent.parent
+for _p in (_ROOT / "experiments", _ROOT / "analysis"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
 
 # Guards on whether a phase regression means anything.
 #

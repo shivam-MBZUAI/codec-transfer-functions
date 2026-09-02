@@ -26,7 +26,7 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import codec_zoo  # noqa: E402
 from estimator import estimate_f0  # noqa: E402
 from stimuli import ratio_to_cents  # noqa: E402

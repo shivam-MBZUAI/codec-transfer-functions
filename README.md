@@ -1,128 +1,149 @@
-# Codec transfer functions
+# Codec Transfer Functions
 
-Measuring **where** a neural audio codec loses information, rather than how much.
+**Measuring *where* a neural audio codec loses information, rather than how much.**
 
-Aggregate codec benchmarks report a scalar summary of reconstruction error over
-a corpus. That marginalises out the dependence on the property under test, so it
-cannot distinguish a codec that loses a little of everything from one that loses
-a single class of distinction entirely. This repository treats a codec as a
-measurement instrument: drive it with stimuli in which exactly one property
-varies, recover that property from the output, and report the **transfer
-function** and its residual.
+Neural audio codecs supply the token vocabulary for modern audio language
+models, and they are evaluated almost entirely by aggregate perceptual scores.
+Those scores say how much a codec loses on average. They cannot say where it
+goes.
 
-The pitch experiments need no dataset. Stimuli come from a short deterministic
-script, so the central result reproduces from this repository and publicly
-released checkpoints alone.
+This repository treats a codec as a measurement instrument: drive it with
+stimuli in which exactly one property varies, recover that property from the
+output, and report the **transfer function** and its residual.
 
-| | |
-|---|---|
-| **[DATA.md](DATA.md)** | every model and corpus, with links and download instructions |
-| **[EXPERIMENTS.md](EXPERIMENTS.md)** | the programme, why each experiment is in it, and what is blocked |
-| **[RESULTS.md](RESULTS.md)** | generated from `results/`; never hand-written |
-| **[cluster/README.md](cluster/README.md)** | Slurm setup and the environment traps worth knowing |
+The headline result is that the residual is periodic in log frequency with a
+period of exactly one semitone, and registered to an **absolute** twelve-tone
+grid rather than to the interval under test.
+
+<p align="center">
+  <img src="figures/detuning_regression.png" width="88%"><br>
+  <em>Detuning the reference pitch advances the residual's phase with slope
+  1.0010, 95% CI [0.9935, 1.0085], R² = 0.99988. A residual locked to the
+  interval, or produced by the analysis, would sit on the dotted line at zero.</em>
+</p>
 
 ---
 
-## Quick start
+## What was found
+
+| | |
+|---|---|
+| **Registered to the grid** | slope 1.0010, *R²* = 0.99988, across 9 conditions and 4 codec families |
+| **Aggregate metrics conceal it** | DAC 16k and SNAC 44k report a median grid bias of 0.000 and register cleanly |
+| **Not architectural** | period constant in cents across four octaves; conv strides would give constant Hz |
+| **Not in the codebook** | removing quantisation leaves 5.74 of 9.26 cents; code boundaries uniform (Rayleigh *p* = 0.86) |
+| **Learned** | flattening the tuning grid of the training audio weakens it by 18% |
+| **Bounded** | absent on real instrument recordings, in phonology across 20 languages, and in downstream WER |
+
+Two of seven pre-registered predictions are falsified. **[FINDINGS.md](FINDINGS.md)
+states every number, every null, and every design that failed.**
+
+---
+
+## Quickstart
 
 ```bash
-uv venv --python 3.12 && uv pip install -r requirements.txt
-python cluster/fetch_checkpoints.py
-cd experiments
+python -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt
+make gate
 ```
 
-Two things must pass before any codec run means anything:
+`make gate` runs the three checks that must pass before any measurement means
+anything, and takes a few minutes:
 
-```bash
-python test_estimator.py                                     # must print PASS
-python run_sweep.py --codec identity:24000 --reps 2 --theta-step 25 \
-    --out ../results/selftest_identity.csv
-python analyze_sweep.py ../results/selftest_identity.csv      # must report NULL
+1. the estimator's noise floor on uncoded stimuli
+2. the whole pipeline with **no codec in the loop**, which must report null
+3. the pilot sweep on EnCodec
+
+See **[REPRODUCE.md](REPRODUCE.md)** for the exact command behind every figure
+and table in the paper.
+
+---
+
+## Repository map
+
+```
+experiments/     measurement entry points; each writes raw per-trial CSV
+  stimuli.py         deterministic synthesis: tone pairs, vowels, vibrato, noise
+  estimator.py       YIN + harmonic-sum coarse stages, harmonic least-squares refine
+  codec_zoo.py       every codec behind one interface, plus identity and bypass controls
+  run_sweep.py       the pitch sweep
+  run_phonology.py   Experiment 2
+  run_asr.py         Experiment 3, Whisper
+  run_asr_mms.py     Experiment 3, MMS cross-check
+  train_rvq.py       from-scratch codec (a failed design, retained)
+  finetune_encodec.py  the causal experiment
+  retune_real.py     ecological test on real recordings
+  probe_codebook.py  reads code assignments across pitch
+
+analysis/        every derived number and figure
+  analyze_sweep.py       summary statistics for one sweep
+  analyze_detuning.py    the registration regression
+  make_results.py        regenerates RESULTS.md
+  make_figures.py        regenerates every paper figure
+  diagnose_exclusions.py checks the exclusion rule is not creating the effect
+
+data/            corpus and checkpoint acquisition
+infra/           Slurm and detached-session tooling
+results/         64 result files, each with a .meta.json provenance sidecar
+figures/         generated; never hand-edited
+docs/            DATA.md, EXPERIMENTS.md, CLUSTER.md, PIPELINE.md
 ```
 
-The first measures the estimator's own noise floor. The second runs the same
-stimuli through the same estimator and the same analysis with **no codec in the
-loop**, and must find nothing. An analysis that reports an effect on that run is
-measuring itself.
-
-Then the real thing:
-
-```bash
-python run_sweep.py --codec encodec:3 --reps 3 --out ../results/pilot_encodec3.csv
-python analyze_sweep.py ../results/pilot_encodec3.csv --fig ../figures/pilot.png
-python ../scripts/make_results.py        # regenerate RESULTS.md
-```
+`run_*.py` computes no statistics. It writes raw estimates and a sidecar
+recording arguments and package versions. Every derived number comes from
+`analysis/`, so the analysis can be rerun and audited without repeating the
+codec passes.
 
 ---
 
 ## What is measured
 
-For a stimulus `x(theta)` in which one property takes value `theta`, and an
-estimator `E` recovering it from a waveform:
+For a stimulus `x(θ)` in which one property takes value `θ`, and an estimator
+`E` recovering it:
 
 ```
-T(theta) = E[ C(x(theta)) ]                      transfer function
-r(theta) = T(theta) - theta                      residual
-b(theta) = sign(g(theta) - theta) * r(theta)     grid bias
+T(θ) = E[ C(x(θ)) ]                    transfer function
+r(θ) = T(θ) − θ                        residual
+b(θ) = sign(g(θ) − θ) · r(θ)           grid bias
 ```
 
-`g(theta)` is the nearest 12-tone equal-tempered interval. **The sign carries
-the argument.** A residual of a given magnitude symmetric about the true value
-is ordinary degradation. The same magnitude directed consistently toward
-`g(theta)` is quantisation onto a learned grid. Those are different claims and
-aggregate metrics cannot separate them.
+`g(θ)` is the nearest 12-tone equal-tempered interval. **The sign carries the
+argument**: a residual of a given magnitude symmetric about the true value is
+ordinary degradation; the same magnitude directed consistently toward `g(θ)` is
+quantisation onto a learned grid.
 
 ---
 
 ## Controls
 
-The pipeline is built around the ways this measurement can lie to you.
+The pipeline is built around the ways this measurement can lie.
 
 | Control | What it rules out |
 |---|---|
-| Amplitude-stability guard | a confident slope fitted through noise phases |
-| `identity` codec | any effect produced by the stimuli, estimator or analysis |
-| Detuned reference | an effect locked to the interval rather than to absolute pitch |
-| Per-sample-rate noise floor | estimator error masquerading as codec error |
+| `identity` codec | any effect from the stimuli, estimator or analysis |
+| Detuned reference | an effect locked to the interval rather than absolute pitch |
+| Per-sample-rate noise floor | estimator error read as codec error |
 | Blind estimation | ground truth leaking into the estimate and suppressing the effect |
-| Octave gate at 200 cents | estimator failures, without being able to suppress a real effect, since the largest measurable effect is 50 cents |
-| Exclusion vs grid distance | an exclusion rule that manufactures the effect |
+| Octave gate at 200 cents | estimator failures, without suppressing a real effect (max measurable is 50 cents) |
+| Exclusion-vs-grid-distance | an exclusion rule manufacturing the effect |
 | Sawtooth vs sinusoid fit | confusing a density correction with coarse cell assignment |
-| Below-floor guard in `make_results.py` | ratios computed from two numbers that are both noise |
+| **Amplitude-stability guard** | **a confident slope fitted through noise phases** |
 
----
-
-## Layout
-
-```
-experiments/
-  stimuli.py           deterministic tone-pair synthesis, no dataset
-  estimator.py         YIN + harmonic-sum coarse stages, harmonic LS refinement
-  codec_zoo.py         codec round trips behind one interface, plus identity
-  run_sweep.py         runs a sweep, writes raw per-trial CSV, no statistics
-  analyze_sweep.py     every summary statistic and figure
-  test_estimator.py    noise floor and octave robustness
-cluster/
-  fetch_checkpoints.py core codec weights
-  fetch_all.py         ASR models and additional codecs
-  fetch_fleurs.py      FLEURS test splits
-  sweep.sbatch         Slurm array over codec/rate configurations
-scripts/
-  make_results.py      regenerates RESULTS.md from results/
-```
-
-`run_sweep.py` computes no statistics; it writes raw estimates only. Every
-derived number comes from `analyze_sweep.py` or `make_results.py`, so the
-analysis can be rerun and audited without repeating the codec passes. Each
-results CSV carries a `.meta.json` sidecar recording the full argument set and
-package versions, because a results file that cannot say what produced it is not
-reproducible evidence.
+That last one is not decoration. Two codecs produced clean-looking slopes
+(−0.92 at *R²* 0.61, and 1.017 at *R²* 0.994) from phases that were pure noise.
+Both are now refused and reported as not measurable. Anyone repeating this on a
+codec outside its operating domain will hit the same trap.
 
 ---
 
 ## A note on numbers
 
-`RESULTS.md` is generated. There is no path by which a value that was not
-measured can appear in it, and experiments that have not run are listed as *not
-yet measured* rather than shown with placeholder values. A placeholder that
-looks like a result is how a draft ends up asserting things nobody measured.
+`RESULTS.md` is generated by `analysis/make_results.py` from files in
+`results/`. There is no path by which a value that was not measured can appear
+in it, and unrun experiments are listed as *not yet measured* rather than shown
+with placeholders. The figures are generated the same way.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).

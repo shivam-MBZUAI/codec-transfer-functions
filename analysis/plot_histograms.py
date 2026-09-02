@@ -19,6 +19,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parent.parent
+for _p in (_ROOT / "experiments", _ROOT / "analysis"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+
 ROOT = Path(__file__).resolve().parent.parent
 SETS = [("hist_gtzan.csv", "GTZAN (Western music)", "#0072B2"),
         ("hist_librispeech.csv", "LibriSpeech (speech)", "#D55E00")]

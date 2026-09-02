@@ -24,7 +24,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stimuli import interval_stimulus  # noqa: E402
 from train_rvq import Codec, make_batch, stft_loss  # noqa: E402
 

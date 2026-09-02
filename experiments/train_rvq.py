@@ -41,7 +41,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stimuli import harmonic_tone  # noqa: E402,F401  (CPU reference generator)
 
 CENTS_PER_OCTAVE = 1200.0

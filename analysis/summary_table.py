@@ -12,8 +12,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parent.parent
+for _p in (_ROOT / "experiments", _ROOT / "analysis"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+
 ROOT = Path(__file__).resolve().parent.parent
-EXP = ROOT / "experiments"
+ANA = ROOT / "analysis"
 
 RUNS = [
     # (file stem, codec, operating point, stimulus family)
@@ -38,9 +47,9 @@ def parse(name: str):
     p = ROOT / "results" / f"{name}.csv"
     if not p.exists():
         return None
-    out = subprocess.run([sys.executable, str(EXP / "analyze_detuning.py"), str(p),
+    out = subprocess.run([sys.executable, str(ANA / "analyze_detuning.py"), str(p),
                           "--exclusion=gate"],
-                         capture_output=True, text=True, cwd=str(EXP)).stdout
+                         capture_output=True, text=True, cwd=str(ANA)).stdout
     if "REFUSING TO FIT" in out:
         why = "unstable amplitude" if "amplitude varies" in out else "estimator failing"
         return {"refused": why}

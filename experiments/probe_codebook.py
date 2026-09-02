@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import codec_zoo  # noqa: E402
 from stimuli import harmonic_tone  # noqa: E402
 

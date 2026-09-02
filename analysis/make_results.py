@@ -20,6 +20,11 @@ sys.path.insert(0, str(ROOT / "experiments"))
 
 import numpy as np  # noqa: E402
 
+_ROOT = Path(__file__).resolve().parent.parent
+for _p in (_ROOT / "experiments", _ROOT / "analysis"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
 from analyze_sweep import (  # noqa: E402
     DISAGREE_CENTS, grid, load, summarise,
 )

@@ -22,6 +22,15 @@ FIG.mkdir(exist_ok=True)
 sys.path.insert(0, str(EXP))
 from analyze_sweep import DISAGREE_CENTS, fit_sinusoid, grid, load  # noqa: E402
 
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parent.parent
+for _p in (_ROOT / "experiments", _ROOT / "analysis"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+
 OKABE = {"enc": "#0072B2", "dac": "#E69F00", "mimi": "#009E73", "spt": "#D55E00",
          "grey": "#666666"}
 

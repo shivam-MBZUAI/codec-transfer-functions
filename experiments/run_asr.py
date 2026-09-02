@@ -25,7 +25,7 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import codec_zoo  # noqa: E402
 from fleurs_data import utterances  # noqa: E402
 from languages import EXPLORATORY, GROUPS, group_of  # noqa: E402

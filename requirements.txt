@@ -1,10 +1,31 @@
-# Core analysis. Sufficient to run the identity (uncoded) control end to end
-# and to reproduce the estimator noise floor.
-numpy>=1.24
-matplotlib>=3.7
+# Pinned to the versions these results were produced with, read from the
+# .meta.json provenance sidecars: all 49 recorded runs used torch 2.8.0+cu128
+# and transformers 5.16.1.
+#
+# torch is listed without a CUDA suffix because the default wheel carries CUDA
+# on Linux and falls back to CPU or MPS elsewhere. Nothing here needs a GPU
+# except the ASR passes and the fine-tuning; the pitch experiments are CPU-bound
+# on F0 estimation.
+torch==2.8.0
+transformers==5.16.1
+numpy>=2.1
+scipy>=1.15
+soundfile>=0.13
+matplotlib>=3.9
+huggingface_hub>=0.30
 
-# Codec round trips. EnCodec, DAC and Mimi are all reachable through
-# transformers alone; SpeechTokenizer needs its own package.
-torch>=2.2
-torchaudio>=2.2
-transformers>=4.45
+# Needed only for codecs that do not load through transformers.
+speechtokenizer==1.0.1
+beartype                # speechtokenizer imports it without declaring it
+tensorboard             # likewise
+snac
+
+# NOT INSTALLED, and deliberately.
+#
+#   xcodec2   silently downgrades torch to 2.5.0, which is not the version these
+#             results were produced under. Install it in a separate environment
+#             if you want it.
+#   bigcodec  released as weights with no config; its ten architecture
+#             hyperparameters cannot be recovered from the checkpoint, so it
+#             cannot be instantiated without guessing. See codec_zoo.py.
+#   WavTokenizer  not installable from PyPI in usable form.
