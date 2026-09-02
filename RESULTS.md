@@ -99,6 +99,16 @@ placeholder values.
 | `detune_mimi` | mimi | Q8 | 458.2Hz_+70.2c | 33 | 5.0e-06 | 26.834 | 15.466 | 0.58 | 0.518 | [-2.97, 11.04] | 0.17 | 0.33 | sawtooth |
 | `detune_mimi` | mimi | Q8 | 460.8Hz_+80.0c | 200 | 4.5e-06 | 6.411 | 15.410 | 2.40 | 2.537 | [0.00, 4.88] | 0.23 | 0.23 | sinusoid |
 | `detune_mimi` | mimi | Q8 | 463.5Hz_+90.1c | 548 | 4.7e-06 | 4.958 | 13.434 | 2.71 | 3.581 | [2.19, 4.95] | 0.21 | 0.17 | sinusoid |
+| `detune_snac32` | snac | 32khz | 440Hz_ongrid | 961 | 1.6e-05 | 0.536 | 1.516 | 2.83 | 0.441 | [0.35, 0.60] | 0.21 | 0.18 | sinusoid |
+| `detune_snac32` | snac | 32khz | 442.5Hz_+09.8c | 962 | 8.6e-06 | 0.460 | 1.421 | 3.09 | 0.454 | [0.34, 0.57] | 0.20 | 0.16 | sinusoid |
+| `detune_snac32` | snac | 32khz | 445.1Hz_+20.0c | 963 | 2.1e-05 | 1.188 | 1.641 | 1.38 | 0.669 | [0.54, 0.83] | 0.18 | 0.13 | sinusoid |
+| `detune_snac32` | snac | 32khz | 447.7Hz_+30.0c | 963 | 1.2e-05 | 1.453 | 1.229 | 0.85 | 0.087 | [0.00, 0.22] | 0.17 | 0.14 | sinusoid |
+| `detune_snac32` | snac | 32khz | 450.3Hz_+40.1c | 963 | 1.2e-05 | 2.412 | 0.987 | 0.41 | -0.314 | [-0.44, -0.15] | 0.23 | 0.18 | n/a, below floor |
+| `detune_snac32` | snac | 32khz | 452.9Hz_+50.0c | 961 | 2.7e-05 | 1.689 | 0.819 | 0.49 | -0.541 | [-0.72, -0.42] | 0.22 | 0.17 | n/a, below floor |
+| `detune_snac32` | snac | 32khz | 455.5Hz_+59.9c | 961 | 9.2e-06 | 1.036 | 0.874 | 0.84 | -0.525 | [-0.64, -0.37] | 0.25 | 0.22 | n/a, below floor |
+| `detune_snac32` | snac | 32khz | 458.2Hz_+70.2c | 960 | 1.6e-05 | 1.774 | 2.099 | 1.18 | -0.423 | [-0.69, -0.22] | 0.10 | 0.09 | n/a, below floor |
+| `detune_snac32` | snac | 32khz | 460.8Hz_+80.0c | 963 | 1.1e-05 | 0.972 | 1.398 | 1.44 | -0.023 | [-0.13, 0.00] | 0.17 | 0.14 | n/a, below floor |
+| `detune_snac32` | snac | 32khz | 463.5Hz_+90.1c | 962 | 9.1e-06 | 0.624 | 1.630 | 2.61 | 0.334 | [0.21, 0.42] | 0.20 | 0.16 | sinusoid |
 | `detune_snac44` | snac | 44khz | 440Hz_ongrid | 960 | 2.9e-06 | 0.430 | 0.787 | 1.83 | 0.037 | [0.00, 0.10] | 0.03 | 0.04 | sawtooth |
 | `detune_snac44` | snac | 44khz | 442.5Hz_+09.8c | 959 | 3.6e-06 | 0.345 | 0.880 | 2.55 | 0.000 | [0.00, 0.04] | 0.03 | 0.04 | n/a, below floor |
 | `detune_snac44` | snac | 44khz | 445.1Hz_+20.0c | 959 | 6.9e-06 | 0.658 | 0.908 | 1.38 | 0.000 | [-0.07, 0.00] | 0.03 | 0.04 | n/a, below floor |
@@ -181,7 +191,7 @@ placeholder values.
 | `vowel_speechtok` | speechtokenizer | Q8 | 220Hz_ongrid | 643 | 3.6e-05 | 0.654 | 0.729 | 1.12 | 0.000 | [-0.04, 9.7e-04] | 0.02 | 0.01 | n/a, below floor |
 | `vowel_speechtok` | speechtokenizer | Q8 | 226.4Hz_+49.6c | 661 | 3.4e-05 | 0.952 | 0.836 | 0.88 | 0.033 | [0.00, 0.15] | 0.06 | 0.07 | sawtooth |
 
-**Skipped:** `asr_encodec3` (no usable rows), `asr_encodec3_v2` (no usable rows), `asr_mms_encodec3` (no usable rows), `causal_12tet` (no usable rows), `causal_53tet` (no usable rows), `causal_uniform` (no usable rows), `detune_snac` (no usable rows), `ftvowel_12tet` (no usable rows), `ftvowel_53tet` (no usable rows), `ftvowel_uniform` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `phon_encodec3` (no usable rows), `phon_encodec3_big` (no usable rows), `phon_mimi` (no usable rows), `probe_encodec3` (no usable rows), `retune_dac16` (no usable rows), `retune_encodec3` (no usable rows), `retune_encodec3_big` (no usable rows), `retune_synthetic` (no usable rows), `vowel_encodec3` (no usable rows)
+**Skipped:** `asr_encodec3` (no usable rows), `asr_encodec3_v2` (no usable rows), `asr_mms_encodec3` (no usable rows), `asr_mms_mimi` (no usable rows), `causal_12tet` (no usable rows), `causal_53tet` (no usable rows), `causal_uniform` (no usable rows), `detune_snac` (no usable rows), `ftvowel_12tet` (no usable rows), `ftvowel_53tet` (no usable rows), `ftvowel_uniform` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `phon_dac16` (no usable rows), `phon_encodec3` (no usable rows), `phon_encodec3_big` (no usable rows), `phon_mimi` (no usable rows), `probe_encodec3` (no usable rows), `retune_dac16` (no usable rows), `retune_encodec3` (no usable rows), `retune_encodec3_big` (no usable rows), `retune_synthetic` (no usable rows), `vowel_encodec3` (no usable rows)
 
 **Reading this table.** `floor` is the estimator's own error on uncoded stimuli in the same run: no effect below it means anything. `grid bias` is positive when the codec moved an interval *toward* the Western semitone grid, which is the directional claim; a symmetric residual of the same magnitude is ordinary degradation. `sine R2` against `saw R2` discriminates the two candidate mechanisms: a density correction predicts a sinusoid, coarse cell assignment predicts a sawtooth, and they scale differently with rate.
 

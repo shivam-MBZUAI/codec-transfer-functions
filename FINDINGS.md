@@ -10,6 +10,8 @@ result contradicts the paper draft, that is stated.
 Detuning the reference pitch across a full semitone shifts the residual's phase
 with **unit slope**, while its amplitude stays constant.
 
+Eleven measurable conditions across four codec families:
+
 | Codec | Stimulus | Amplitude | Relative slope | 95% CI | R² |
 |---|---|---|---|---|---|
 | EnCodec 24k | tones | 13.72c | **1.0010** | [0.9935, 1.0085] | 0.99988 |
@@ -169,6 +171,8 @@ over languages:
 | EnCodec | click (2) | LSD | 1.077 | [0.97, 1.11] |
 | Mimi | tone (6) | F₀ | 0.921 | [0.73, 1.20] |
 | Mimi | ejective (3) | LSD | 1.044 | [0.94, 1.16] |
+| **DAC 16k** | tone (6) | F₀ | **1.041** | [0.82, 1.24] |
+| **DAC 16k** | ejective (3) | LSD | 1.024 | [0.99, 1.03] |
 
 Every interval includes 1, under two codecs with very different frame rates. The
 tone ratio sits on opposite sides of unity across codecs. **P4 registered 1.6
@@ -214,7 +218,10 @@ It was caught by comparing the `.meta.json` provenance sidecars, which record
 package versions per run, against the live environment. Every reported result
 was produced under torch 2.8.0+cu128 and transformers 5.16.1.
 
-**P6 is falsified under both recognisers.** It predicted tone languages at 31%
+Extending to a second codec, Mimi under MMS gives control 148.7% against tone
+63.6%, a ratio of 0.43. The pattern holds across two codecs and two recognisers.
+
+**P6 is falsified under both recognisers and both codecs.** It predicted tone languages at 31%
 against English at 9%, requiring at least 1.5×; measured 0.47× and 0.67×, the
 opposite direction.
 

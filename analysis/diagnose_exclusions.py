@@ -23,15 +23,15 @@ from pathlib import Path
 
 import numpy as np
 
-from analyze_sweep import DISAGREE_CENTS, grid, load, summarise  # noqa: E402
-
-import sys
-from pathlib import Path
-
 _ROOT = Path(__file__).resolve().parent.parent
 for _p in (_ROOT / "experiments", _ROOT / "analysis"):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
+
+from analyze_sweep import DISAGREE_CENTS, grid, load, summarise  # noqa: E402
+
+import sys
+from pathlib import Path
 
 
 
