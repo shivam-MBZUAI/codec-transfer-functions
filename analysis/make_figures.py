@@ -281,7 +281,7 @@ def fig_mechanism():
     """Main-text Figure 2: (a) residual shape across codecs and the bypass,
     (b) bias against rate with the bypass floor, (c) the octave test,
     (d) the causal experiment: training densities and fitted amplitudes."""
-    fig, axes = plt.subplots(1, 4, figsize=(11.2, 2.3),
+    fig, axes = plt.subplots(1, 4, figsize=(7.6, 2.05),
                              gridspec_kw={"width_ratios": [1.25, 1, 1, 1.05]})
     ax = axes[0]
     runs = [("detune_encodec3", "EnCodec 3 kbps", "enc"), ("codec_mimi", "Mimi", "mimi"),
@@ -301,10 +301,10 @@ def fig_mechanism():
                 label=f"{label} ({amp:.1f}c)")
     ax.axhline(0, color="0.7", lw=0.8)
     ax.set_xlim(0, 100); ax.set_xticks([0, 25, 50, 75, 100])
-    ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=7)
-    ax.set_ylabel("fitted residual (cents)", fontsize=7)
-    ax.set_title("(a) same phase, four codecs", fontsize=7.5)
-    ax.legend(fontsize=5.6, loc="upper left", frameon=False); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
+    ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=6.4)
+    ax.set_ylabel("fitted residual (cents)", fontsize=6.4)
+    ax.set_title("(a) residual: same phase, four codecs", fontsize=6.6)
+    ax.legend(fontsize=5.2, loc="upper left", frameon=False); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
 
     ax = axes[1]
     rates, biases = [], []
@@ -321,9 +321,9 @@ def fig_mechanism():
     ax.plot(rates, biases, "o-", color=OKABE["enc"], lw=1.6, ms=4.5, label="EnCodec 24k")
     ax.axhline(floor, color=OKABE["grey"], ls="--", lw=1.3, label=f"no quantiser ({floor:.2f}c)")
     ax.set_xscale("log"); ax.set_xticks(rates); ax.set_xticklabels([str(r) for r in rates])
-    ax.set_ylim(0, 12); ax.set_xlabel("bitrate (kbps)", fontsize=7); ax.set_ylabel("grid bias (cents)", fontsize=7)
-    ax.set_title("(b) rate: decays to the bypass floor", fontsize=7.5)
-    ax.legend(fontsize=5.6, frameon=False); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
+    ax.set_ylim(0, 12); ax.set_xlabel("bitrate (kbps)", fontsize=6.4); ax.set_ylabel("grid bias (cents)", fontsize=6.4)
+    ax.set_title("(b) bias vs rate: floor = no quantiser", fontsize=6.6)
+    ax.legend(fontsize=5.2, frameon=False); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
 
     ax = axes[2]
     d = load(RES / "octaves_encodec3.csv")
@@ -335,11 +335,11 @@ def fig_mechanism():
         a, ph, _ = fit_sinusoid(theta[m], rc[m]); fr.append(float(lab.split("Hz")[0])); am.append(a); phs.append(ph)
     ax.plot(fr, am, "s-", color=OKABE["enc"], lw=1.6, ms=4.5)
     for f, a, ph in zip(fr, am, phs):
-        ax.annotate(f"{ph:.0f}°", (f, a), textcoords="offset points", xytext=(0, 6), ha="center", fontsize=6)
+        ax.annotate(f"{ph:.0f}°", (f, a), textcoords="offset points", xytext=(0, 5), ha="center", fontsize=5.4)
     ax.set_xscale("log", base=2); ax.set_xticks(fr); ax.set_xticklabels([f"{int(f)}" for f in fr])
-    ax.set_ylim(0, 17); ax.set_xlabel("reference pitch (Hz)", fontsize=7); ax.set_ylabel("100-cent fit amplitude (cents)", fontsize=7)
-    ax.set_title("(c) octaves: same period, phase within 40°", fontsize=7.5)
-    ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
+    ax.set_ylim(0, 17); ax.set_xlabel("reference pitch (Hz)", fontsize=6.4); ax.set_ylabel("fit amplitude (cents)", fontsize=6.4)
+    ax.set_title("(c) octaves: period holds, phase within 40°", fontsize=6.6)
+    ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
 
     ax = axes[3]
     for fname, label, colour, ls in [("hist_gtzan.csv", "GTZAN (peak/mean 1.79)", OKABE["enc"], "-"),
@@ -348,11 +348,11 @@ def fig_mechanism():
         if p.exists():
             x, dens = _hist(p); ax.plot(x, dens, color=colour, lw=1.6, ls=ls, label=label)
     ax.axhline(1, color="0.6", ls=":", lw=1)
-    ax.set_xlim(0, 100); ax.set_ylim(0, 2.0); ax.set_xlabel("cents from nearest 12-TET pitch", fontsize=7)
-    ax.set_ylabel("relative density", fontsize=7)
-    ax.set_title("(d) fine-tune on each: pull 4.44c vs 3.76c", fontsize=7.5)
-    ax.legend(fontsize=5.6, frameon=False, loc="upper center"); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
-    fig.tight_layout(w_pad=1.0); fig.savefig(FIG / "mechanism.png", dpi=200)
+    ax.set_xlim(0, 100); ax.set_ylim(0, 2.0); ax.set_xlabel("cents from nearest 12-TET pitch", fontsize=6.4)
+    ax.set_ylabel("relative density", fontsize=6.4)
+    ax.set_title("(d) fine-tuning corpora: 4.44 vs 3.76c", fontsize=6.6)
+    ax.legend(fontsize=5.2, frameon=False, loc="upper center"); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
+    fig.tight_layout(w_pad=0.6); fig.savefig(FIG / "mechanism.png", dpi=200)
     print("  mechanism.png")
 
 
