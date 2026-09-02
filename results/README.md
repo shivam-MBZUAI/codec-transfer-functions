@@ -21,7 +21,11 @@ produced it.
 | `vib_*` | vibrato sweep, which refuted the out-of-distribution account |
 | `retune_*` | ecological test on real instrument recordings; `retune_synthetic` is its protocol control |
 | `phon_*` | Experiment 2 (phonological contrasts), three codecs |
-| `asr_encodec3_v2`, `asr_mms_*` | Experiment 2 (downstream recognition), two codecs, two recognisers |
+| `asr_*_n100` | Experiment 2 (downstream recognition) at 100 utterances per language, two codecs, two recognisers. **The reported runs** |
+| `corpus_pull_*` | the transfer function on whole polyphonic clips of the tuning-flattened GTZAN corpus; EnCodec pulls real music toward the grid, Opus does not |
+| `detune_opus*`, `detune_mp3*` | classical codecs through the registration sweep: the control for "learned" |
+| `detune_encodec3_220`, `detune_encodec3_880` | registration at other registers |
+| `octaves_opus6` | octave test for the one classical condition with a measurable residual |
 | `ctrl_identity`, `ctrl_sinusoid` | the null controls |
 
 ## Retained but NOT reported as results
@@ -31,6 +35,7 @@ claim. Do not read them as measurements of the phenomenon.
 
 | Prefix | Why it is here |
 |---|---|
+| `asr_encodec3_v2`, `asr_mms_encodec3`, `asr_mms_mimi` | the 30-utterance recognition runs, superseded by the `_n100` files, which give the same ordering with narrower intervals |
 | `asr_encodec3.csv` | the **first, buggy** ASR run, before level normalisation. FLEURS utterance levels span a factor of 100, and on near-silent clips Whisper emits its silence hallucination, which reads as catastrophic codec damage. Superseded by `asr_encodec3_v2`. Retained as the evidence for that discussion |
 | `causal_*`, `ft_*`, `ftvowel_*` | the **failed** synthetic-tone causal design. A codec trained or fine-tuned on narrow synthetic stimuli becomes too good at them and the effect disappears whatever the pitch density. Superseded by `ftm_grid` / `ftm_flat`. See "What did not work" in the appendix |
 | `codec_speechtok.csv` | SpeechTokenizer on musical tones, where it is out of distribution: ~100 cent errors, 97% estimator disagreement. The vowel runs replace it |

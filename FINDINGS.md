@@ -141,7 +141,25 @@ Pure sinusoids show **less than 0.01 cents** of grid bias against 8.88 for harmo
 complexes through the same codec at the same rate. Whatever produces the lock
 operates on spectral pattern, not on pitch as such.
 
-## 9. The effect does NOT appear on real instrument recordings
+## 9. The effect appears on real music, at a quarter of its synthetic amplitude
+
+Whole polyphonic clips of the tuning-flattened GTZAN corpus, coded, with F0
+tracked frame by frame before and after coding by the same blind estimator
+(`corpus_pull.py`). Position is the input pitch's within the semitone.
+
+| Codec | Usable frames | Off-grid grid bias | Sinusoid amplitude | Phase |
+|---|---|---|---|---|
+| EnCodec 3 kbps | 18,279 / 61,714 | **+2.49c** [+2.21, +2.81] | 3.05c | +163° (synthetic: +155°) |
+| DAC 16k | 14,260 / 61,680 | +0.17c [−0.09, +0.47] | 0.66c | +92° |
+| Opus 6 kbps | 14,907 / 61,686 | +0.07c [−0.16, +0.34] | 0.32c | -- |
+| Opus 12 kbps | 20,819 / 61,703 | +0.02c [−0.05, +0.09] | 0.07c | -- |
+
+EnCodec's binned medians run −0.5, −2.6, −3.7, −4.1, −3.2 cents over the
+five 10-cent bins above a grid point and −0.4, +2.2, +3.3, +2.9, +1.2 over the
+five below the next: the sign pattern of the sweeps. The pull acts on
+everyday music, and the classical codec on the same clips shows none.
+
+## 9a. The isolated-note protocol was not sensitive enough
 
 Real instrument notes from NSynth, resampled to sit a controlled distance from
 the nearest 12-TET pitch and pushed through a codec, show no detectable pull
@@ -208,19 +226,25 @@ recogniser. Whisper is a weak instrument here, failing outright on Amharic,
 Georgian and Yoruba with baseline error 1.0, and having no setting at all for
 Igbo, Oromo, Zulu or Xhosa.
 
-MMS could be run on 18 of the 21 languages: **Mandarin, Cantonese and Oromo**
-are absent from the MMS result files, so the MMS tone group is four languages,
-not six. The two tone languages it loses are Mandarin and Cantonese, which are
+MMS could be run on 18 of the 21 languages: the **Mandarin, Cantonese and
+Oromo** adapters could not be loaded, so the MMS tone group is four languages,
+not six. All three combinations were re-run at 100 utterances per language
+(`asr_*_n100.csv`); the numbers below are from those runs. The two tone languages it loses are Mandarin and Cantonese, which are
 exactly the two sitting at ceiling under Whisper with baselines near 0.5, so
 their absence removes the least informative members rather than biasing the
 comparison. Both recognisers agree:
 
-| Group | Whisper | MMS |
-|---|---|---|
-| control | 54.0% | 45.8% |
-| tone | 25.1% (0.47×), n=4 | 30.7% (0.67×), n=4 |
-| ejective | not measurable | 43.4% (0.95×) |
-| click | not measurable | **59.7% (1.30×)**, n=2 |
+| Group | EnCodec, Whisper | EnCodec, MMS | Mimi, MMS |
+|---|---|---|---|
+| control | 77.6% [21, 293] | 64.8% [29, 94] | 154.0% [111, 188] |
+| tone (n=4) | 28.1% [1, 95] (0.36×) | 32.7% [11, 45] (0.50×) | 67.8% [20, 103] (0.44×) |
+| ejective | not measurable | 47.1% [25, 70] | 104.2% [82, 127] |
+| click (n=2) | not measurable | 59.2% [50, 68] | 97.6% [97, 98] |
+
+Intervals are bootstraps over languages. For Mimi under MMS the tone and
+control intervals separate; no group exceeds the control in any combination.
+The 30-utterance "clicks above the control at 1.30×" observation did not
+survive the larger sample.
 
 An environment note that belongs in the reproducibility statement: three runs in
 this round failed silently because installing `xcodec2` to probe an additional
@@ -260,7 +284,19 @@ though estimator noise does grow.
 This weakens the out-of-distribution explanation for the ecological null:
 vibrato makes a stimulus more like real music, and the effect gets stronger.
 
-## 13. The ecological null survives a protocol control
+## 13. Classical codecs show no pull
+
+Opus and MP3, which have no learned component, through the same registration
+sweep (`detune_opus*`, `detune_mp3*`): Opus 12 kbps and MP3 32 kbps are
+refused by the amplitude guard (amplitude ≤ 0.26 and 0.00 cents); MP3 16 kbps
+registers at 0.01 cents, three orders of magnitude below EnCodec; Opus 6 kbps
+shows a 1.6-cent residual at slope 0.93 [0.81, 1.04] whose phase (+101°) is
+symmetric about the grid points, so its grid bias is 0.000. Its octave test
+gives 0.21 and 0.13 cents at 110 and 220 Hz (0% and 1.5% gated) against 0.86
+and 0.91 at 440 and 880 Hz (40% and 66% gated), with the phase wandering from
+−67° to +52°: it tracks codec failure, not pitch.
+
+## 13a. The isolated-note null survives a protocol control
 
 The obvious remaining suspect was our own protocol. Running it on synthetic
 tones, where the interval sweep puts the effect at 13.7 cents:

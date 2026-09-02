@@ -86,6 +86,28 @@ placeholder values.
 | `detune_encodec3` | encodec | 3.0kbps | 460.8Hz_+20c | 1205 | 4.5e-06 | 3.472 | 22.192 | 6.39 | 2.837 | [1.94, 3.86] | 0.64 | 0.59 | sinusoid |
 | `detune_encodec3` | encodec | 3.0kbps | 463.5Hz_+10c | 1205 | 7.2e-06 | 3.862 | 20.546 | 5.32 | 5.813 | [4.82, 6.83] | 0.63 | 0.57 | sinusoid |
 | `detune_encodec3` | encodec | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 4.607 | 15.570 | 3.38 | 8.365 | [7.78, 9.02] | 0.63 | 0.58 | sinusoid |
+| `detune_encodec3_220` | encodec | 3.0kbps | 220Hz_ongrid | 1205 | 8.3e-06 | 2.261 | 9.791 | 4.33 | 5.850 | [5.39, 6.28] | 0.48 | 0.36 | sinusoid |
+| `detune_encodec3_220` | encodec | 3.0kbps | 221.3Hz_+10.0c | 1205 | 8.7e-06 | 2.217 | 11.171 | 5.04 | 5.799 | [5.33, 6.20] | 0.48 | 0.36 | sinusoid |
+| `detune_encodec3_220` | encodec | 3.0kbps | 222.6Hz_+20.0c | 1205 | 8.7e-06 | 2.401 | 13.167 | 5.48 | 4.636 | [4.17, 5.19] | 0.47 | 0.37 | sinusoid |
+| `detune_encodec3_220` | encodec | 3.0kbps | 223.8Hz_+30.0c | 1205 | 8.4e-06 | 2.945 | 14.986 | 5.09 | 2.346 | [1.68, 3.39] | 0.50 | 0.38 | sinusoid |
+| `detune_encodec3_220` | encodec | 3.0kbps | 225.1Hz_+40.0c | 1161 | 1.0e-05 | 6.169 | 12.398 | 2.01 | -1.077 | [-2.19, 0.00] | 0.35 | 0.27 | n/a, below floor |
+| `detune_encodec3_220` | encodec | 3.0kbps | 226.4Hz_+50.0c | 1203 | 1.3e-05 | 9.144 | 6.087 | 0.67 | -5.967 | [-6.56, -5.24] | 0.41 | 0.31 | n/a, below floor |
+| `detune_encodec3_220` | encodec | 3.0kbps | 227.8Hz_+60.0c | 1205 | 1.7e-05 | 8.681 | 10.125 | 1.17 | -5.161 | [-6.33, -4.13] | 0.40 | 0.30 | n/a, below floor |
+| `detune_encodec3_220` | encodec | 3.0kbps | 229.1Hz_+70.0c | 1205 | 2.0e-05 | 4.300 | 16.720 | 3.89 | 0.000 | [0.00, 0.18] | 0.48 | 0.37 | n/a, below floor |
+| `detune_encodec3_220` | encodec | 3.0kbps | 230.4Hz_+80.0c | 1205 | 7.2e-06 | 3.426 | 16.893 | 4.93 | 2.539 | [1.47, 3.43] | 0.49 | 0.36 | sinusoid |
+| `detune_encodec3_220` | encodec | 3.0kbps | 231.7Hz_+90.0c | 1204 | 1.1e-05 | 2.887 | 13.498 | 4.68 | 4.759 | [4.08, 5.37] | 0.49 | 0.37 | sinusoid |
+| `detune_encodec3_220` | encodec | 3.0kbps | 233.1Hz_ongrid | 1205 | 2.5e-05 | 2.363 | 10.531 | 4.46 | 6.014 | [5.57, 6.51] | 0.49 | 0.36 | sinusoid |
+| `detune_encodec3_880` | encodec | 3.0kbps | 880Hz_ongrid | 1145 | 3.4e-06 | 4.815 | 20.647 | 4.29 | 7.936 | [7.14, 8.84] | 0.04 | 0.03 | sinusoid |
+| `detune_encodec3_880` | encodec | 3.0kbps | 885.1Hz_+10.0c | 1136 | 3.8e-06 | 4.296 | 20.084 | 4.68 | 8.375 | [7.41, 9.22] | 0.04 | 0.03 | sinusoid |
+| `detune_encodec3_880` | encodec | 3.0kbps | 890.2Hz_+20.0c | 1127 | 4.2e-06 | 5.317 | 21.855 | 4.11 | 7.720 | [6.87, 8.44] | 0.04 | 0.03 | sinusoid |
+| `detune_encodec3_880` | encodec | 3.0kbps | 895.4Hz_+30.0c | 1115 | 3.6e-06 | 6.026 | 24.341 | 4.04 | 6.088 | [4.81, 7.13] | 0.03 | 0.02 | sinusoid |
+| `detune_encodec3_880` | encodec | 3.0kbps | 900.6Hz_+40.0c | 1103 | 3.9e-06 | 9.074 | 21.349 | 2.35 | 2.310 | [0.85, 4.03] | 0.03 | 0.03 | sinusoid |
+| `detune_encodec3_880` | encodec | 3.0kbps | 905.8Hz_+50.0c | 1096 | 4.2e-06 | 13.148 | 15.489 | 1.18 | -0.954 | [-2.95, 0.00] | 0.03 | 0.02 | n/a, below floor |
+| `detune_encodec3_880` | encodec | 3.0kbps | 911Hz_+60.0c | 1085 | 2.7e-06 | 23.888 | 11.796 | 0.49 | -7.351 | [-8.90, -5.94] | 0.03 | 0.02 | n/a, below floor |
+| `detune_encodec3_880` | encodec | 3.0kbps | 916.3Hz_+70.0c | 1076 | 4.2e-06 | 12.167 | 22.650 | 1.86 | 0.000 | [-0.10, 0.45] | 0.03 | 0.02 | n/a, below floor |
+| `detune_encodec3_880` | encodec | 3.0kbps | 921.6Hz_+80.0c | 1064 | 4.1e-06 | 6.989 | 26.608 | 3.81 | 4.839 | [2.80, 6.61] | 0.03 | 0.02 | sinusoid |
+| `detune_encodec3_880` | encodec | 3.0kbps | 927Hz_+90.0c | 1054 | 3.3e-06 | 5.896 | 24.306 | 4.12 | 6.903 | [5.72, 7.96] | 0.02 | 0.01 | sinusoid |
+| `detune_encodec3_880` | encodec | 3.0kbps | 932.3Hz_+100.0c | 1041 | 3.5e-06 | 5.029 | 22.027 | 4.38 | 7.791 | [6.91, 8.62] | 0.03 | 0.02 | sinusoid |
 | `detune_encodec48` | encodec | 6.0kbps | 440Hz_ongrid | 964 | 4.9e-06 | 1.221 | 7.611 | 6.23 | 3.958 | [3.52, 4.32] | 0.46 | 0.45 | sinusoid |
 | `detune_encodec48` | encodec | 6.0kbps | 442.5Hz_+09.8c | 964 | 4.5e-06 | 1.105 | 7.555 | 6.84 | 3.521 | [3.16, 3.90] | 0.46 | 0.45 | sinusoid |
 | `detune_encodec48` | encodec | 6.0kbps | 445.1Hz_+20.0c | 964 | 7.0e-06 | 1.739 | 7.355 | 4.23 | 2.180 | [1.88, 2.52] | 0.48 | 0.48 | sawtooth |
@@ -106,6 +128,50 @@ placeholder values.
 | `detune_mimi` | mimi | Q8 | 458.2Hz_+70.2c | 960 | 5.0e-06 | 10.708 | 12.196 | 1.14 | -1.633 | [-2.78, -0.45] | 0.07 | 0.07 | n/a, below floor |
 | `detune_mimi` | mimi | Q8 | 460.8Hz_+80.0c | 961 | 4.5e-06 | 7.963 | 11.630 | 1.46 | 0.000 | [-0.74, 0.00] | 0.07 | 0.06 | n/a, below floor |
 | `detune_mimi` | mimi | Q8 | 463.5Hz_+90.1c | 961 | 4.7e-06 | 5.639 | 10.233 | 1.81 | 0.897 | [0.00, 1.95] | 0.09 | 0.06 | sinusoid |
+| `detune_mp316` | mp3 | 16kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 0.010 | 0.011 | 1.17 | 0.000 | [0.00, 6.6e-04] | 0.03 | 0.03 | n/a, below floor |
+| `detune_mp316` | mp3 | 16kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 0.012 | 0.012 | 1.00 | 0.000 | [0.00, 7.0e-04] | 0.02 | 0.03 | n/a, below floor |
+| `detune_mp316` | mp3 | 16kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 0.011 | 0.011 | 0.98 | 1.8e-04 | [0.00, 1.7e-03] | 0.02 | 0.03 | sawtooth |
+| `detune_mp316` | mp3 | 16kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 0.011 | 0.010 | 0.90 | 0.000 | [0.00, 7.4e-04] | 0.02 | 0.02 | n/a, below floor |
+| `detune_mp316` | mp3 | 16kbps | 450.3Hz_+40.0c | 1205 | 8.9e-06 | 0.013 | 0.010 | 0.74 | 0.000 | [-7.7e-04, 0.00] | 0.02 | 0.03 | n/a, below floor |
+| `detune_mp316` | mp3 | 16kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 0.010 | 0.009 | 1.00 | 0.000 | [0.00, 4.3e-04] | 0.02 | 0.03 | n/a, below floor |
+| `detune_mp316` | mp3 | 16kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 0.010 | 0.008 | 0.77 | -6.5e-04 | [-1.4e-03, 0.00] | 0.02 | 0.03 | n/a, below floor |
+| `detune_mp316` | mp3 | 16kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 0.007 | 0.007 | 0.98 | 0.000 | [-5.0e-04, 0.00] | 0.02 | 0.02 | n/a, below floor |
+| `detune_mp316` | mp3 | 16kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 0.008 | 0.008 | 0.96 | 0.000 | [-1.1e-04, 0.00] | 0.02 | 0.02 | n/a, below floor |
+| `detune_mp316` | mp3 | 16kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 0.009 | 0.009 | 1.03 | 0.000 | [-5.2e-04, 0.00] | 0.02 | 0.03 | n/a, below floor |
+| `detune_mp316` | mp3 | 16kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 0.009 | 0.009 | 1.06 | 0.000 | [0.00, 4.4e-04] | 0.02 | 0.03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 0.001 | 0.001 | 0.91 | 0.000 | [-6.8e-05, 0.00] | 1.7e-04 | 3.4e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 0.001 | 0.002 | 1.05 | 0.000 | [0.00, 9.4e-05] | 2.9e-03 | 3.3e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 0.001 | 0.002 | 1.14 | 0.000 | [-4.5e-08, 2.7e-05] | 2.6e-04 | 1.9e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 0.001 | 0.001 | 1.07 | 0.000 | [-2.6e-05, 0.00] | 6.6e-05 | 2.7e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 450.3Hz_+40.0c | 1205 | 8.9e-06 | 0.002 | 0.001 | 0.86 | 0.000 | [0.00, 1.9e-04] | 5.8e-03 | 8.0e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 0.002 | 0.001 | 0.93 | 0.000 | [-3.4e-05, 0.00] | 5.2e-04 | 2.3e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 0.001 | 0.001 | 0.92 | 0.000 | [0.00, 3.0e-05] | 1.2e-04 | 3.0e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 0.001 | 8.8e-04 | 0.74 | 0.000 | [-6.3e-05, 0.00] | 6.4e-04 | 1.3e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 0.001 | 0.001 | 1.03 | 0.000 | [0.00, 2.0e-05] | 5.3e-04 | 2.2e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 0.001 | 0.001 | 0.89 | 1.4e-05 | [0.00, 1.4e-04] | 2.0e-03 | 3.8e-03 | n/a, below floor |
+| `detune_mp332` | mp3 | 32kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 0.001 | 0.001 | 0.96 | 0.000 | [-4.3e-05, 0.00] | 1.7e-04 | 1.2e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 440Hz_ongrid | 1001 | 4.9e-06 | 0.061 | 0.052 | 0.86 | 0.000 | [-3.0e-03, 0.00] | 1.4e-03 | 4.7e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 442.5Hz_+10.0c | 1011 | 8.2e-06 | 0.044 | 0.045 | 1.03 | 0.000 | [0.00, 3.7e-03] | 2.7e-03 | 4.0e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 445.1Hz_+20.0c | 1003 | 8.3e-06 | 0.063 | 0.062 | 0.99 | 0.000 | [0.00, 6.2e-03] | 9.5e-04 | 5.9e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 447.7Hz_+30.0c | 978 | 4.5e-06 | 0.415 | 0.159 | 0.38 | 0.000 | [-2.1e-03, 0.00] | 2.2e-03 | 4.9e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 450.3Hz_+40.0c | 982 | 8.9e-06 | 0.245 | 0.205 | 0.83 | 0.000 | [0.00, 6.3e-03] | 5.9e-04 | 3.9e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 452.9Hz_+50.0c | 983 | 5.1e-06 | 0.065 | 0.072 | 1.10 | 0.000 | [-2.1e-03, 7.7e-04] | 7.3e-04 | 5.6e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 455.5Hz_+60.0c | 976 | 4.7e-06 | 0.037 | 0.045 | 1.19 | 0.000 | [-2.8e-03, 0.00] | 6.0e-06 | 2.8e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 458.2Hz_+70.0c | 982 | 8.1e-06 | 0.041 | 0.044 | 1.07 | 0.000 | [-5.8e-04, 2.0e-03] | 8.7e-04 | 4.0e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 460.8Hz_+80.0c | 997 | 4.5e-06 | 0.752 | 0.712 | 0.95 | 0.000 | [0.00, 4.7e-03] | 6.1e-05 | 2.7e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 463.5Hz_+90.0c | 995 | 7.2e-06 | 1.033 | 0.614 | 0.59 | 0.000 | [0.00, 2.5e-03] | 2.4e-03 | 4.7e-03 | n/a, below floor |
+| `detune_opus12` | opus | 12kbps | 466.2Hz_ongrid | 975 | 6.4e-06 | 0.120 | 0.111 | 0.92 | 0.000 | [-8.3e-03, 0.00] | 1.8e-04 | 3.8e-03 | n/a, below floor |
+| `detune_opus6` | opus | 6kbps | 440Hz_ongrid | 714 | 4.9e-06 | 4.307 | 3.987 | 0.93 | 0.000 | [-3.1e-03, 0.42] | 0.01 | 0.01 | n/a, below floor |
+| `detune_opus6` | opus | 6kbps | 442.5Hz_+10.0c | 737 | 8.2e-06 | 2.761 | 2.959 | 1.07 | 0.000 | [0.00, 0.20] | 0.03 | 0.05 | n/a, below floor |
+| `detune_opus6` | opus | 6kbps | 445.1Hz_+20.0c | 727 | 8.3e-06 | 1.811 | 2.309 | 1.27 | 0.167 | [0.00, 0.44] | 7.8e-03 | 0.02 | sawtooth |
+| `detune_opus6` | opus | 6kbps | 447.7Hz_+30.0c | 714 | 4.5e-06 | 1.807 | 2.140 | 1.18 | 0.340 | [0.12, 0.61] | 0.02 | 0.03 | sawtooth |
+| `detune_opus6` | opus | 6kbps | 450.3Hz_+40.0c | 709 | 8.9e-06 | 4.944 | 4.448 | 0.90 | 0.000 | [0.00, 0.64] | 0.02 | 0.03 | n/a, below floor |
+| `detune_opus6` | opus | 6kbps | 452.9Hz_+50.0c | 703 | 5.1e-06 | 6.465 | 8.047 | 1.24 | 1.127 | [0.00, 3.03] | 0.04 | 0.03 | sinusoid |
+| `detune_opus6` | opus | 6kbps | 455.5Hz_+60.0c | 598 | 4.7e-06 | 1.968 | 2.144 | 1.09 | 0.000 | [-0.18, 0.00] | 0.02 | 0.03 | n/a, below floor |
+| `detune_opus6` | opus | 6kbps | 458.2Hz_+70.0c | 121 | 8.1e-06 | 3.575 | 1.879 | 0.53 | -0.391 | [-1.14, 0.00] | 6.8e-03 | 0.05 | n/a, below floor |
+| `detune_opus6` | opus | 6kbps | 460.8Hz_+80.0c | 682 | 4.5e-06 | 5.893 | 5.336 | 0.91 | 0.000 | [-0.34, 0.00] | 0.03 | 0.02 | n/a, below floor |
+| `detune_opus6` | opus | 6kbps | 463.5Hz_+90.0c | 689 | 7.2e-06 | 2.856 | 2.326 | 0.81 | -0.489 | [-0.92, -0.05] | 0.01 | 0.04 | n/a, below floor |
+| `detune_opus6` | opus | 6kbps | 466.2Hz_ongrid | 673 | 6.4e-06 | 3.316 | 3.444 | 1.04 | 0.000 | [0.00, 0.52] | 0.02 | 0.03 | n/a, below floor |
 | `detune_snac` | snac | 24khz | 440Hz_ongrid | 98 | 4.9e-06 | 68.533 | 120.373 | 1.76 | -43.562 | [-69.04, -18.76] | 0.06 | 0.10 | n/a, below floor |
 | `detune_snac` | snac | 24khz | 442.5Hz_+09.8c | 92 | 4.5e-06 | 73.169 | 74.524 | 1.02 | -17.797 | [-44.03, 0.00] | 0.03 | 0.04 | n/a, below floor |
 | `detune_snac` | snac | 24khz | 445.1Hz_+20.0c | 75 | 7.0e-06 | 104.667 | 79.192 | 0.76 | 0.000 | [-39.76, 19.54] | 3.2e-04 | 0.04 | n/a, below floor |
@@ -194,6 +260,10 @@ placeholder values.
 | `octaves_encodec3` | encodec | 3.0kbps | 220Hz_ongrid | 1446 | 8.4e-06 | 2.281 | 10.574 | 4.64 | 5.837 | [5.43, 6.42] | 0.48 | 0.38 | sinusoid |
 | `octaves_encodec3` | encodec | 3.0kbps | 440Hz_ongrid | 1446 | 4.9e-06 | 4.379 | 13.427 | 3.07 | 8.867 | [8.34, 9.41] | 0.64 | 0.57 | sinusoid |
 | `octaves_encodec3` | encodec | 3.0kbps | 880Hz_ongrid | 1371 | 3.4e-06 | 4.727 | 20.807 | 4.40 | 7.757 | [6.82, 8.57] | 0.04 | 0.03 | sinusoid |
+| `octaves_opus6` | opus | 6kbps | 110Hz_ongrid | 1205 | 2.6e-05 | 0.311 | 0.291 | 0.93 | 0.000 | [-0.01, 0.00] | 3.9e-03 | 0.01 | n/a, below floor |
+| `octaves_opus6` | opus | 6kbps | 220Hz_ongrid | 1187 | 8.4e-06 | 2.306 | 2.137 | 0.93 | 0.000 | [0.00, 0.09] | 5.4e-04 | 5.1e-03 | n/a, below floor |
+| `octaves_opus6` | opus | 6kbps | 440Hz_ongrid | 725 | 4.9e-06 | 4.079 | 3.590 | 0.88 | 0.000 | [0.00, 0.48] | 8.5e-03 | 0.02 | n/a, below floor |
+| `octaves_opus6` | opus | 6kbps | 880Hz_ongrid | 412 | 3.4e-06 | 5.661 | 6.478 | 1.14 | 0.000 | [-0.34, 0.45] | 2.8e-03 | 7.4e-03 | n/a, below floor |
 | `pilot_encodec3` | encodec | 3.0kbps | 440Hz_ongrid | 723 | 4.9e-06 | 4.196 | 13.786 | 3.29 | 9.206 | [8.29, 9.92] | 0.65 | 0.60 | sinusoid |
 | `pilot_encodec3` | encodec | 3.0kbps | 452.9Hz_+50c | 723 | 5.2e-06 | 9.321 | 15.524 | 1.67 | -6.041 | [-8.36, -3.26] | 0.56 | 0.49 | n/a, below floor |
 | `rate_encodec_1.5` | encodec | 1.5kbps | 440Hz_ongrid | 1191 | 4.9e-06 | 4.102 | 17.080 | 4.16 | 10.459 | [9.70, 11.02] | 0.57 | 0.48 | sinusoid |
@@ -223,7 +293,7 @@ placeholder values.
 | `vowel_speechtok` | speechtokenizer | Q8 | 220Hz_ongrid | 964 | 3.6e-05 | 0.971 | 0.784 | 0.81 | 0.000 | [-0.04, 0.00] | 0.03 | 0.03 | n/a, below floor |
 | `vowel_speechtok` | speechtokenizer | Q8 | 226.4Hz_+49.6c | 963 | 3.4e-05 | 1.057 | 1.022 | 0.97 | 0.033 | [0.00, 0.17] | 0.05 | 0.04 | sinusoid |
 
-**Skipped:** `asr_encodec3` (no usable rows), `asr_encodec3_v2` (no usable rows), `asr_mms_encodec3` (no usable rows), `asr_mms_mimi` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `phon_dac16` (no usable rows), `phon_encodec3` (no usable rows), `phon_encodec3_big` (no usable rows), `phon_mimi` (no usable rows), `probe_encodec3` (no usable rows), `retune_dac16` (no usable rows), `retune_encodec3` (no usable rows), `retune_encodec3_big` (no usable rows), `retune_synthetic` (no usable rows)
+**Skipped:** `asr_encodec3` (no usable rows), `asr_encodec3_n100` (no usable rows), `asr_encodec3_v2` (no usable rows), `asr_mms_encodec3` (no usable rows), `asr_mms_encodec3_n100` (no usable rows), `asr_mms_mimi` (no usable rows), `asr_mms_mimi_n100` (no usable rows), `corpus_pull_dac166` (no usable rows), `corpus_pull_encodec3` (no usable rows), `corpus_pull_opus12` (no usable rows), `corpus_pull_opus6` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `phon_dac16` (no usable rows), `phon_encodec3` (no usable rows), `phon_encodec3_big` (no usable rows), `phon_mimi` (no usable rows), `probe_encodec3` (no usable rows), `retune_dac16` (no usable rows), `retune_encodec3` (no usable rows), `retune_encodec3_big` (no usable rows), `retune_synthetic` (no usable rows)
 
 **Reading this table.** `floor` is the estimator's own error on uncoded stimuli in the same run: no effect below it means anything. `grid bias` is positive when the codec moved an interval *toward* the Western semitone grid, which is the directional claim; a symmetric residual of the same magnitude is ordinary degradation. `sine R2` against `saw R2` discriminates the two candidate mechanisms: a density correction predicts a sinusoid, coarse cell assignment predicts a sawtooth, and they scale differently with rate.
 
@@ -233,9 +303,17 @@ placeholder values.
 
 ![detuning_regression](figures/detuning_regression.png)
 
+### `mechanism.png`
+
+![mechanism](figures/mechanism.png)
+
 ### `octaves.png`
 
 ![octaves](figures/octaves.png)
+
+### `overview.png`
+
+![overview](figures/overview.png)
 
 ### `pilot_encodec3.png`
 
@@ -248,6 +326,10 @@ placeholder values.
 ### `rate_scaling.png`
 
 ![rate_scaling](figures/rate_scaling.png)
+
+### `registration_all.png`
+
+![registration_all](figures/registration_all.png)
 
 ### `residual_shape.png`
 

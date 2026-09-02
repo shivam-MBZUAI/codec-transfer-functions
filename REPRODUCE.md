@@ -138,11 +138,13 @@ python experiments/run_phonology.py --codec encodec:3 --per-language 150 \
     --out results/phon_encodec3_big.csv
 python analysis/analyze_phonology.py results/phon_encodec3_big.csv
 
-python experiments/run_asr.py --codec encodec:3 --per-language 30 \
-    --out results/asr_encodec3_v2.csv              # Whisper
-python experiments/run_asr_mms.py --codec encodec:3 --per-language 30 \
-    --out results/asr_mms_encodec3.csv             # MMS cross-check
-python analysis/analyze_asr.py results/asr_mms_encodec3.csv
+python experiments/run_asr.py --codec encodec:3 --per-language 100 \
+    --out results/asr_encodec3_n100.csv            # Whisper
+python experiments/run_asr_mms.py --codec encodec:3 --per-language 100 \
+    --out results/asr_mms_encodec3_n100.csv        # MMS
+python experiments/run_asr_mms.py --codec mimi:8 --per-language 100 \
+    --out results/asr_mms_mimi_n100.csv
+python analysis/analyze_asr.py results/asr_mms_encodec3_n100.csv   # prints bootstrap intervals
 ```
 
 Both return nulls. Two caveats are built into the code rather than left to the
@@ -152,7 +154,31 @@ then emits its silence hallucination, which reads as catastrophic codec damage);
 and languages where the recogniser fails **before** any codec is applied are
 flagged and excluded, since a baseline error near 1.0 leaves no headroom.
 
-## The ecological test, and its control
+## The classical-codec control, the extra registers, and real music
+
+`infra/pod_run.sh` runs all of these (`classical`, `registers`, `corpus`);
+the commands behind it are:
+
+```bash
+REFS=$(python3 -c "print(' '.join(f'{440*2**(d/1200):.4f}' for d in range(0,101,10)))")
+for c in opus:6 opus:12 mp3:16 mp3:32; do          # no learned component
+  python experiments/run_sweep.py --codec $c --reps 5 --references $REFS --out results/detune_${c/:/}.csv
+  python analysis/analyze_detuning.py results/detune_${c/:/}.csv
+done
+python experiments/run_sweep.py --codec opus:6 --reps 5 --references 110 220 440 880 --out results/octaves_opus6.csv
+python experiments/make_detuned_corpus.py --src corpora/gtzan --dst corpora/gtzan_detuned
+for c in encodec:3 dac16:6 opus:6 opus:12; do      # the transfer function on real music
+  python experiments/corpus_pull.py --audio-root corpora/gtzan_detuned --codec $c --out results/corpus_pull_${c/:/}.csv
+  python analysis/analyze_corpus_pull.py results/corpus_pull_${c/:/}.csv
+done
+```
+Expect EnCodec 3 kbps to pull real music by +2.49 cents [2.21, 2.81] with a
+3.05-cent sinusoid at phase +163°, and Opus to show nothing. Opus 12 kbps and
+MP3 32 kbps are refused by the guard; MP3 16 kbps registers at 0.01 cents;
+Opus 6 kbps shows a 1.6-cent residual with zero grid bias whose amplitude
+tracks the octave-gate rate, not pitch.
+
+## The ecological test on isolated notes, and its control
 
 ```bash
 python data/get_nsynth.py
