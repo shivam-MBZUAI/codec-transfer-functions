@@ -32,10 +32,10 @@ grid rather than to the interval under test.
 | **Aggregate metrics conceal it** | DAC 16k and SNAC 44k report a median grid bias of 0.000 and register cleanly |
 | **Not architectural** | period constant in cents across four octaves; conv strides would give constant Hz |
 | **Not in the codebook** | removing quantisation leaves 5.66 of 8.88 cents; code boundaries uniform (Rayleigh *p* = 0.86) |
-| **Learned** | flattening the tuning grid of the training audio weakens it by 18% |
+| **Learned** | flattening the tuning grid of the training audio weakens it by 15% |
 | **Bounded** | absent on real instrument recordings, in phonology across 20 languages, and in downstream WER |
 
-Two of seven pre-registered predictions are falsified. **[FINDINGS.md](FINDINGS.md)
+Two pre-registered predictions are falsified and three could not be measured; the scored table is in the paper repository's `PREDICTIONS.md`. **[FINDINGS.md](FINDINGS.md)
 states every number, every null, and every design that failed.**
 
 ---

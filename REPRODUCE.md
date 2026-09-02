@@ -125,7 +125,7 @@ for arm in grid:gtzan flat:gtzan_detuned; do
       --reps 5 --references $REFS --out results/ftm_${arm%%:*}.csv
 done
 ```
-Expect 4.44 cents on grid-peaked music against 3.76 on flattened, an 18%
+Expect 4.44 cents on grid-peaked music against 3.76 on flattened, a 15%
 reduction with both retaining unit slope.
 
 ---
