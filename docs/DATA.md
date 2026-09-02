@@ -18,8 +18,8 @@ inputs, and exactly one of those is not automatable.
 ## 1. Codec checkpoints — automatic
 
 ```bash
-source /scratch/shivam.chauhan/codecs/env.sh
-python cluster/fetch_checkpoints.py
+source "$CODECS_ROOT/env.sh"      # site-specific, untracked; see docs/CLUSTER.md
+python data/fetch_checkpoints.py
 ```
 
 | Codec | Repo | Role |
@@ -60,7 +60,7 @@ EnCodec 48 kHz   music checkpoint                  -> predict strongest
 ## 2. Additional codecs — automatic, availability varies
 
 ```bash
-python cluster/fetch_all.py
+python data/fetch_all.py
 ```
 
 Repo identifiers for these move more than the core set, so the fetcher reports
@@ -95,7 +95,7 @@ any "ok" that is not backed by a file count as unverified.
 ## 3. Speech corpus and ASR — automatic
 
 ```bash
-python cluster/fetch_fleurs.py
+python data/fetch_fleurs.py
 ```
 
 | Input | Source | Note |
@@ -291,4 +291,4 @@ with `HF_HUB_OFFLINE=1` and never touch the network.
 
 **A trap worth repeating:** `snapshot_download` returns success when
 `allow_patterns` matched nothing. Always verify a file count after downloading,
-which is what every fetcher in `cluster/` now does.
+which is what every fetcher in `data/` now does.

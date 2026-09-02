@@ -9,7 +9,7 @@ per-trial CSV with a `.meta.json` sidecar; every derived number comes from
 ```bash
 python -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
-python data/fetch_checkpoints.py        # ~1.9 GB, seven codecs
+python data/fetch_checkpoints.py        # ~2 GB, ten checkpoints
 ```
 
 **Do not install `xcodec2` into this environment.** It downgrades torch to
@@ -35,7 +35,7 @@ make gate
 |---|---|
 | `experiments/test_estimator.py` | `PASS`, floor below 10⁻⁴ cents |
 | identity codec through the full pipeline | `NULL` |
-| pilot sweep, EnCodec 3 kbps | grid bias ≈ 9.3 cents |
+| pilot sweep, EnCodec 3 kbps | grid bias ≈ 9 cents |
 
 The identity run is the important one: it puts the same stimuli through the same
 estimator and the same analysis with **no codec**, and must find nothing.
@@ -44,21 +44,32 @@ estimator and the same analysis with **no codec**, and must find nothing.
 
 ## Main text
 
+**Exclusion scheme.** Every number in the paper uses the octave gate alone,
+which excludes 0% of trials on every reported run. The estimator cross-check
+(`--exclusion=full` on `analyze_sweep.py`, `analyze_detuning.py` and
+`analyze_rate.py`) is a robustness variant and is reported as such in the
+paper, because it fires preferentially 30 to 50 cents from a grid point.
+`analysis/diagnose_exclusions.py` prints all three schemes side by side.
+
 ### Figure 1, the registration regression
 
+Eleven reference pitches from 0 to 100 cents above A440 in 10-cent steps. The
+100-cent point is one semitone up and folds onto the 0-cent condition, so ten
+distinct conditions enter the regression.
+
 ```bash
-REFS="440 442.5 445.1 447.7 450.3 452.9 455.5 458.2 460.8 463.5"
-python experiments/run_sweep.py --codec encodec:3 --reps 4 --references $REFS \
+REFS="440 442.5489 445.1126 447.6911 450.2845 452.8930 455.5166 458.1553 460.8094 463.4789 466.1638"
+python experiments/run_sweep.py --codec encodec:3 --reps 5 --references $REFS \
     --out results/detune_encodec3.csv
 python analysis/analyze_detuning.py results/detune_encodec3.csv \
     figures/detuning_regression.png
 ```
-Expect slope 1.0010, CI [0.9935, 1.0085], *R²* 0.99988.
+Expect slope 1.0010, CI [0.9935, 1.0085], *R²* 0.99988, amplitude 13.72 ± 0.16.
 
-### Table 1, universality across codecs
+### The universality table, phase registration across codecs
 
 ```bash
-for c in encodec:3 encodec:24 encodec48:6 mimi:8 dac16:6 dac24:8 snac44; do
+for c in encodec:3 encodec:24 encodec48:6 mimi:8 dac16:6 dac24:8 dac:4 snac snac32 snac44; do
   python experiments/run_sweep.py --codec $c --reps 4 --references $REFS \
       --out results/detune_${c/:/}.csv
 done
@@ -67,7 +78,7 @@ python analysis/summary_table.py
 Two conditions are **refused** rather than reported: SNAC 24k and DAC 44k fail
 the amplitude-stability guard. That is the intended behaviour, not a failure.
 
-### Table 2 and Figure 3, rate scaling and the bypass floor
+### The rate table and the rate-scaling figure, with the bypass floor
 
 ```bash
 for kb in 1.5 3 6 12 24; do
@@ -78,8 +89,8 @@ python experiments/run_sweep.py --codec encodec_bypass --reps 5 \
     --references 440 452.8929 --out results/mech_bypass.csv
 python analysis/analyze_rate.py
 ```
-Expect the sweep to plateau at the bypass value, raw slope −0.328 and
-floor-subtracted slope −2.434.
+Expect the sweep to plateau at the bypass value (5.66 cents), raw slope −0.324
+and floor-subtracted slope −2.612.
 
 ### The codebook probe
 
@@ -89,7 +100,7 @@ python analysis/analyze_probe.py results/probe_encodec3.csv
 ```
 Expect uniform boundary positions, Rayleigh *p* = 0.86.
 
-### Figure 4, the training-density premise
+### The training-density premise (pitch histograms)
 
 ```bash
 python data/fetch_corpora.py

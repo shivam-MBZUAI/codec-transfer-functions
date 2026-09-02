@@ -3,8 +3,9 @@
 # GPU-bound, so they run concurrently: one process per configuration, each
 # single-threaded, across a machine with 255 vCPUs.
 set -u
-export HF_HOME=/workspace/.hf
-cd /workspace/codecs/experiments
+ROOT="${CODECS_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+export HF_HOME="${HF_HOME:-$ROOT/.hf}"
+cd "$ROOT/experiments"
 mkdir -p ../results ../figures ../logs ../checkpoints
 
 REPS=${REPS:-5}

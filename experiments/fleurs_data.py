@@ -20,7 +20,11 @@ from pathlib import Path
 
 import numpy as np
 
-HF = Path("/workspace/.hf/hub/datasets--google--fleurs")
+import os
+
+# FLEURS lives in the HuggingFace cache. HF_HOME is the same variable the
+# fetchers honour; the old hard-coded /workspace path was a pod-specific detail.
+HF = Path(os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface")) / "hub" / "datasets--google--fleurs"
 
 
 @lru_cache(maxsize=1)

@@ -31,6 +31,11 @@ REPOS = [
     # music at all, so under the training-distribution hypothesis it is the
     # negative control that should show no 12-TET structure.
     ("fnlp/SpeechTokenizer", "SpeechTokenizer, LibriSpeech only, NO MUSIC: the negative control"),
+    # SNAC: multi-scale RVQ, each quantiser level at its own frame rate. Loaded
+    # through the `snac` package, which pulls from these repos.
+    ("hubertsiuzdak/snac_24khz", "SNAC 24 kHz, 0.98 kbps, three levels at 12/23/47 Hz"),
+    ("hubertsiuzdak/snac_32khz", "SNAC 32 kHz, 1.9 kbps, four levels at 10/21/42/83 Hz"),
+    ("hubertsiuzdak/snac_44khz", "SNAC 44.1 kHz, 2.6 kbps, four levels at 14/29/57/115 Hz"),
 ]
 
 

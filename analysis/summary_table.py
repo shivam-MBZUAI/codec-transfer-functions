@@ -47,6 +47,9 @@ def parse(name: str):
     p = ROOT / "results" / f"{name}.csv"
     if not p.exists():
         return None
+    # Octave gate only, the scheme used throughout the paper. The estimator
+    # cross-check would discard most trials for the speech-shaped stimuli and
+    # trip the retention guard for reasons unrelated to what is measured.
     out = subprocess.run([sys.executable, str(ANA / "analyze_detuning.py"), str(p),
                           "--exclusion=gate"],
                          capture_output=True, text=True, cwd=str(ANA)).stdout

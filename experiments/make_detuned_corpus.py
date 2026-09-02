@@ -13,8 +13,8 @@ spectral balance, note density, production and dynamics are untouched, so the
 only thing that differs between the two corpora is the position of the tuning
 grid.
 
-    python make_detuned_corpus.py --src /workspace/corpora/gtzan \\
-        --dst /workspace/corpora/gtzan_detuned
+    python make_detuned_corpus.py --src corpora/gtzan \\
+        --dst corpora/gtzan_detuned
 """
 
 from __future__ import annotations

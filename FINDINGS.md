@@ -3,6 +3,11 @@
 Every number here is measured and traceable to a file in `results/`. Where a
 result contradicts the paper draft, that is stated.
 
+**Exclusion scheme.** Every number below, and every number in the paper, uses
+the octave gate alone, which excludes 0% of trials on every reported run. The
+estimator cross-check (`--exclusion=full`) is reported only as a robustness
+variant, because it fires preferentially 30 to 50 cents from a grid point.
+
 ---
 
 ## 1. The central result: the residual is locked to an absolute learned grid
@@ -10,7 +15,8 @@ result contradicts the paper draft, that is stated.
 Detuning the reference pitch across a full semitone shifts the residual's phase
 with **unit slope**, while its amplitude stays constant.
 
-Eleven measurable conditions across four codec families:
+Ten measurable conditions across four codec families; the five that carry the
+argument (the full table is `analysis/summary_table.py`):
 
 | Codec | Stimulus | Amplitude | Relative slope | 95% CI | R² |
 |---|---|---|---|---|---|
@@ -26,8 +32,10 @@ The interval account is excluded by roughly 250 standard errors for EnCodec.
 Two points to report honestly:
 
 - **The exclusion scheme matters for the noisier codecs.** EnCodec and DAC give
-  slope 1.0 under either scheme. Mimi and SpeechTokenizer reach 1.0 under the
-  stricter estimator cross-check and fall below it under the octave gate alone.
+  slope 1.0 under either scheme. Adding the estimator cross-check moves Mimi to
+  1.02 and SpeechTokenizer to 0.99, but discards most trials for the
+  speech-shaped stimuli and trips the retention guard on the EnCodec vowel
+  condition, so the octave-gate scheme is the one reported.
 - **The effect is 16x weaker on speech than on music** for the same codec
   (0.87c against 13.72c). This bears directly on what can be claimed about speech.
 
@@ -59,8 +67,8 @@ twelve tones, and we do not claim otherwise. The hypothesis concerns the
 quantiser rather than the architecture."* Two measurements contradict this.
 
 **Quantiser bypass.** Running encoder to decoder with no quantisation at all
-still gives **5.74 cents** of grid bias against 9.26 with the quantiser. The
-bypass reconstructs *better* overall (2.22c on-grid against 4.04c), exactly as
+still gives **5.66 cents** of grid bias against 8.88 with the quantiser. The
+bypass reconstructs *better* overall (2.58c on-grid against 4.20c), exactly as
 skipping quantisation should, so it is working correctly.
 
 **Codebook probe.** Sweeping pitch at 2-cent resolution and recording which code
@@ -79,8 +87,8 @@ density term −2.
 
 | Fit | Slope | 95% CI | vs −1 | vs −2 |
 |---|---|---|---|---|
-| Raw bias | −0.328 | [−0.601, −0.055] | 4.8σ | 12.0σ |
-| **Bypass floor subtracted** | **−2.434** | [−3.336, −1.533] | 3.1σ | **0.9σ** |
+| Raw bias | −0.324 | [−0.590, −0.058] | 5.0σ | 12.4σ |
+| **Bypass floor subtracted** | **−2.612** | [−3.345, −1.879] | 4.3σ | **1.6σ** |
 
 The rate sweep plateaus at exactly the bypass value, so the effect decomposes
 into a rate-independent architecture component and a rate-dependent quantiser
@@ -88,7 +96,7 @@ component that scales as Δ² precisely as the proposition says.
 
 | Rate | 1.5 | 3 | 6 | 12 | 24 | bypass |
 |---|---|---|---|---|---|---|
-| Bias (c) | 10.59 | 9.26 | 6.68 | 6.00 | 5.84 | **5.74** |
+| Bias (c) | 10.46 | 8.88 | 6.60 | 5.94 | 5.73 | **5.66** |
 
 **The proposition is correct. The draft is wrong that it accounts for the whole
 effect.**
@@ -118,7 +126,8 @@ differing only in whether the tuning grid exists. EnCodec fine-tuned on each,
 | grid-peaked music | 1.788 | **4.44 ± 0.09c** | 0.9991 |
 | flat music | 1.073 | **3.76 ± 0.08c** | 0.9975 |
 
-An **18% reduction** from flattening the training density alone, the difference
+A **15% reduction** from flattening the training density alone (the grid-trained
+amplitude exceeds the flat-trained one by 18%), the difference
 about eight times the spread across ten detuning conditions. Both retain unit
 slope at R² 0.9999, so the lock is weakened rather than moved or destroyed.
 
@@ -128,7 +137,7 @@ amplitude from 13.72 to about 4 in both arms.
 
 ## 8. The effect requires harmonic structure
 
-Pure sinusoids show **0.002 cents** of grid bias against 9.43 for harmonic
+Pure sinusoids show **less than 0.01 cents** of grid bias against 8.88 for harmonic
 complexes through the same codec at the same rate. Whatever produces the lock
 operates on spectral pattern, not on pitch as such.
 
@@ -173,8 +182,10 @@ over languages:
 | Mimi | ejective (3) | LSD | 1.044 | [0.94, 1.16] |
 | **DAC 16k** | tone (6) | F₀ | **1.041** | [0.82, 1.24] |
 | **DAC 16k** | ejective (3) | LSD | 1.024 | [0.99, 1.03] |
+| **DAC 16k** | click (2) | LSD | 0.972 | [0.95, 0.98] |
 
-Every interval includes 1, under two codecs with very different frame rates. The
+Eight of nine intervals include 1, and the ninth (DAC on clicks) lies below it,
+under three codecs with very different frame rates. The
 tone ratio sits on opposite sides of unity across codecs. **P4 registered 1.6
 with falsification below 1.1; measured 1.048 and 0.921, so it is falsified**, not
 merely unsupported.
@@ -197,9 +208,9 @@ recogniser. Whisper is a weak instrument here, failing outright on Amharic,
 Georgian and Yoruba with baseline error 1.0, and having no setting at all for
 Igbo, Oromo, Zulu or Xhosa.
 
-MMS covers 19 of the 21 languages: the **Mandarin (`cmn`) and Oromo (`gaz`)
-adapters were unavailable** at run time, so the MMS tone group is four
-languages, not six. The two it loses are Mandarin and Cantonese, which are
+MMS could be run on 18 of the 21 languages: **Mandarin, Cantonese and Oromo**
+are absent from the MMS result files, so the MMS tone group is four languages,
+not six. The two tone languages it loses are Mandarin and Cantonese, which are
 exactly the two sitting at ceiling under Whisper with baselines near 0.5, so
 their absence removes the least informative members rather than biasing the
 comparison. Both recognisers agree:
@@ -312,4 +323,4 @@ harmonic complex as far out of distribution. The source-filter vowel fixed this:
 | Effect ordered by codec fidelity | not supported; ordering is not by fidelity |
 | Music-trained checkpoint shows most | **contradicted**: EnCodec 48k shows less than 24k |
 | Makam validation | audio still blocked; NSynth retuning is the unblocked route |
-| Every reported number | all placeholders; replace from `RESULTS.md` |
+| Every reported number | transcribed from `analysis/` output; the paper's tables match `summary_table.py`, `analyze_rate.py`, `analyze_phonology.py` and `analyze_asr.py` |

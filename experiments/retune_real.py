@@ -13,7 +13,7 @@ should follow the same one-semitone period as the synthetic sweeps.
 Unlike the synthetic tones these carry real instrument timbre, attack, decay and
 recording conditions, none of which the measurement controls.
 
-    python retune_real.py --audio-root /workspace/corpora/nsynth --codec encodec:3 \\
+    python retune_real.py --audio-root corpora/nsynth --codec encodec:3 \\
         --out ../results/retune_encodec3.csv
 """
 

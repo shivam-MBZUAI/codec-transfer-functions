@@ -31,23 +31,26 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
 
 from analyze_sweep import DISAGREE_CENTS, load, summarise  # noqa: E402
 
-import sys
-from pathlib import Path
-
 
 # EnCodec 24 kHz: 75 Hz frames, latent dimension 128, 1024-entry codebooks.
 FRAME_HZ, LATENT_D = 75.0, 128
+
+# Octave gate only, as everywhere in the paper. --exclusion=full adds the
+# estimator cross-check as a robustness variant.
+SCHEME = "gate"
 
 
 def bias_of(path: Path) -> tuple[float, int]:
     d = load(path)
     theta, rc, ru = d["theta_cents"], d["residual_coded_cents"], d["residual_uncoded_cents"]
     labels = d["reference_label"]
-    dis = np.maximum(np.abs(d.get("disagreement_f1_cents", np.zeros_like(theta))),
-                     np.abs(d.get("disagreement_f2_cents", np.zeros_like(theta))))
-    keep = np.nan_to_num(dis, nan=1e9) <= DISAGREE_CENTS
+    keep = np.ones_like(theta, dtype=bool)
     if "octave_flag" in d:
         keep &= d["octave_flag"] < 0.5
+    if SCHEME == "full":
+        dis = np.maximum(np.abs(d.get("disagreement_f1_cents", np.zeros_like(theta))),
+                         np.abs(d.get("disagreement_f2_cents", np.zeros_like(theta))))
+        keep &= np.nan_to_num(dis, nan=1e9) <= DISAGREE_CENTS
     # On-grid reference only: the metric is defined against the 12-TET grid.
     on = np.array([l.endswith("ongrid") for l in labels.tolist()])
     s = summarise(theta[on], rc[on], ru[on], keep[on], "ongrid")
@@ -55,7 +58,13 @@ def bias_of(path: Path) -> tuple[float, int]:
 
 
 def main() -> int:
-    results_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("../results")
+    global SCHEME
+    for a in sys.argv[1:]:
+        if a.startswith("--exclusion="):
+            SCHEME = a.split("=", 1)[1]
+    argv = [a for a in sys.argv[1:] if not a.startswith("--")]
+    results_dir = Path(argv[0]) if argv else Path("../results")
+    print(f"  [exclusion scheme: {SCHEME}]")
     rates, biases, ns = [], [], []
     for kb in ("1.5", "3", "6", "12", "24"):
         p = results_dir / f"rate_encodec_{kb}.csv"

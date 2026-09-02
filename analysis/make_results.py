@@ -1,6 +1,6 @@
 """Generate RESULTS.md from the result files. Never hand-write that document.
 
-    python scripts/make_results.py
+    python analysis/make_results.py
 
 Every number in RESULTS.md is computed here from a CSV in results/. There is no
 path by which a value that was not measured can appear in it. Experiments that
@@ -30,36 +30,39 @@ from analyze_sweep import (  # noqa: E402
 )
 
 # Every experiment the programme defines, so what is missing is as visible as
-# what is present. Keys match EXPERIMENTS.md.
+# what is present. Keys match EXPERIMENTS.md. The third field lists the result
+# files (stems under results/) whose presence means the experiment has run;
+# an empty tuple means it has not, and the row says so.
 PROGRAMME = [
-    ("E0.1", "Estimator noise floor", "test_estimator.py"),
-    ("E0.2", "Identity control (no codec)", "identity"),
-    ("E0.3", "Resample-only control", None),
-    ("E0.4", "Pilot gate", "encodec"),
-    ("E1.1", "Detuning sweep, phase vs reference offset", None),
-    ("E1.2", "Quantiser bypass", None),
-    ("E1.3", "Direct codebook probing", None),
-    ("E1.4", "Per-RVQ-level decomposition", None),
-    ("E1.5", "Random-codebook control", None),
-    ("E1.6", "Causal: RVQ trained on controlled pitch distributions", None),
-    ("E2.1", "Codec breadth", None),
-    ("E2.2", "Training-distribution contrast", None),
-    ("E2.3", "Rate sweep in bits per latent dimension", None),
-    ("E2.4", "Stimulus ablations", None),
-    ("E3.1", "Speech-shaped pitch stimuli", None),
-    ("E3.2", "Retuned instrument samples", None),
-    ("E3.3", "Makam validation", None),
-    ("E3.4", "Token-level probe", None),
-    ("E3.5", "Phonological survival (FLEURS)", None),
-    ("E3.6", "Downstream ASR", None),
+    ("E0.1", "Estimator noise floor", ("ctrl_identity",)),   # floor column of every run
+    ("E0.2", "Identity control (no codec)", ("ctrl_identity",)),
+    ("E0.3", "Resample-only control", ()),
+    ("E0.4", "Pilot gate", ("pilot_encodec3",)),
+    ("E1.1", "Detuning sweep, phase vs reference offset", ("detune_encodec3",)),
+    ("E1.2", "Quantiser bypass", ("mech_bypass",)),
+    ("E1.3", "Direct codebook probing", ("probe_encodec3",)),
+    ("E1.4", "Per-RVQ-level decomposition", ()),
+    ("E1.5", "Random-codebook control", ("mech_shuffled",)),
+    ("E1.6", "Causal: RVQ trained on controlled pitch distributions", ("causal_12tet", "ftm_grid")),
+    ("E2.1", "Codec breadth", ("detune_mimi", "detune_dac16", "detune_snac44")),
+    ("E2.2", "Training-distribution contrast", ("detune_encodec48", "ftm_flat")),
+    ("E2.3", "Rate sweep in bits per latent dimension", ("rate_encodec_3",)),
+    ("E2.4", "Stimulus ablations", ("ctrl_sinusoid", "vib_20")),
+    ("E3.1", "Speech-shaped pitch stimuli", ("detune_vowel_encodec", "detune_vowel_speechtok")),
+    ("E3.2", "Retuned instrument samples", ("retune_encodec3_big",)),
+    ("E3.3", "Makam validation", ()),
+    ("E3.4", "Token-level probe", ()),
+    ("E3.5", "Phonological survival (FLEURS)", ("phon_encodec3_big",)),
+    ("E3.6", "Downstream ASR", ("asr_encodec3_v2", "asr_mms_encodec3")),
 ]
 
 HEADER = """# Results
 
 <!-- GENERATED FILE. Do not edit by hand.
-     Regenerate with:  python scripts/make_results.py
+     Regenerate with:  python analysis/make_results.py
      Every number below is computed from a CSV in results/. Nothing here is a
-     prediction, a placeholder, or a value typed by a human. -->
+     prediction, a placeholder, or a value typed by a human.
+     Exclusion scheme: octave gate only, as in the paper. -->
 
 Every figure and table here is derived from a file in `results/`. Experiments
 that have not run are listed as not yet measured rather than shown with
@@ -99,11 +102,11 @@ def summarise_csv(path: Path):
     r_coded, r_unc = d["residual_coded_cents"], d["residual_uncoded_cents"]
     labels = d["reference_label"]
 
-    dis = np.maximum(
-        np.abs(d.get("disagreement_f1_cents", np.zeros_like(theta))),
-        np.abs(d.get("disagreement_f2_cents", np.zeros_like(theta))),
-    )
-    keep = np.nan_to_num(dis, nan=1e9) <= DISAGREE_CENTS
+    # Octave gate only: the scheme every number in the paper uses. The
+    # estimator cross-check is a robustness variant (analyze_sweep.py
+    # --exclusion=full), not the primary analysis, because it fires
+    # preferentially 30 to 50 cents from a grid point.
+    keep = np.ones_like(theta, dtype=bool)
     if "octave_flag" in d:
         keep &= d["octave_flag"] < 0.5
 
@@ -190,10 +193,8 @@ def main() -> int:
         out.append("None generated yet.\n\n")
 
     out.append("## Programme status\n\n| id | experiment | status |\n|---|---|---|\n")
-    for eid, name, tag in PROGRAMME:
-        done = tag is not None and tag in measured_keys
-        if eid == "E0.1":
-            done = False
+    for eid, name, stems in PROGRAMME:
+        done = any((results_dir / f"{s}.csv").exists() for s in stems)
         out.append(f"| {eid} | {name} | {'measured' if done else 'not yet measured'} |\n")
     out.append(
         "\nSee [EXPERIMENTS.md](EXPERIMENTS.md) for what each of these tests and "

@@ -70,6 +70,10 @@ def load(path: Path) -> dict:
 def fit_sinusoid(theta: np.ndarray, r: np.ndarray) -> tuple[float, float, float]:
     """Least squares fit of a*sin(2pi*theta/100) + b*cos(...). Returns
     (amplitude, phase in degrees, fraction of variance explained)."""
+    ok = np.isfinite(theta) & np.isfinite(r)
+    theta, r = theta[ok], r[ok]
+    if r.size < 3:
+        return float("nan"), float("nan"), float("nan")
     w = 2.0 * math.pi / PERIOD
     design = np.column_stack([np.sin(w * theta), np.cos(w * theta), np.ones_like(theta)])
     coef, *_ = np.linalg.lstsq(design, r, rcond=None)
@@ -85,6 +89,10 @@ def fit_sawtooth(theta: np.ndarray, r: np.ndarray) -> tuple[float, float, float]
     """Fit s * (g(theta + phi) - (theta + phi)) over a grid of phase offsets.
     Returns (peak amplitude, best phase offset in cents, variance explained)."""
     best = (float("nan"), float("nan"), -np.inf)
+    ok = np.isfinite(theta) & np.isfinite(r)
+    theta, r = theta[ok], r[ok]
+    if r.size < 3:
+        return best
     ss_tot = float(np.sum((r - r.mean()) ** 2))
     for phi in np.arange(-50.0, 50.0, 0.5):
         shifted = theta + phi
@@ -155,11 +163,14 @@ def main() -> None:
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("csv", type=Path)
     p.add_argument("--fig", type=Path, default=None)
-    p.add_argument("--exclusion", choices=["full", "gate", "none"], default="full",
-                   help="full: octave gate AND estimator cross-check (default). "
-                        "gate: octave gate only, for codecs where one coarse "
-                        "estimator fails systematically while the reported "
-                        "estimate stays accurate. none: no exclusions.")
+    p.add_argument("--exclusion", choices=["full", "gate", "none"], default="gate",
+                   help="gate: octave gate only (default, and the scheme every "
+                        "number in the paper uses). The gate excludes no trial on "
+                        "any run reported, so no exclusion can manufacture the "
+                        "effect. full: additionally drop trials on which the two "
+                        "independent estimators disagree; reported as a "
+                        "robustness variant, since that rule fires preferentially "
+                        "30 to 50 cents from a grid point. none: no exclusions.")
     args = p.parse_args()
 
     d = load(args.csv)
@@ -177,9 +188,8 @@ def main() -> None:
         keep &= d["octave_flag"] < 0.5
     if args.exclusion == "full":
         keep &= np.nan_to_num(disagree, nan=1e9) <= DISAGREE_CENTS
-    if args.exclusion != "full":
-        print(f"  [exclusion scheme: {args.exclusion}] "
-              f"{100 * (1 - keep.mean()):.1f}% of trials dropped")
+    print(f"  [exclusion scheme: {args.exclusion}] "
+          f"{100 * (1 - keep.mean()):.1f}% of trials dropped")
 
     results = []
     for label in sorted(set(labels.tolist())):

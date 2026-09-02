@@ -1,6 +1,9 @@
 # Reproduction targets. See REPRODUCE.md for the full command behind each.
 PY      ?= python
-REFS    := 440 442.5 445.1 447.7 450.3 452.9 455.5 458.2 460.8 463.5
+# Eleven reference pitches, 0 to 100 cents above A440 in 10-cent steps. The
+# 100-cent point folds onto the 0-cent condition, so ten distinct conditions
+# enter the regression.
+REFS    := 440 442.5489 445.1126 447.6911 450.2845 452.8930 455.5166 458.1553 460.8094 463.4789 466.1638
 
 .PHONY: help gate checkpoints sweep detune rate figures results clean-figures
 

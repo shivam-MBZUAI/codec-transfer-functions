@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=32G
 #SBATCH --time=04:00:00
-#SBATCH --output=/scratch/shivam.chauhan/codecs/slurm/%x-%A_%a.out
+#SBATCH --output=slurm/%x-%A_%a.out   # relative to the submit directory, $CODECS_ROOT
 #SBATCH --array=0-5
 
 # One array task per codec/rate configuration. Ask for one GPU and a slice of a
@@ -22,7 +22,9 @@
 # that could reach git.
 
 set -euo pipefail
-source /scratch/shivam.chauhan/codecs/env.sh
+# env.sh sets CODECS_ROOT and the cache locations; it is site-specific and
+# untracked. See docs/CLUSTER.md.
+source "${CODECS_ROOT:?set CODECS_ROOT to the repository root}/env.sh"
 cd "$CODECS_ROOT/experiments"
 
 CONFIGS=(

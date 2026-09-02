@@ -10,7 +10,7 @@ produced it.
 
 | Prefix | What it is |
 |---|---|
-| `detune_*` | the registration regression, one file per codec. **The paper's central result** |
+| `detune_*` | the registration regression, one file per codec. **The paper's central result**. Every number in the paper uses the octave gate alone as its exclusion rule; the estimator cross-check is a robustness variant |
 | `rate_encodec_*` | rate sweep, EnCodec at five bitrates |
 | `mech_bypass` | encoder to decoder with the quantiser removed |
 | `mech_untrained`, `mech_shuffled` | architecture and codebook controls |

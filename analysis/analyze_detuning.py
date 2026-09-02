@@ -8,8 +8,13 @@ period, i.e. 3.6 degrees per cent, a slope of 1.0 across a full semitone.
 If instead the residual were a property of the interval itself, or an artefact
 of the analysis, the phase would not move at all: slope 0.
 
-A two-point test can pass by chance. An eleven-point regression with unit slope
-and a tight interval cannot.
+A two-point test can pass by chance. A ten-point regression across the full
+semitone with unit slope and a tight interval cannot. (The run sweeps eleven
+reference pitches from 0 to 100 cents; the 100-cent point is one semitone up
+and folds onto the 0-cent condition, so ten distinct conditions enter the fit.)
+
+Exclusion scheme: the octave gate alone by default, which is what every number
+in the paper uses. Pass --exclusion=full to add the estimator cross-check.
 """
 
 from __future__ import annotations
@@ -49,7 +54,7 @@ def main() -> int:
     # balance enough that the harmonic-sum coarse estimator locks to a
     # subharmonic while the reported estimate stays accurate, which drops almost
     # every trial for reasons unrelated to what is being measured.
-    scheme = "full"
+    scheme = "gate"
     argv = [a for a in sys.argv[1:] if not a.startswith("--")]
     for a in sys.argv[1:]:
         if a.startswith("--exclusion="):

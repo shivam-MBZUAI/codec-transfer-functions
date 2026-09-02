@@ -2,8 +2,12 @@
 
 ## Setup, once
 
+`env.sh` is a site-specific, untracked file that exports `CODECS_ROOT` and points
+`HF_HOME`, `TORCH_HOME` and `TMPDIR` under it.
+
 ```bash
-source /scratch/shivam.chauhan/codecs/env.sh
+export CODECS_ROOT=/path/to/fast/shared/storage/codecs
+source "$CODECS_ROOT/env.sh"
 ```
 
 Everything that grows lives under `$CODECS_ROOT` on fast shared storage: the
@@ -32,7 +36,8 @@ Pre-fetch on the login node, where the proxy exists, before submitting
 anything. Compute nodes may not have the same egress:
 
 ```bash
-source /scratch/shivam.chauhan/codecs/env.sh
+export CODECS_ROOT=/path/to/fast/shared/storage/codecs
+source "$CODECS_ROOT/env.sh"
 python -c "from transformers import EncodecModel; EncodecModel.from_pretrained('facebook/encodec_24khz')"
 ```
 
@@ -42,8 +47,8 @@ Then jobs can run with `HF_HUB_OFFLINE=1` and will not depend on egress at all.
 
 ```bash
 mkdir -p "$CODECS_ROOT/slurm"
-sbatch cluster/sweep.sbatch                 # full sweep, 6 array tasks
-REPS=3 sbatch --array=1 cluster/sweep.sbatch   # pilot only, one config
+sbatch infra/sweep.sbatch                 # full sweep, 6 array tasks
+REPS=3 sbatch --array=1 infra/sweep.sbatch   # pilot only, one config
 ```
 
 Ask for one GPU and a slice of a node rather than a whole node. Eight GPUs per

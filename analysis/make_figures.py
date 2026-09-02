@@ -27,15 +27,13 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
 
 from analyze_sweep import DISAGREE_CENTS, fit_sinusoid, grid, load  # noqa: E402
 
-import sys
-from pathlib import Path
-
 
 OKABE = {"enc": "#0072B2", "dac": "#E69F00", "mimi": "#009E73", "spt": "#D55E00",
          "grey": "#666666"}
 
 
 def keep_mask(d, scheme="gate"):
+    """Octave gate only by default: the scheme every number in the paper uses."""
     theta = d["theta_cents"]
     k = np.ones_like(theta, dtype=bool)
     if "octave_flag" in d:
@@ -49,7 +47,7 @@ def keep_mask(d, scheme="gate"):
 
 def fig_residual_shape():
     """Residual folded into one semitone, for each codec."""
-    runs = [("pilot_encodec3", "EnCodec 24k, 3 kbps", "enc"),
+    runs = [("detune_encodec3", "EnCodec 24k, 3 kbps", "enc"),
             ("codec_mimi", "Mimi", "mimi"),
             ("codec_dac16", "DAC 16k", "dac"),
             ("mech_bypass", "EnCodec, quantiser removed", "grey")]

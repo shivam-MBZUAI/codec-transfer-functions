@@ -28,10 +28,10 @@ grid rather than to the interval under test.
 
 | | |
 |---|---|
-| **Registered to the grid** | slope 1.0010, *R²* = 0.99988, across 9 conditions and 4 codec families |
+| **Registered to the grid** | slope 1.0010, *R²* = 0.99988, across 10 conditions and 4 codec families |
 | **Aggregate metrics conceal it** | DAC 16k and SNAC 44k report a median grid bias of 0.000 and register cleanly |
 | **Not architectural** | period constant in cents across four octaves; conv strides would give constant Hz |
-| **Not in the codebook** | removing quantisation leaves 5.74 of 9.26 cents; code boundaries uniform (Rayleigh *p* = 0.86) |
+| **Not in the codebook** | removing quantisation leaves 5.66 of 8.88 cents; code boundaries uniform (Rayleigh *p* = 0.86) |
 | **Learned** | flattening the tuning grid of the training audio weakens it by 18% |
 | **Bounded** | absent on real instrument recordings, in phonology across 20 languages, and in downstream WER |
 
@@ -127,7 +127,8 @@ The pipeline is built around the ways this measurement can lie.
 | Detuned reference | an effect locked to the interval rather than absolute pitch |
 | Per-sample-rate noise floor | estimator error read as codec error |
 | Blind estimation | ground truth leaking into the estimate and suppressing the effect |
-| Octave gate at 200 cents | estimator failures, without suppressing a real effect (max measurable is 50 cents) |
+| Octave gate at 200 cents | estimator failures, without suppressing a real effect (max measurable is 50 cents). **The only exclusion in the primary analysis**; it fires on 0% of trials in every reported run |
+| Estimator cross-check (`--exclusion=full`) | reported as a robustness variant, never as the primary number: it fires preferentially 30 to 50 cents from a grid point |
 | Exclusion-vs-grid-distance | an exclusion rule manufacturing the effect |
 | Sawtooth vs sinusoid fit | confusing a density correction with coarse cell assignment |
 | **Amplitude-stability guard** | **a confident slope fitted through noise phases** |

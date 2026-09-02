@@ -1,9 +1,9 @@
 #!/bin/bash
 # Run a command in a detached tmux session so it survives SSH disconnect.
 #
-#   ./cluster/detached.sh <name> <command...>
-#   ./cluster/detached.sh status
-#   ./cluster/detached.sh log <name>
+#   ./infra/detached.sh <name> <command...>
+#   ./infra/detached.sh status
+#   ./infra/detached.sh log <name>
 #
 # Why this exists: a command launched over `ssh host "cmd"` is a child of that
 # SSH session and dies with it, so closing a laptop kills a running experiment.
@@ -11,7 +11,8 @@
 # ssh here. tmux is reliable: the session is owned by the tmux server, not by
 # any connection.
 set -u
-cd /workspace/codecs
+ROOT="${CODECS_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+cd "$ROOT"
 mkdir -p logs
 
 case "${1:-}" in
@@ -28,5 +29,5 @@ name=$1; shift
 # Wrap in an explicit bash -c: tmux runs the command through its default shell,
 # and a bare pipeline there exited immediately and wrote no log.
 tmux new-session -d -s "$name" bash -c \
-  "cd /workspace/codecs && export HF_HOME=/workspace/.hf && PYTHONUNBUFFERED=1 $* > logs/${name}.log 2>&1"
-echo "launched '$name' detached; check with: ./cluster/detached.sh status"
+  "cd '$ROOT' && export HF_HOME='${HF_HOME:-$ROOT/.hf}' && PYTHONUNBUFFERED=1 $* > logs/${name}.log 2>&1"
+echo "launched '$name' detached; check with: ./infra/detached.sh status"

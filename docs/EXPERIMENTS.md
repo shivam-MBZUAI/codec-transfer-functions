@@ -10,7 +10,7 @@ items still outstanding.
 |---|---|
 | Tier 0, gate and controls | done |
 | Tier 1, mechanism | done, and it moved the conclusion: the prior is not in the codebook |
-| Tier 2, codec breadth | done, nine measurable conditions across four families |
+| Tier 2, codec breadth | done, ten measurable conditions across four families |
 | Tier 3, ecological and downstream | done, all three returned nulls with validated controls |
 
 ## Outstanding
