@@ -53,11 +53,42 @@ def main() -> int:
         print(f"  {LANG_NAMES.get(l, l):<12}{d['g']:<12}{o:10.3f}{c:9.3f}"
               f"{100*rel:10.1f}%{len(d['o']):5d}")
 
+    # Per-language bootstrap over utterances: resample utterances, recompute
+    # the median baseline and coded WER, and the relative increase.
+    rng = np.random.default_rng(0)
+    lang_ci = {}
+    for l, d in per_lang.items():
+        o, c = np.array(d["o"]), np.array(d["c"])
+        if len(o) < 5 or np.median(o) <= 0:
+            continue
+        boots = []
+        for _ in range(4000):
+            idx = rng.integers(0, len(o), len(o))
+            mo, mc = np.median(o[idx]), np.median(c[idx])
+            if mo > 0:
+                boots.append((mc - mo) / mo)
+        if boots:
+            lang_ci[l] = (float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5)))
+    print("\n  per-language 95% bootstrap intervals on the relative increase (over utterances)")
+    for l in sorted(lang_ci, key=lambda x: (per_lang[x]["g"], x)):
+        lo, hi = lang_ci[l]
+        print(f"  {LANG_NAMES.get(l, l):<12}{per_lang[l]['g']:<12}[{100*lo:7.1f}%, {100*hi:7.1f}%]")
+
     groups = defaultdict(list)
     for l, (rel, g) in lang_rel.items():
         if np.isfinite(rel):
             groups[g].append(rel)
 
+    def _group_ci(vals):
+        vals = np.array(vals)
+        if len(vals) < 2:
+            return float("nan"), float("nan")
+        b = [np.median(vals[rng.integers(0, len(vals), len(vals))]) for _ in range(4000)]
+        return float(np.percentile(b, 2.5)), float(np.percentile(b, 97.5))
+    print("\n  group 95% bootstrap intervals over languages")
+    for g in sorted(groups):
+        lo, hi = _group_ci(groups[g])
+        print(f"  {g:<12}n={len(groups[g]):<3} median {100*np.median(groups[g]):6.1f}%  [{100*lo:6.1f}%, {100*hi:6.1f}%]")
     print(f"\n  {'group':<12}{'langs':>6}{'median relative increase':>26}")
     for g in sorted(groups):
         v = np.array(groups[g])
