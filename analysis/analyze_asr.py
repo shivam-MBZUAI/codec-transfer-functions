@@ -79,6 +79,28 @@ def main() -> int:
         if np.isfinite(rel):
             groups[g].append(rel)
 
+    # Three normalisations, because the sign of a group difference depends on
+    # it when baselines differ several-fold: relative increase (coded-base)/base,
+    # absolute increase coded-base, and headroom-normalised (coded-base)/(1-base).
+    lang_stats = {}
+    for l, d in per_lang.items():
+        o, c = float(np.median(d["o"])), float(np.median(d["c"]))
+        lang_stats[l] = (d["g"], o, c - o, (c - o) / (1 - o) if o < 1 else float("nan"),
+                         (c - o) / o if o > 0 else float("nan"))
+    print("\n  group medians under three normalisations (95% bootstrap over languages)")
+    print(f"  {'group':<12}{'n':>3}{'baseline':>10}{'absolute':>22}{'headroom':>22}{'relative':>22}")
+    for g in sorted(set(v[0] for v in lang_stats.values())):
+        rows_g = [v for v in lang_stats.values() if v[0] == g]
+        cols = []
+        for j in (2, 3, 4):
+            vals = np.array([r[j] for r in rows_g if np.isfinite(r[j])])
+            if len(vals) == 0:
+                cols.append("--"); continue
+            b = [np.median(vals[rng.integers(0, len(vals), len(vals))]) for _ in range(4000)] if len(vals) > 1 else [np.median(vals)]
+            cols.append(f"{np.median(vals):+.3f} [{np.percentile(b,2.5):+.3f},{np.percentile(b,97.5):+.3f}]")
+        base = np.median([r[1] for r in rows_g])
+        print(f"  {g:<12}{len(rows_g):>3}{base:>10.3f}{cols[0]:>22}{cols[1]:>22}{cols[2]:>22}")
+
     def _group_ci(vals):
         vals = np.array(vals)
         if len(vals) < 2:
