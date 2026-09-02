@@ -15,8 +15,9 @@ python data/fetch_checkpoints.py        # ~2 GB, ten checkpoints
 **Do not install `xcodec2` into this environment.** It downgrades torch to
 2.5.0, and every result here was produced under 2.8.0. We found this only
 because each result file carries a `.meta.json` recording the package versions
-of the run that produced it; all 49 recorded runs agree on torch 2.8.0+cu128 and
-transformers 5.16.1. If you extend this work, keep those sidecars.
+of the run that produced it; all 76 sidecars record torch 2.8.0+cu128 and
+transformers 5.16.1 (the seven `corpus_pull_*` sidecars were annotated after
+the fact from a sweep sidecar of the same pod session, and say so). If you extend this work, keep those sidecars.
 
 A GPU helps but is not required for most of this. The pitch experiments are
 **CPU-bound on F₀ estimation**, not GPU-bound: the codec forward pass is a small
@@ -45,7 +46,9 @@ estimator and the same analysis with **no codec**, and must find nothing.
 ## Main text
 
 **Exclusion scheme.** Every number in the paper uses the octave gate alone,
-which excludes 0% of trials on every reported run. The estimator cross-check
+which excludes 0% of trials on the headline run and up to 9% on most reported
+runs; DAC 16k loses 65% (`analysis/guard_sensitivity.py` lists every run, and
+`--exclusion=none` shows its registration slope survives without the gate). The estimator cross-check
 (`--exclusion=full` on `analyze_sweep.py`, `analyze_detuning.py` and
 `analyze_rate.py`) is a robustness variant and is reported as such in the
 paper, because it fires preferentially 30 to 50 cents from a grid point.
@@ -64,14 +67,15 @@ python experiments/run_sweep.py --codec encodec:3 --reps 5 --references $REFS \
 python analysis/analyze_detuning.py results/detune_encodec3.csv \
     figures/detuning_regression.png
 ```
-Expect slope 1.0010, CI [0.9935, 1.0085], *R²* 0.99988, amplitude 13.72 ± 0.16.
+Expect slope 1.0010, CI [0.9922, 1.0099] (t on 8 degrees of freedom), *R²* 0.99988,
+amplitude 13.72 ± 0.16.
 
 ### The universality table, phase registration across codecs
 
 ```bash
 for c in encodec:3 encodec:24 encodec48:6 mimi:8 dac16:6 dac24:8 dac:4 snac snac32 snac44; do
   python experiments/run_sweep.py --codec $c --reps 4 --references $REFS \
-      --out results/detune_${c/:/}.csv
+      --out results/detune_${c/:/}.csv   # checked-in names: detune_encodec24kbps, detune_encodec48, detune_dac16, detune_dac24, detune_dac44, detune_snac, detune_snac32, detune_snac44
 done
 python analysis/summary_table.py
 ```

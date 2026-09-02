@@ -32,7 +32,7 @@ gate:
 	@$(PY) analysis/analyze_sweep.py results/gate_pilot.csv | grep -E "grid bias|ratio"
 
 detune:
-	$(PY) experiments/run_sweep.py --codec encodec:3 --reps 4 --references $(REFS) \
+	$(PY) experiments/run_sweep.py --codec encodec:3 --reps 5 --references $(REFS) \
 		--out results/detune_encodec3.csv
 	$(PY) analysis/analyze_detuning.py results/detune_encodec3.csv \
 		figures/detuning_regression.png

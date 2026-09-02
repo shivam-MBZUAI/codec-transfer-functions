@@ -1,5 +1,5 @@
 # Pinned to the versions these results were produced with, read from the
-# .meta.json provenance sidecars: all 49 recorded runs used torch 2.8.0+cu128
+# .meta.json provenance sidecars: all 76 sidecars record torch 2.8.0+cu128
 # and transformers 5.16.1.
 #
 # torch is listed without a CUDA suffix because the default wheel carries CUDA

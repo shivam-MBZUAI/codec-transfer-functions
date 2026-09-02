@@ -52,6 +52,21 @@ class Codec:
         return y[: len(x)]
 
 
+
+def _rev(model_id: str):
+    """Pinned Hugging Face revision for a checkpoint, or None for local paths
+    and fine-tuned checkpoints, which carry no upstream revision."""
+    try:
+        from data.fetch_checkpoints import REVISIONS  # noqa: WPS433
+    except Exception:
+        import importlib.util
+        from pathlib import Path as _P
+        spec = importlib.util.spec_from_file_location(
+            "fetch_checkpoints", _P(__file__).resolve().parent.parent / "data" / "fetch_checkpoints.py")
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        REVISIONS = mod.REVISIONS
+    return REVISIONS.get(str(model_id))
+
 def _device():
     import torch
 
@@ -72,7 +87,7 @@ def encodec(bandwidth_kbps: float = 3.0, model_id: str = "facebook/encodec_24khz
     from transformers import EncodecModel
 
     device = _device()
-    model = EncodecModel.from_pretrained(model_id).to(device).eval()
+    model = EncodecModel.from_pretrained(model_id, revision=_rev(model_id)).to(device).eval()
     sr = model.config.sampling_rate
     # encodec_48khz is a stereo model. Feeding it a mono tensor fails on the
     # channel dimension, so mono input is duplicated and the decoded left
@@ -100,7 +115,7 @@ def dac(n_quantizers: int = 4, model_id: str = "descript/dac_44khz") -> Codec:
     from transformers import DacModel
 
     device = _device()
-    model = DacModel.from_pretrained(model_id).to(device).eval()
+    model = DacModel.from_pretrained(model_id, revision=_rev(model_id)).to(device).eval()
     sr = model.config.sampling_rate
 
     @torch.no_grad()
@@ -117,7 +132,7 @@ def mimi(n_quantizers: int = 8, model_id: str = "kyutai/mimi") -> Codec:
     from transformers import MimiModel
 
     device = _device()
-    model = MimiModel.from_pretrained(model_id).to(device).eval()
+    model = MimiModel.from_pretrained(model_id, revision=_rev(model_id)).to(device).eval()
     sr = model.config.sampling_rate
 
     @torch.no_grad()
@@ -145,7 +160,7 @@ def encodec_bypass(model_id: str = "facebook/encodec_24khz") -> Codec:
     from transformers import EncodecModel
 
     device = _device()
-    model = EncodecModel.from_pretrained(model_id).to(device).eval()
+    model = EncodecModel.from_pretrained(model_id, revision=_rev(model_id)).to(device).eval()
     sr = model.config.sampling_rate
     n_ch = int(getattr(model.config, "audio_channels", 1))
 
@@ -176,7 +191,7 @@ def encodec_shuffled(bandwidth_kbps: float = 3.0,
     from transformers import EncodecModel
 
     device = _device()
-    model = EncodecModel.from_pretrained(model_id).to(device).eval()
+    model = EncodecModel.from_pretrained(model_id, revision=_rev(model_id)).to(device).eval()
     sr = model.config.sampling_rate
     n_ch = int(getattr(model.config, "audio_channels", 1))
 
@@ -263,7 +278,7 @@ def encodec_untrained(model_id: str = "facebook/encodec_24khz", seed: int = 0) -
     from transformers import EncodecModel
 
     device = _device()
-    cfg = EncodecModel.from_pretrained(model_id).config
+    cfg = EncodecModel.from_pretrained(model_id, revision=_rev(model_id)).config
     torch.manual_seed(seed)
     model = EncodecModel(cfg).to(device).eval()      # random init, same shape
     sr = cfg.sampling_rate
@@ -291,7 +306,7 @@ def snac(model_id: str = "hubertsiuzdak/snac_24khz") -> Codec:
     from snac import SNAC as _SNAC
 
     device = _device()
-    model = _SNAC.from_pretrained(model_id).to(device).eval()
+    model = _SNAC.from_pretrained(model_id, revision=_rev(model_id)).to(device).eval()
     sr = int(model.sampling_rate)
 
     @torch.no_grad()
@@ -396,8 +411,8 @@ def encodec_swap(encoder_id: str, decoder_id: str, bandwidth_kbps: float = 3.0) 
     from transformers import EncodecModel
 
     device = _device()
-    enc_model = EncodecModel.from_pretrained(encoder_id).to(device).eval()
-    dec_model = EncodecModel.from_pretrained(decoder_id).to(device).eval()
+    enc_model = EncodecModel.from_pretrained(encoder_id, revision=_rev(encoder_id)).to(device).eval()
+    dec_model = EncodecModel.from_pretrained(decoder_id, revision=_rev(decoder_id)).to(device).eval()
     sr = dec_model.config.sampling_rate
 
     @torch.no_grad()
@@ -433,8 +448,8 @@ def speechtokenizer(n_quantizers: int = 8, model_id: str = "fnlp/SpeechTokenizer
     from speechtokenizer import SpeechTokenizer
 
     device = _device()
-    cfg = hf_hub_download(model_id, "speechtokenizer_hubert_avg/config.json")
-    ckpt = hf_hub_download(model_id, "speechtokenizer_hubert_avg/SpeechTokenizer.pt")
+    cfg = hf_hub_download(model_id, "speechtokenizer_hubert_avg/config.json", revision=_rev(model_id))
+    ckpt = hf_hub_download(model_id, "speechtokenizer_hubert_avg/SpeechTokenizer.pt", revision=_rev(model_id))
     model = SpeechTokenizer.load_from_checkpoint(cfg, ckpt).to(device).eval()
     sr = int(model.sample_rate)
 

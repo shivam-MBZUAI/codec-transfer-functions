@@ -112,7 +112,13 @@ def main() -> int:
                 print(f"  {i+1}/{len(files)} clips, {n_rows} frames, {time.time()-t0:.0f}s", flush=True)
     meta = {"args": {k: (str(v) if isinstance(v, Path) else v) for k, v in vars(args).items()},
             "codec": codec.name, "rate_label": codec.rate_label, "sample_rate": sr,
-            "frames": n_rows, "clips": len(files)}
+            "frames": n_rows, "clips": len(files),
+            "python": sys.version.split()[0], "packages": {}}
+    for mod in ("torch", "transformers", "numpy", "scipy", "soundfile"):
+        try:
+            meta["packages"][mod] = __import__(mod).__version__
+        except Exception:
+            meta["packages"][mod] = None
     args.out.with_suffix(".meta.json").write_text(json.dumps(meta, indent=2))
     print(f"wrote {args.out} ({n_rows} frames)")
     return 0

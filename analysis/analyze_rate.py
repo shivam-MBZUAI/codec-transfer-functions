@@ -30,6 +30,7 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
         sys.path.insert(0, str(_p))
 
 from analyze_sweep import DISAGREE_CENTS, load, summarise  # noqa: E402
+from scipy import stats  # noqa: E402
 
 
 # EnCodec 24 kHz: 75 Hz frames, latent dimension 128, 1024-entry codebooks.
@@ -99,12 +100,17 @@ def main() -> int:
         pred = A @ [slope, icept]
         resid = np.log2(y[ok]) - pred
         ss, tot = float((resid ** 2).sum()), float(((np.log2(y[ok]) - np.log2(y[ok]).mean()) ** 2).sum())
-        se = float(np.sqrt(ss / max(ok.sum() - 2, 1) / ((r_over_d[ok] - r_over_d[ok].mean()) ** 2).sum()))
-        print(f"  {tag}\n    slope {slope:+.3f}  95% CI [{slope-1.96*se:+.3f}, {slope+1.96*se:+.3f}]"
-              f"   R2 {1-ss/tot if tot else float('nan'):.3f}")
+        dof = max(int(ok.sum()) - 2, 1)
+        se = float(np.sqrt(ss / dof / ((r_over_d[ok] - r_over_d[ok].mean()) ** 2).sum()))
+        # Five rates, so three degrees of freedom: the interval uses t(3) =
+        # 3.182, not 1.96, and each regime is tested with a two-sided t test.
+        tq = float(stats.t.ppf(0.975, dof))
+        print(f"  {tag}\n    slope {slope:+.3f}  SE {se:.3f}  95% CI [{slope-tq*se:+.3f}, {slope+tq*se:+.3f}]"
+              f"  (t({dof}) = {tq:.3f})   R2 {1-ss/tot if tot else float('nan'):.3f}")
         for name, target in (("coarse cell assignment", -1.0), ("Bennett density term", -2.0)):
-            z = abs(slope - target) / max(se, 1e-9)
-            print(f"      vs {name:24} ({target:+.0f}): {z:5.1f} sigma away")
+            t = abs(slope - target) / max(se, 1e-9)
+            pval = 2 * float(stats.t.sf(t, dof))
+            print(f"      vs {name:24} ({target:+.0f}): t = {t:5.2f}, p = {pval:.4f}")
 
     print()
     fit(biases, "raw bias against R/D")

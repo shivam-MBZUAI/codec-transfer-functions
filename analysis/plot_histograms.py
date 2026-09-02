@@ -30,6 +30,7 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
 
 ROOT = Path(__file__).resolve().parent.parent
 SETS = [("hist_gtzan.csv", "GTZAN (Western music)", "#0072B2"),
+        ("hist_gtzan_detuned.csv", "GTZAN, tuning flattened (fine-tuning arm)", "#009E73"),
         ("hist_librispeech.csv", "LibriSpeech (speech)", "#D55E00")]
 
 fig, axes = plt.subplots(1, len(SETS), figsize=(9.5, 3.4), sharey=True, squeeze=False)

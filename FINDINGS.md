@@ -4,7 +4,9 @@ Every number here is measured and traceable to a file in `results/`. Where a
 result contradicts the paper draft, that is stated.
 
 **Exclusion scheme.** Every number below, and every number in the paper, uses
-the octave gate alone, which excludes 0% of trials on every reported run. The
+the octave gate alone, which excludes 0% of trials on the headline run and up to
+9% on most reported runs, and 65% on DAC 16k (whose slope survives with the gate
+removed: 0.98 [0.88, 1.08]); `analysis/guard_sensitivity.py` lists every run. The
 estimator cross-check (`--exclusion=full`) is reported only as a robustness
 variant, because it fires preferentially 30 to 50 cents from a grid point.
 
@@ -207,8 +209,10 @@ function of how far the stimulus sits from the training distribution.
 
 ## 10. Experiment 2: no phonological disparity, and P4 is falsified
 
-Ratios against the non-tonal control, 150 utterances per language, bootstrap
-over languages:
+Ratios against the non-tonal control, up to 150 utterances per language (Xhosa
+has 4, Oromo 41, English 62), bootstrap over languages for the six-language tone
+group; the two- and three-language groups get the range of per-language ratios
+instead, since a bootstrap over two items is not an interval:
 
 | Codec | Group | Metric | Ratio | 95% CI |
 |---|---|---|---|---|
@@ -221,14 +225,15 @@ over languages:
 | **DAC 16k** | ejective (3) | LSD | 1.024 | [0.99, 1.03] |
 | **DAC 16k** | click (2) | LSD | 0.972 | [0.95, 0.98] |
 
-Eight of nine intervals include 1, and the ninth (DAC on clicks) lies below it,
-under three codecs with very different frame rates. The
+The tone intervals all include 1 under three codecs with very different frame
+rates, and no per-language ratio in the consonantal groups exceeds 1.3. The
 tone ratio sits on opposite sides of unity across codecs. **P4 registered 1.6
-with falsification below 1.1; measured 1.048 and 0.921, so it is falsified**, not
-merely unsupported.
-
-The null is well determined rather than underpowered: it holds at 150 utterances
-per language and the intervals exclude the registered effect size.
+with falsification below 1.1; the point estimates 1.048, 0.921 and 1.041 all fall
+below 1.1, so the registered rule fires.** The interval [0.86, 1.25] excludes the
+registered point value 1.6 but not the falsification threshold or the bottom of
+the credible range (1.2), so the paper reports it as falsified at the point
+estimate and underpowered against the grid mechanism specifically (a doubled pull
+in tone languages would move the ratio by about 0.06).
 
 **Contrast groups corrected.** The draft grouped Arabic, Hebrew, Amharic and
 Maltese under pharyngealisation. Only Arabic carries it unambiguously: Modern
@@ -275,9 +280,15 @@ was produced under torch 2.8.0+cu128 and transformers 5.16.1.
 Extending to a second codec, Mimi under MMS gives control 148.7% against tone
 63.6%, a ratio of 0.43. The pattern holds across two codecs and two recognisers.
 
-**P6 is falsified under both recognisers and both codecs.** It predicted tone languages at 31%
-against English at 9%, requiring at least 1.5×; measured 0.47× and 0.67×, the
-opposite direction.
+**P6, as registered in relative terms, is falsified under both recognisers and
+both codecs.** It predicted tone languages at 31% against English at 9%,
+requiring at least 1.5×; measured 0.47× and 0.67×, the opposite direction. The
+absolute and headroom normalisations, which were not registered, run the other
+way (tone +0.090 vs control +0.059 under MMS/EnCodec); the paper reports the
+registered verdict first and the normalisation dependence as an exploratory
+caveat. Under the relative normalisation clicks and ejectives also sit BELOW the
+control (59.2% and 47.1% vs 64.8%); they exceed it only under the absolute and
+headroom normalisations.
 
 MMS also rescues four languages Whisper cannot handle. Amharic goes from a
 baseline of 1.000 to 0.271, Yoruba from 1.000 to 0.487. The click group, absent

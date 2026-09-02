@@ -7,6 +7,9 @@ across metrics would be meaningless and is never formed.
 Bootstrap intervals are over languages, not utterances. Utterances within a
 language are not independent draws from the quantity of interest, which is a
 per-language effect, so an utterance-level interval would be far too narrow.
+A bootstrap over two or three languages is not an interval either, so groups
+with fewer than five languages get the RANGE of their per-language ratios
+instead, and the bootstrap is printed only for the tone group (six languages).
 """
 
 from __future__ import annotations
@@ -83,11 +86,17 @@ def main() -> int:
             v = [lang_med[l][m] for l in groups[g] if m in lang_med[l]]
             c = [lang_med[l][m] for l in ctrl if m in lang_med[l]]
             pt, lo, hi = boot_ratio(v, c)
-            flag = ""
-            if np.isfinite(lo) and lo <= 1.0 <= hi:
-                flag = "  interval includes 1: no reliable effect"
-            print(f"  {g:<12}{len(groups[g]):6d}{name:>14}{pt:9.3f}"
-                  f"{f'[{lo:.2f}, {hi:.2f}]':>18}{flag}")
+            per = sorted(x / float(np.median(c)) for x in v) if c else []
+            rng_txt = f"per-language {per[0]:.2f} to {per[-1]:.2f}" if per else ""
+            if len(v) >= 5:
+                flag = ""
+                if np.isfinite(lo) and lo <= 1.0 <= hi:
+                    flag = "  interval includes 1: no reliable effect"
+                print(f"  {g:<12}{len(groups[g]):6d}{name:>14}{pt:9.3f}"
+                      f"{f'[{lo:.2f}, {hi:.2f}]':>18}{flag}   {rng_txt}")
+            else:
+                print(f"  {g:<12}{len(groups[g]):6d}{name:>14}{pt:9.3f}"
+                      f"{'(n<5: no bootstrap)':>22}   {rng_txt}")
 
     print("\n  Note: tone is the group for which F0 error is the meaningful metric;")
     print("  ejective and click are consonantal and LSD is theirs. Both are printed")

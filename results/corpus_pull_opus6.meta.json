@@ -10,5 +10,12 @@
   "rate_label": "6kbps",
   "sample_rate": 24000,
   "frames": 61686,
-  "clips": 199
+  "clips": 199,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1"
+  },
+  "packages_note": "corpus_pull.py did not record versions at the time of this run; these are copied from results/detune_opus6.meta.json, produced on the same pod in the same session with the same environment"
 }

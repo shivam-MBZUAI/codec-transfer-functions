@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import sys
 import tarfile
 from pathlib import Path
@@ -84,6 +85,17 @@ def main() -> int:
         w.writerow(["bin_lo_cents", "bin_hi_cents", "density"])
         for lo, hi, d in zip(edges[:-1], edges[1:], hist):
             w.writerow([f"{lo:.2f}", f"{hi:.2f}", f"{d:.6f}"])
+    # Sidecar with the count and the corpus, since the CSV stores densities
+    # only and the count is what the paper's corpus table quotes.
+    meta = {"args": {k: (str(v) if isinstance(v, Path) else v) for k, v in vars(args).items()},
+            "n_f0_estimates": int(len(cents)), "peak_over_mean": ratio,
+            "python": sys.version.split()[0], "packages": {}}
+    for mod in ("numpy", "scipy", "soundfile"):
+        try:
+            meta["packages"][mod] = __import__(mod).__version__
+        except Exception:
+            meta["packages"][mod] = None
+    args.out.with_suffix(".meta.json").write_text(json.dumps(meta, indent=2))
     print(f"  wrote {args.out}")
     return 0
 

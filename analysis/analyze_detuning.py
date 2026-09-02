@@ -14,7 +14,13 @@ reference pitches from 0 to 100 cents; the 100-cent point is one semitone up
 and folds onto the 0-cent condition, so ten distinct conditions enter the fit.)
 
 Exclusion scheme: the octave gate alone by default, which is what every number
-in the paper uses. Pass --exclusion=full to add the estimator cross-check.
+in the paper uses. Pass --exclusion=full to add the estimator cross-check, or
+--exclusion=none to fit with no exclusion at all (the check that the gate does
+not manufacture the slope; DAC 16k, which loses 65% of trials to the gate,
+still regresses at 0.98 [0.88, 1.08] without it).
+
+Confidence intervals on the slope use the t quantile on n-2 degrees of freedom
+(ten conditions, so t(8) = 2.306), not 1.96.
 """
 
 from __future__ import annotations
@@ -30,9 +36,7 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
         sys.path.insert(0, str(_p))
 
 from analyze_sweep import DISAGREE_CENTS, fit_sinusoid, load  # noqa: E402
-
-import sys
-from pathlib import Path
+from scipy import stats  # noqa: E402
 
 
 # Guards on whether a phase regression means anything.
@@ -45,6 +49,15 @@ from pathlib import Path
 # Two things do discriminate. The theory predicts the amplitude is FLAT across
 # detuning, so an amplitude that swings wildly means the model does not hold.
 # And a condition retaining almost no trials has no phase to speak of.
+#
+# PROVENANCE. These two guards were added after the SNAC 24 kHz run produced a
+# slope of -0.92 from per-condition fits that were noise; they are post hoc
+# relative to the pre-registration and the paper says so. The thresholds below
+# are the ones every reported table uses. Membership of the reported set is
+# insensitive to them: the ten measurable conditions have cv <= 0.21 and
+# retention >= 0.43, and the refusals have cv >= 0.41 (DAC 44k) or retention
+# 0.06 (SNAC 24k), so any cv limit in [0.21, 0.41) and any retention limit in
+# (0.06, 0.43] gives the same table (analysis/guard_sensitivity.py).
 MAX_AMP_CV = 0.35        # sd/mean of amplitude across conditions
 MIN_RETENTION = 0.25     # fraction of trials surviving exclusions
 
@@ -128,15 +141,28 @@ def main() -> int:
     r2 = 1 - ss / tot if tot else float("nan")
     # 3.6 deg per cent is one full period of the residual per semitone.
     rel = slope / 3.6
-    resid_sd = float(np.sqrt(ss / max(len(offsets) - 2, 1)))
+    dof = max(len(offsets) - 2, 1)
+    resid_sd = float(np.sqrt(ss / dof))
     se = resid_sd / float(np.sqrt(np.sum((offsets - offsets.mean()) ** 2)))
+    # Ordinary least squares on the unwrapped per-condition phases; the
+    # interval is slope +/- t_{0.975, n-2} * SE with n the number of conditions.
+    # The per-condition phases enter as points. Their own uncertainty (a
+    # bootstrap gives about 1 degree for EnCodec at 3 kbps and about 10 degrees
+    # for the sub-2-cent conditions) is what the regression's residual scatter
+    # consists of, so it is captured by the SE rather than added to it.
+    tq = float(stats.t.ppf(0.975, dof))
+    lo, hi = (slope - tq * se) / 3.6, (slope + tq * se) / 3.6
+    excl = 1.0 - float(np.mean(keep))
 
     print(f"\n  slope            {slope:.4f} deg/cent   (locked-to-grid predicts 3.6000)")
     print(f"  relative slope   {rel:.4f}          (1.0 = perfect lock, 0.0 = no lock)")
-    print(f"  95% CI           [{(slope - 1.96*se)/3.6:.4f}, {(slope + 1.96*se)/3.6:.4f}]")
+    print(f"  95% CI           [{lo:.4f}, {hi:.4f}]   (t({dof}) = {tq:.3f} on {len(offsets)} conditions)")
     print(f"  R2               {r2:.5f}")
     print(f"  amplitude        {np.mean([r[1] for r in rows]):.2f} +/- "
           f"{np.std([r[1] for r in rows]):.2f} cents (should be flat: only phase moves)")
+    print(f"  guards           amplitude cv {cv:.3f} (limit {MAX_AMP_CV}), "
+          f"retention {retention:.2f} (limit {MIN_RETENTION})")
+    print(f"  exclusion        {100*excl:.1f}% of trials removed by the '{scheme}' scheme")
 
     if len(argv) > 1:
         import matplotlib
@@ -150,8 +176,8 @@ def main() -> int:
         ax.plot(offsets, phases, "o", color="#0072B2", ms=6, label="measured")
         ax.set_xlabel("reference detuning (cents)")
         ax.set_ylabel("residual phase (degrees)")
-        ax.set_title(f"slope {rel:.4f}  [{(slope-1.96*se)/3.6:.3f}, "
-                     f"{(slope+1.96*se)/3.6:.3f}]   $R^2$={r2:.5f}", fontsize=9)
+        ax.set_title(f"slope {rel:.4f}  [{lo:.4f}, {hi:.4f}]   $R^2$={r2:.5f}",
+                     fontsize=9)
         ax.legend(fontsize=7); ax.grid(alpha=0.25)
 
         ax2.plot(offsets, [r[1] for r in rows], "s", color="#D55E00", ms=5)
