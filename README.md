@@ -32,10 +32,11 @@ grid rather than to the interval under test.
 | **Aggregate metrics conceal it** | DAC 16k and SNAC 44k report a median grid bias of 0.000 and register cleanly |
 | **Not architectural** | period constant in cents across four octaves; conv strides would give constant Hz |
 | **Not in the codebook** | removing quantisation leaves 5.66 of 8.88 cents; code boundaries uniform (Rayleigh *p* = 0.86) |
-| **Learned** | flattening the tuning grid of the training audio weakens it by 15% |
-| **Bounded** | absent on real instrument recordings, in phonology across 20 languages, and in downstream WER |
+| **Learned** | flattening the tuning grid of the training audio weakens it by 16%, replicated over three seeds with a resampling control; the fine-tuning changes only the decoder |
+| **Not a learned-codec artefact of test tones** | Opus and MP3 show no pull; on real polyphonic music, Western and Carnatic, EnCodec pulls by about 2.5 cents with the same phase |
+| **Bounded in speech** | no phonological disparity across 20 languages; the downstream recognition effect changes sign with the error normalisation |
 
-Two pre-registered predictions are falsified and three could not be measured; the scored table is in the paper repository's `PREDICTIONS.md`. **[FINDINGS.md](FINDINGS.md)
+One pre-registered prediction is falsified, one is unresolved by its own metric, and three could not be measured as registered; the scored table is in the paper repository's `PREDICTIONS.md`. **[FINDINGS.md](FINDINGS.md)
 states every number, every null, and every design that failed.**
 
 ---
