@@ -20,9 +20,12 @@ refs () { python3 -c "print(' '.join(f'{$1*2**(d/1200):.4f}' for d in range(0,10
 
 case "${1:-}" in
 setup)
-  apt-get update -qq && apt-get install -y -qq ffmpeg tmux > /dev/null
-  pip install -q -r requirements.txt
-  pip install -q jiwer transformers[torch] accelerate
+  which ffmpeg > /dev/null || (apt-get update -qq && apt-get install -y -qq ffmpeg tmux > /dev/null)
+  # The pod ships torch 2.8.0+cu128 already, the version every result was
+  # produced under; reinstalling it from the pin is pointless and risky.
+  export PIP_BREAK_SYSTEM_PACKAGES=1
+  grep -v '^torch' requirements.txt | pip install -q -r /dev/stdin
+  pip install -q jiwer accelerate
   python3 data/fetch_checkpoints.py
   python3 data/fetch_pod_corpora.py
   python3 experiments/make_detuned_corpus.py --src corpora/gtzan --dst corpora/gtzan_detuned --max-files 400
