@@ -20,8 +20,8 @@ produced it.
 | `ftm_grid`, `ftm_flat` | **the causal experiment**: EnCodec fine-tuned on real music, tuning grid present versus flattened |
 | `vib_*` | vibrato sweep, which refuted the out-of-distribution account |
 | `retune_*` | ecological test on real instrument recordings; `retune_synthetic` is its protocol control |
-| `phon_*` | Experiment 2, three codecs |
-| `asr_encodec3_v2`, `asr_mms_*` | Experiment 3, two codecs, two recognisers |
+| `phon_*` | Experiment 2 (phonological contrasts), three codecs |
+| `asr_encodec3_v2`, `asr_mms_*` | Experiment 2 (downstream recognition), two codecs, two recognisers |
 | `ctrl_identity`, `ctrl_sinusoid` | the null controls |
 
 ## Retained but NOT reported as results

@@ -68,9 +68,9 @@ experiments/     measurement entry points; each writes raw per-trial CSV
   estimator.py       YIN + harmonic-sum coarse stages, harmonic least-squares refine
   codec_zoo.py       every codec behind one interface, plus identity and bypass controls
   run_sweep.py       the pitch sweep
-  run_phonology.py   Experiment 2
-  run_asr.py         Experiment 3, Whisper
-  run_asr_mms.py     Experiment 3, MMS cross-check
+  run_phonology.py   Experiment 2, phonological contrasts
+  run_asr.py         Experiment 2, downstream recognition (Whisper)
+  run_asr_mms.py     Experiment 2, downstream recognition (MMS)
   train_rvq.py       from-scratch codec (a failed design, retained)
   finetune_encodec.py  the causal experiment
   retune_real.py     ecological test on real recordings
