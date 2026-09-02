@@ -125,8 +125,16 @@ for arm in grid:gtzan flat:gtzan_detuned; do
       --reps 5 --references $REFS --out results/ftm_${arm%%:*}.csv
 done
 ```
-Expect 4.44 cents on grid-peaked music against 3.76 on flattened, a 15%
-reduction with both retaining unit slope.
+That is the single-seed original. The replicated version, three seeds and a
+whole-semitone resampling control, is `bash infra/pod_run.sh causal3`: expect
+4.45 +- 0.09 cents on the original clips, 4.60 +- 0.04 on the same clips
+resampled by exactly one semitone, and 3.73 +- 0.09 on the flattened corpus.
+Note that this fine-tuning changes only the decoder (code assignment is an
+argmin, so no gradient reaches the encoder or codebooks); `bash
+infra/pod_run.sh swap` demonstrates it. The Carnatic measurement is
+`bash infra/saraga_fetch.sh` (resumable 14 GB download from Zenodo, then
+`corpus_pull.py` on the recordings); expect EnCodec +2.63 cents [2.27, 2.97]
+and Opus nothing.
 
 ---
 

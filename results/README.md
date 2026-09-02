@@ -22,7 +22,8 @@ produced it.
 | `retune_*` | ecological test on real instrument recordings; `retune_synthetic` is its protocol control |
 | `phon_*` | Experiment 2 (phonological contrasts), three codecs |
 | `asr_*_n100` | Experiment 2 (downstream recognition) at 100 utterances per language, two codecs, two recognisers. **The reported runs** |
-| `corpus_pull_*` | the transfer function on whole polyphonic clips of the tuning-flattened GTZAN corpus; EnCodec pulls real music toward the grid, Opus does not |
+| `corpus_pull_*` | the transfer function on whole polyphonic clips: tuning-flattened GTZAN, and (`corpus_pull_saraga_*`) untouched Carnatic recordings from Saraga. EnCodec pulls both toward the Western grid by about 2.5 cents, Opus neither |
+| `ftm_{grid,gridres,flat}_s{0,1,2}` | **the causal experiment, replicated**: three arms (original clips, resampled by exactly one semitone, tuning-flattened) at three seeds; `swap_*` are the encoder/decoder swap sweeps that show the fine-tuning changed only the decoder |
 | `detune_opus*`, `detune_mp3*` | classical codecs through the registration sweep: the control for "learned" |
 | `detune_encodec3_220`, `detune_encodec3_880` | registration at other registers |
 | `octaves_opus6` | octave test for the one classical condition with a measurable residual |

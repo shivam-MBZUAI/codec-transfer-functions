@@ -115,7 +115,20 @@ As far as we can establish this has been assumed throughout the literature and
 never measured in the frame that matters. LibriSpeech is SpeechTokenizer's
 entire training set.
 
-## 7. Causal: flattening the training grid weakens the lock
+## 7. Causal: flattening the training grid weakens the lock (replicated, decoder-only)
+
+Replicated at three seeds with a control for the resampling operation
+(`ftm_*_s?`): original clips 4.53 / 4.45 / 4.36 cents (mean 4.45 +- 0.09);
+the same clips resampled by exactly one semitone, which keeps the grid peaked
+but carries the same tempo and spectral artefacts, 4.56 / 4.63 / 4.62 (4.60
++- 0.04); flattened 3.73 / 3.81 / 3.64 (3.73 +- 0.09). Resampling does not
+weaken the pull; flattening does, by 16%, eight times the seed spread. All
+nine runs keep unit slope. Comparing checkpoints shows the fine-tuning
+changed ONLY the decoder: code assignment is an argmin, so no gradient reaches
+the encoder or the codebooks, and the `swap_*` sweeps confirm that a
+fine-tuned encoder with the stock decoder reproduces stock exactly. The
+movable part of the pull lives in the decoder. The single-seed numbers below
+are the original run.
 
 Two corpora identical in timbre, instrumentation, production and note density,
 differing only in whether the tuning grid exists. EnCodec fine-tuned on each,
@@ -141,7 +154,13 @@ Pure sinusoids show **less than 0.01 cents** of grid bias against 8.88 for harmo
 complexes through the same codec at the same rate. Whatever produces the lock
 operates on spectral pattern, not on pitch as such.
 
-## 9. The effect appears on real music, at a quarter of its synthetic amplitude
+## 9. The effect appears on real music, Western and Carnatic, at a quarter of its synthetic amplitude
+
+On 200 untouched Saraga Carnatic recordings (`corpus_pull_saraga_*`), whose
+pitches fall anywhere within the semitone (input position mean 54 cents):
+EnCodec 3 kbps +2.63c [2.27, 2.97], amplitude 3.05c at +166°; DAC 16k -0.38c
+[-0.64, -0.12]; Opus 12 kbps -0.01c [-0.07, +0.03]. The same pull as on
+flattened Western music, on the music whose tuning the grid does not fit.
 
 Whole polyphonic clips of the tuning-flattened GTZAN corpus, coded, with F0
 tracked frame by frame before and after coding by the same blind estimator

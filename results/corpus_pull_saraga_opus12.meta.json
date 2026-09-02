@@ -1,0 +1,14 @@
+{
+  "args": {
+    "audio_root": "corpora/saraga_carnatic",
+    "codec": "opus:12",
+    "max_files": 200,
+    "clip_seconds": 10.0,
+    "out": "results/corpus_pull_saraga_opus12.csv"
+  },
+  "codec": "opus",
+  "rate_label": "12kbps",
+  "sample_rate": 24000,
+  "frames": 52854,
+  "clips": 200
+}
