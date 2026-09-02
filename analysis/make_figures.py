@@ -143,6 +143,76 @@ def fig_octaves():
     print("  octaves.png")
 
 
+def fig_overview():
+    """The paper's first figure: the pull toward the grid and its registration
+    to absolute pitch, both from the headline detuning run. Panel (a) is the
+    residual folded into one semitone at the on-grid reference; panel (b) is the
+    phase regression of analyze_detuning.py, reproduced here so the figure and
+    the reported slope come from one computation path."""
+    p = RES / "detune_encodec3.csv"
+    if not p.exists():
+        return
+    d = load(p)
+    theta, rc = d["theta_cents"], d["residual_coded_cents"]
+    keep = keep_mask(d) & np.isfinite(rc)
+    f1 = d["f1_nominal"]
+    offsets_all = (1200.0 * np.log2(f1 / 440.0)) % 100.0
+
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(5.4, 2.2),
+                                  gridspec_kw={"width_ratios": [1.15, 1]})
+    # (a) folded residual, on-grid reference
+    m = keep & (np.round(offsets_all, 3) == 0.0)
+    folded = theta[m] % 100.0
+    ax.axhline(0, color="0.6", lw=0.8)
+    ax.scatter(folded, rc[m], s=3, alpha=0.22, color=OKABE["enc"], rasterized=True)
+    amp, ph, r2 = fit_sinusoid(theta[m], rc[m])
+    gx = np.linspace(0, 100, 300)
+    ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)), color="black", lw=1.7)
+    ax.annotate("pulled up toward\nnext semitone", xy=(80, 13), xytext=(52, 36),
+                fontsize=6, ha="center",
+                arrowprops=dict(arrowstyle="->", lw=0.8, color="0.3"))
+    ax.annotate("pulled down toward\nprevious semitone", xy=(30, -13), xytext=(50, -44),
+                fontsize=6, ha="center",
+                arrowprops=dict(arrowstyle="->", lw=0.8, color="0.3"))
+    ax.set_xlim(0, 100); ax.set_ylim(-55, 55)
+    ax.set_xticks([0, 25, 50, 75, 100])
+    ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=7)
+    ax.set_ylabel("residual (cents)", fontsize=7)
+    ax.set_title("(a) residual, folded into one semitone", fontsize=7)
+    ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
+
+    # (b) registration regression, as in analyze_detuning.py (gate scheme)
+    rows = []
+    for off_key in sorted(set(np.round(offsets_all, 3).tolist())):
+        mm = (np.round(offsets_all, 3) == off_key) & keep
+        if mm.sum() < 50:
+            continue
+        a, phs, _ = fit_sinusoid(theta[mm], rc[mm])
+        rows.append((float(off_key), a, phs))
+    rows.sort()
+    offs = np.array([r[0] for r in rows])
+    phases = np.degrees(np.unwrap(np.radians([r[2] for r in rows])))
+    phases = phases - phases[0]
+    A = np.vstack([offs, np.ones_like(offs)]).T
+    slope, icpt = np.linalg.lstsq(A, phases, rcond=None)[0]
+    pred = A @ [slope, icpt]
+    ss = float(np.sum((phases - pred) ** 2)); tot = float(np.sum((phases - phases.mean()) ** 2))
+    r2b = 1 - ss / tot
+    se = float(np.sqrt(ss / max(len(offs) - 2, 1))) / float(np.sqrt(np.sum((offs - offs.mean()) ** 2)))
+    rel, lo, hi = slope / 3.6, (slope - 1.96 * se) / 3.6, (slope + 1.96 * se) / 3.6
+    ax2.plot([0, 100], [0, 360], color="0.55", ls="--", lw=1.2, label="slope 1: absolute grid")
+    ax2.axhline(0, color="0.55", ls=":", lw=1.2, label="slope 0: interval or artefact")
+    ax2.plot(offs, phases, "o", color="#D55E00", ms=4.5, label="measured")
+    ax2.set_xlim(-3, 100); ax2.set_ylim(-20, 370)
+    ax2.set_xlabel("reference detuning (cents)", fontsize=7)
+    ax2.set_ylabel("residual phase shift (deg)", fontsize=7)
+    ax2.set_title(f"(b) slope {rel:.4f} [{lo:.4f}, {hi:.4f}], $R^2$={r2b:.5f}",
+                  fontsize=7)
+    ax2.legend(fontsize=5.5, loc="upper left"); ax2.tick_params(labelsize=6); ax2.grid(alpha=0.2)
+    fig.tight_layout(); fig.savefig(FIG / "overview.png", dpi=200)
+    print(f"  overview.png   (slope {rel:.4f} [{lo:.4f}, {hi:.4f}] R2 {r2b:.5f}, amp {amp:.2f})")
+
+
 if __name__ == "__main__":
     print("figures:")
-    fig_residual_shape(); fig_rate(); fig_octaves()
+    fig_overview(); fig_residual_shape(); fig_rate(); fig_octaves()
