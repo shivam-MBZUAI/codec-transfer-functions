@@ -326,20 +326,33 @@ def fig_mechanism():
     ax.legend(fontsize=5.2, frameon=False); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
 
     ax = axes[2]
-    d = load(RES / "octaves_encodec3.csv")
-    theta, rc, labels = d["theta_cents"], d["residual_coded_cents"], d["reference_label"]
-    refs = sorted(set(labels.tolist()), key=lambda s: float(s.split("Hz")[0]))
-    fr, am, phs = [], [], []
-    for lab in refs:
-        m = (labels == lab) & keep_mask(d) & np.isfinite(rc)
-        a, ph, _ = fit_sinusoid(theta[m], rc[m]); fr.append(float(lab.split("Hz")[0])); am.append(a); phs.append(ph)
-    ax.plot(fr, am, "s-", color=OKABE["enc"], lw=1.6, ms=4.5)
-    for f, a, ph in zip(fr, am, phs):
-        ax.annotate(f"{ph:.0f}°", (f, a), textcoords="offset points", xytext=(0, 5), ha="center", fontsize=5.4)
-    ax.set_xscale("log", base=2); ax.set_xticks(fr); ax.set_xticklabels([f"{int(f)}" for f in fr])
-    ax.set_ylim(0, 17); ax.set_xlabel("reference pitch (Hz)", fontsize=6.4); ax.set_ylabel("fit amplitude (cents)", fontsize=6.4)
-    ax.set_title("(c) octaves: period holds, phase within 40°", fontsize=6.6)
-    ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
+    # (c) the transfer function on real polyphonic music: binned median residual
+    # against input position within the semitone, from corpus_pull.py.
+    for name, label, ck, ls in [("corpus_pull_encodec3", "EnCodec 3 kbps", "enc", "-"),
+                                ("corpus_pull_dac166", "DAC 16k", "dac", "-"),
+                                ("corpus_pull_opus12", "Opus 12 kbps (no learning)", "grey", "--")]:
+        p = RES / f"{name}.csv"
+        if not p.exists():
+            continue
+        rows = list(csv.DictReader(open(p)))
+        pos = np.array([float(r["position_cents"]) for r in rows])
+        res = np.array([float(r["residual_cents"]) for r in rows])
+        din = np.array([float(r["disagreement_in"]) for r in rows])
+        dout = np.array([float(r["disagreement_out"]) for r in rows])
+        k = (np.nan_to_num(din, nan=1e9) <= 20) & (np.nan_to_num(dout, nan=1e9) <= 20) & (np.abs(res) <= 200)
+        pos, res = pos[k], res[k]
+        edges = np.arange(0, 101, 10); xs, ys = [], []
+        for a, b in zip(edges[:-1], edges[1:]):
+            m = (pos >= a) & (pos < b)
+            if m.sum() > 50:
+                xs.append(0.5 * (a + b)); ys.append(float(np.median(res[m])))
+        ax.plot(xs, ys, "o-", color=OKABE[ck], ls=ls, lw=1.5, ms=3.2, label=label)
+    ax.axhline(0, color="0.7", lw=0.8)
+    ax.set_xlim(0, 100); ax.set_xticks([0, 25, 50, 75, 100]); ax.set_ylim(-6, 6)
+    ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=6.4)
+    ax.set_ylabel("median residual (cents)", fontsize=6.4)
+    ax.set_title("(c) real music: same pull, smaller", fontsize=6.6)
+    ax.legend(fontsize=5.2, frameon=False, loc="upper left"); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
 
     ax = axes[3]
     for fname, label, colour, ls in [("hist_gtzan.csv", "GTZAN (peak/mean 1.79)", OKABE["enc"], "-"),
@@ -350,7 +363,7 @@ def fig_mechanism():
     ax.axhline(1, color="0.6", ls=":", lw=1)
     ax.set_xlim(0, 100); ax.set_ylim(0, 2.0); ax.set_xlabel("cents from nearest 12-TET pitch", fontsize=6.4)
     ax.set_ylabel("relative density", fontsize=6.4)
-    ax.set_title("(d) fine-tuning corpora: 4.44 vs 3.76c", fontsize=6.6)
+    ax.set_title("(d) fine-tuning corpora (4.44 vs 3.76c)", fontsize=6.6)
     ax.legend(fontsize=5.2, frameon=False, loc="upper center"); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
     fig.tight_layout(w_pad=0.6); fig.savefig(FIG / "mechanism.png", dpi=200)
     print("  mechanism.png")
