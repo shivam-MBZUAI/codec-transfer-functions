@@ -1,0 +1,37 @@
+{
+  "args": {
+    "codec": "encodec:3",
+    "references": [
+      880.0,
+      885.0978,
+      890.2251,
+      895.3821,
+      900.569,
+      905.786,
+      911.0331,
+      916.3107,
+      921.6188,
+      926.9577,
+      932.3275
+    ],
+    "reps": 5,
+    "theta_step": 5.0,
+    "theta_stop": 1200.0,
+    "partials": 8,
+    "sinusoid": false,
+    "vibrato_cents": 0.0,
+    "noise_db": null,
+    "vowel": false,
+    "seed": 20260826,
+    "out": "results/detune_encodec3_880.csv"
+  },
+  "codec": "encodec",
+  "rate_label": "3.0kbps",
+  "sample_rate": 24000,
+  "python": "3.12.3",
+  "packages": {
+    "numpy": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1"
+  }
+}
