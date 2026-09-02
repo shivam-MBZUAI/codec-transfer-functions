@@ -193,14 +193,26 @@ recogniser. Whisper is a weak instrument here, failing outright on Amharic,
 Georgian and Yoruba with baseline error 1.0, and having no setting at all for
 Igbo, Oromo, Zulu or Xhosa.
 
-MMS covers all 21 languages. Both recognisers agree:
+MMS covers 19 of the 21 languages: the **Mandarin (`cmn`) and Oromo (`gaz`)
+adapters were unavailable** at run time, so the MMS tone group is four
+languages, not six. The two it loses are Mandarin and Cantonese, which are
+exactly the two sitting at ceiling under Whisper with baselines near 0.5, so
+their absence removes the least informative members rather than biasing the
+comparison. Both recognisers agree:
 
 | Group | Whisper | MMS |
 |---|---|---|
 | control | 54.0% | 45.8% |
-| tone | 25.1% (0.47×) | 30.7% (0.67×) |
+| tone | 25.1% (0.47×), n=4 | 30.7% (0.67×), n=4 |
 | ejective | not measurable | 43.4% (0.95×) |
-| click | not measurable | **59.7% (1.30×)** |
+| click | not measurable | **59.7% (1.30×)**, n=2 |
+
+An environment note that belongs in the reproducibility statement: three runs in
+this round failed silently because installing `xcodec2` to probe an additional
+codec downgraded torch from 2.8.0 to 2.5.0 and broke the transformers imports.
+It was caught by comparing the `.meta.json` provenance sidecars, which record
+package versions per run, against the live environment. Every reported result
+was produced under torch 2.8.0+cu128 and transformers 5.16.1.
 
 **P6 is falsified under both recognisers.** It predicted tone languages at 31%
 against English at 9%, requiring at least 1.5×; measured 0.47× and 0.67×, the
