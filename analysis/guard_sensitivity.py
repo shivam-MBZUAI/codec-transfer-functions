@@ -46,7 +46,7 @@ def guards(path: Path):
         rows.append((amp, int(m.sum())))
     amps = np.array([r[0] for r in rows])
     cv = float(amps.std() / amps.mean()) if amps.mean() else float("inf")
-    retention = float(np.median([r[1] for r in rows])) / max(len(keep) / len(rows), 1)
+    retention = float(keep.mean())          # kept / total, so 1 - gated
     return cv, retention, 1.0 - float(keep.mean())
 
 

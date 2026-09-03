@@ -19,3 +19,4 @@ checkpoints/
 # Never commit: holds API tokens supplied at runtime.
 env.sh
 .dunya_token
+infra/identity.txt

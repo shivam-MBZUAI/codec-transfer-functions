@@ -18,7 +18,7 @@ grid rather than to the interval under test.
 <p align="center">
   <img src="figures/detuning_regression.png" width="88%"><br>
   <em>Detuning the reference pitch advances the residual's phase with slope
-  1.0010, 95% CI [0.9935, 1.0085], R² = 0.99988. A residual locked to the
+  1.0010, 95% CI [0.9922, 1.0099] (t on 8 degrees of freedom), R² = 0.99988. A residual locked to the
   interval, or produced by the analysis, would sit on the dotted line at zero.</em>
 </p>
 
@@ -151,3 +151,5 @@ with placeholders. The figures are generated the same way.
 ## Licence
 
 MIT. See [LICENSE](LICENSE).
+
+`PREDICTIONS.md` is a copy of the paper repository's pre-registration file with its amendment log, shipped so the supplement is self-contained.

@@ -463,6 +463,26 @@ def speechtokenizer(n_quantizers: int = 8, model_id: str = "fnlp/SpeechTokenizer
     return Codec("speechtokenizer", sr, f"Q{n_quantizers}", fn)
 
 
+def encodec_iter(n_iter: int = 2, bandwidth_kbps: float = 3.0,
+                 model_id: str = "facebook/encodec_24khz") -> Codec:
+    """EnCodec applied n_iter times in a row: decode, then encode the decoded
+    waveform again. This is the accumulation test the discussion asks for: if
+    a generate-and-decode loop over codec tokens re-applies the pull, the
+    grid bias should grow with the number of round trips; if the codec is
+    close to idempotent on its own output, it should saturate after one.
+    build("encodec_iter:3@4") is four round trips at 3 kbps."""
+    base = encodec(bandwidth_kbps=bandwidth_kbps, model_id=model_id)
+
+    def fn(x: np.ndarray) -> np.ndarray:
+        y = np.asarray(x, dtype=np.float32)
+        for _ in range(int(n_iter)):
+            y = np.asarray(base.fn(y), dtype=np.float32)
+        return y
+
+    return Codec(f"encodec_iter{int(n_iter)}", base.sample_rate,
+                 f"{bandwidth_kbps}kbps x{int(n_iter)}", fn)
+
+
 REGISTRY = {
     # The null control: same stimuli, same estimator, same analysis, no codec.
     # Every effect must be shown against a run of this at the same sample rate.
@@ -480,6 +500,8 @@ REGISTRY = {
     # A fine-tuned EnCodec: build("encodec_ft:/path/to/dir@3.0")
     "encodec_ft": None,
     "encodec_shuffled": encodec_shuffled,
+    # Iterated round trips: build("encodec_iter:<kbps>@<n>")
+    "encodec_iter": None,
     # Codecs we trained ourselves: build("trained:/path/to/rvq_12tet.pt")
     "trained": trained,
     "snac": snac,
@@ -515,6 +537,9 @@ def build(spec: str) -> Codec:
         c = encodec(bandwidth_kbps=float(bw or 3.0), model_id=path)
         return Codec(f"encodec_ft_{Path(path).name}", c.sample_rate,
                      c.rate_label, c.fn)
+    elif name == "encodec_iter":
+        bw, _, n = arg.partition("@")
+        return encodec_iter(int(n or 2), float(bw or 3.0))
     elif name == "encodec_shuffled":
         key, val = "bandwidth_kbps", float(arg)
     elif name in ("opus", "mp3"):

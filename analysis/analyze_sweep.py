@@ -165,9 +165,10 @@ def main() -> None:
     p.add_argument("--fig", type=Path, default=None)
     p.add_argument("--exclusion", choices=["full", "gate", "none"], default="gate",
                    help="gate: octave gate only (default, and the scheme every "
-                        "number in the paper uses). The gate excludes no trial on "
-                        "any run reported, so no exclusion can manufacture the "
-                        "effect. full: additionally drop trials on which the two "
+                        "number in the paper uses). The gate removes no trial of the "
+                        "headline run, under 10% on most reported runs and 65% on "
+                        "DAC 16k, whose slope survives with --exclusion=none; "
+                        "guard_sensitivity.py lists every run. full: additionally drop trials on which the two "
                         "independent estimators disagree; reported as a "
                         "robustness variant, since that rule fires preferentially "
                         "30 to 50 cents from a grid point. none: no exclusions.")

@@ -353,6 +353,14 @@ placeholder values.
 | `ftvowel_53tet` | encodec_ft_encodec_ft_53tet | 3.0kbps | 226.4Hz_+49.6c | 1174 | 2.7e-05 | 0.252 | 0.222 | 0.88 | 0.000 | [-0.01, 0.00] | 5.9e-03 | 9.2e-03 | n/a, below floor |
 | `ftvowel_uniform` | encodec_ft_encodec_ft_uniform | 3.0kbps | 220Hz_ongrid | 1164 | 1.6e-05 | 0.142 | 0.162 | 1.14 | 0.012 | [0.00, 0.03] | 0.02 | 0.02 | sinusoid |
 | `ftvowel_uniform` | encodec_ft_encodec_ft_uniform | 3.0kbps | 226.4Hz_+49.6c | 1164 | 2.7e-05 | 0.245 | 0.220 | 0.90 | 0.000 | [-4.9e-03, 0.00] | 5.1e-03 | 8.3e-03 | n/a, below floor |
+| `iter_encodec3_k1` | encodec_iter1 | 3.0kbps x1 | 440Hz_ongrid | 1205 | 4.9e-06 | 4.195 | 13.740 | 3.28 | 8.880 | [8.12, 9.54] | 0.65 | 0.59 | sinusoid |
+| `iter_encodec3_k1` | encodec_iter1 | 3.0kbps x1 | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 8.696 | 15.346 | 1.76 | -5.350 | [-7.51, -3.33] | 0.56 | 0.48 | n/a, below floor |
+| `iter_encodec3_k2` | encodec_iter2 | 3.0kbps x2 | 440Hz_ongrid | 1205 | 4.9e-06 | 3.936 | 12.761 | 3.24 | 8.196 | [7.56, 8.83] | 0.63 | 0.58 | sinusoid |
+| `iter_encodec3_k2` | encodec_iter2 | 3.0kbps x2 | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 9.852 | 9.853 | 1.00 | -7.308 | [-8.59, -5.86] | 0.51 | 0.45 | n/a, below floor |
+| `iter_encodec3_k4` | encodec_iter4 | 3.0kbps x4 | 440Hz_ongrid | 1205 | 4.9e-06 | 3.475 | 13.248 | 3.81 | 7.388 | [6.90, 8.08] | 0.59 | 0.57 | sinusoid |
+| `iter_encodec3_k4` | encodec_iter4 | 3.0kbps x4 | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 9.111 | 7.909 | 0.87 | -6.376 | [-7.16, -5.47] | 0.47 | 0.41 | n/a, below floor |
+| `iter_encodec3_k8` | encodec_iter8 | 3.0kbps x8 | 440Hz_ongrid | 1205 | 4.9e-06 | 3.280 | 13.035 | 3.97 | 7.258 | [6.82, 7.86] | 0.56 | 0.54 | sinusoid |
+| `iter_encodec3_k8` | encodec_iter8 | 3.0kbps x8 | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 10.457 | 7.531 | 0.72 | -6.807 | [-7.51, -6.03] | 0.39 | 0.34 | n/a, below floor |
 | `mech_bypass` | encodec_bypass | no-quantiser | 440Hz_ongrid | 1205 | 4.9e-06 | 2.584 | 8.719 | 3.37 | 5.665 | [5.28, 6.06] | 0.68 | 0.61 | sinusoid |
 | `mech_bypass` | encodec_bypass | no-quantiser | 452.9Hz_+50c | 1205 | 5.2e-06 | 5.145 | 7.526 | 1.46 | -4.672 | [-5.76, -3.65] | 0.69 | 0.62 | n/a, below floor |
 | `octaves_encodec3` | encodec | 3.0kbps | 110Hz_ongrid | 1446 | 2.6e-05 | 0.725 | 1.548 | 2.13 | 0.725 | [0.57, 0.86] | 0.31 | 0.24 | sinusoid |

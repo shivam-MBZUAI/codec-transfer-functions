@@ -390,3 +390,15 @@ harmonic complex as far out of distribution. The source-filter vowel fixed this:
 | Music-trained checkpoint shows most | **contradicted**: EnCodec 48k shows less than 24k |
 | Makam validation | audio still blocked; NSynth retuning is the unblocked route |
 | Every reported number | transcribed from `analysis/` output; the paper's tables match `summary_table.py`, `analyze_rate.py`, `analyze_phonology.py` and `analyze_asr.py` |
+
+## 15. Repeated coding does not compound the pull
+
+`results/iter_encodec3_k{1,2,4,8}.csv`: EnCodec at 3 kbps applied 1, 2, 4 and 8
+times in succession on the headline sweep. All-trial grid bias at the on-grid
+reference: 8.88, 8.20, 7.39, 7.26 cents; fitted amplitude 13.91, 13.49, 12.98,
+13.06 cents; phase +155, +155, +157, +158 degrees; no trial gated. The
+displacement after eight passes is the displacement after one: the codec is
+close to idempotent in pitch on its own output, so a generate-and-decode loop
+applies the pull once per decode rather than accumulating it. This test was
+not pre-registered; it answers the accumulation question the discussion had
+left open.

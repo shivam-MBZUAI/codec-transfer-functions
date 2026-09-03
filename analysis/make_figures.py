@@ -28,14 +28,34 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
 from analyze_sweep import DISAGREE_CENTS, fit_sinusoid, grid, load  # noqa: E402
 
 
-OKABE = {"enc": "#0072B2", "dac": "#E69F00", "mimi": "#009E73", "spt": "#D55E00",
+OKABE = {"enc": "#0072B2", "dac": "#E69F00", "mimi": "#009E73", "spt": "#D55E00", "opus": "#CC79A7",
          "grey": "#666666"}
+
+
+def _save(fig, stem: str, dpi: int = 300) -> None:
+    """Vector PDF for the paper plus a PNG preview. Every figure is generated
+    at the physical width it occupies on the page, so the font sizes set here
+    are the printed font sizes."""
+    fig.savefig(FIG / f"{stem}.pdf")
+    fig.savefig(FIG / f"{stem}.png", dpi=dpi)
+    print(f"  {stem}.pdf")
 
 
 def _tq(n_points: int) -> float:
     """t quantile for a 95% interval on an OLS slope through n points."""
     from scipy import stats
     return float(stats.t.ppf(0.975, max(n_points - 2, 1)))
+
+
+def _clip_ci(v, cluster, n_boot=300, seed=0):
+    units = np.unique(cluster)
+    idx = {u: np.where(cluster == u)[0] for u in units}
+    rng = np.random.default_rng(seed)
+    meds = []
+    for _ in range(n_boot):
+        pick = rng.choice(units, units.size, replace=True)
+        meds.append(np.median(np.concatenate([v[idx[u]] for u in pick])))
+    return float(np.percentile(meds, 2.5)), float(np.percentile(meds, 97.5))
 
 
 def _boot_ci(v, n_boot=2000, seed=0):
@@ -62,11 +82,11 @@ def fig_residual_shape():
             ("codec_mimi", "Mimi", "mimi"),
             ("codec_dac16", "DAC 16k", "dac"),
             ("mech_bypass", "EnCodec, quantiser removed", "grey")]
-    fig, axes = plt.subplots(1, len(runs), figsize=(13, 3.1), sharey=True, squeeze=False)
+    fig, axes = plt.subplots(1, len(runs), figsize=(5.5, 1.9), sharey=True, squeeze=False)
     for ax, (name, label, ck) in zip(axes[0], runs):
         p = RES / f"{name}.csv"
         if not p.exists():
-            ax.set_title(f"{label}\n(not measured)", fontsize=8); continue
+            ax.set_title(f"{label}\n(not measured)", fontsize=6.5); continue
         d = load(p)
         theta, rc = d["theta_cents"], d["residual_coded_cents"]
         m = keep_mask(d) & np.isfinite(rc) & np.array(
@@ -78,12 +98,11 @@ def fig_residual_shape():
         gx = np.linspace(0, 100, 300)
         ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)),
                 color="black", lw=1.6)
-        ax.set_title(f"{label}\namplitude {amp:.2f}c, $R^2$={r2:.2f}", fontsize=8)
-        ax.set_xlabel("cents from grid point", fontsize=8)
+        ax.set_title(f"{label}\namplitude {amp:.2f} c, $R^2$={r2:.2f}", fontsize=6.5)
+        ax.set_xlabel("cents from grid point", fontsize=6.5); ax.tick_params(labelsize=6)
         ax.grid(alpha=0.2)
-    axes[0][0].set_ylabel("residual (cents)", fontsize=8)
-    fig.tight_layout(); fig.savefig(FIG / "residual_shape.png", dpi=180)
-    print("  residual_shape.png")
+    axes[0][0].set_ylabel("residual (cents)", fontsize=6.5)
+    fig.tight_layout(); _save(fig, "residual_shape")
 
 
 def fig_rate():
@@ -110,7 +129,7 @@ def fig_rate():
             [l.endswith("ongrid") for l in d["reference_label"].tolist()])
         floor = float(np.median(np.sign(grid(theta[m]) - theta[m]) * rc[m]))
 
-    fig, ax = plt.subplots(figsize=(5.2, 3.4))
+    fig, ax = plt.subplots(figsize=(3.4, 2.4))
     err = np.array([[b - lo, hi - b] for b, (lo, hi) in zip(biases, cis)]).T
     ax.errorbar(rates, biases, yerr=err, fmt="o-", color=OKABE["enc"], lw=1.8, ms=6,
                 capsize=3, label="EnCodec 24k (95% bootstrap interval)")
@@ -121,10 +140,10 @@ def fig_rate():
     ax.set_xticklabels([str(r) for r in rates])
     ax.set_xlabel("bitrate (kbps)"); ax.set_ylabel("grid bias (cents)")
     ax.set_ylim(0, max(biases) * 1.15)
-    ax.set_title("Grid bias against bitrate, EnCodec 24 kHz, on-grid reference", fontsize=9)
-    ax.legend(fontsize=8); ax.grid(alpha=0.25)
-    fig.tight_layout(); fig.savefig(FIG / "rate_scaling.png", dpi=180)
-    print("  rate_scaling.png")
+    ax.set_title("Grid bias against bitrate, EnCodec 24 kHz", fontsize=7.5)
+    ax.tick_params(labelsize=7); ax.xaxis.label.set_size(7.5); ax.yaxis.label.set_size(7.5)
+    ax.legend(fontsize=6.5); ax.grid(alpha=0.25)
+    fig.tight_layout(); _save(fig, "rate_scaling")
 
 
 def fig_octaves():
@@ -135,7 +154,7 @@ def fig_octaves():
     theta, rc = d["theta_cents"], d["residual_coded_cents"]
     labels = d["reference_label"]
     refs = sorted(set(labels.tolist()), key=lambda s: float(s.split("Hz")[0]))
-    fig, axes = plt.subplots(1, len(refs), figsize=(3.1 * len(refs), 2.9),
+    fig, axes = plt.subplots(1, len(refs), figsize=(5.5, 1.9),
                              sharey=True, squeeze=False)
     for ax, lab in zip(axes[0], refs):
         m = (labels == lab) & keep_mask(d) & np.isfinite(rc)
@@ -144,15 +163,11 @@ def fig_octaves():
         gx = np.linspace(0, 100, 300)
         ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)),
                 color="black", lw=1.6)
-        ax.set_title(f"{lab.split('Hz')[0]} Hz\namp {amp:.1f} cents, phase {ph:.0f}°, $R^2$ {r2:.2f}",
-                     fontsize=8)
-        ax.set_xlabel("cents from grid point", fontsize=8); ax.grid(alpha=0.2)
-    axes[0][0].set_ylabel("residual (cents)", fontsize=8)
-    fig.suptitle("Residual against position within the semitone at four reference "
-                 "pitches, with a 100-cent-period sinusoid fitted to each",
-                 fontsize=8.5, y=1.02)
-    fig.tight_layout(); fig.savefig(FIG / "octaves.png", dpi=180, bbox_inches="tight")
-    print("  octaves.png")
+        ax.set_title(f"{lab.split('Hz')[0]} Hz: amp {amp:.1f} c, phase {ph:.0f}°, $R^2$ {r2:.2f}",
+                     fontsize=6.5)
+        ax.set_xlabel("cents from grid point", fontsize=6.5); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
+    axes[0][0].set_ylabel("residual (cents)", fontsize=6.5)
+    fig.tight_layout(); _save(fig, "octaves")
 
 
 def fig_overview():
@@ -170,7 +185,7 @@ def fig_overview():
     f1 = d["f1_nominal"]
     offsets_all = (1200.0 * np.log2(f1 / 440.0)) % 100.0
 
-    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(5.4, 2.2),
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(3.96, 1.75),
                                   gridspec_kw={"width_ratios": [1.15, 1]})
     # (a) folded residual, on-grid reference
     m = keep & (np.round(offsets_all, 3) == 0.0)
@@ -181,16 +196,16 @@ def fig_overview():
     gx = np.linspace(0, 100, 300)
     ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)), color="black", lw=1.7)
     ax.annotate("pulled up toward\nnext semitone", xy=(80, 13), xytext=(52, 36),
-                fontsize=6, ha="center",
+                fontsize=5.5, ha="center",
                 arrowprops=dict(arrowstyle="->", lw=0.8, color="0.3"))
     ax.annotate("pulled down toward\nprevious semitone", xy=(30, -13), xytext=(50, -44),
-                fontsize=6, ha="center",
+                fontsize=5.5, ha="center",
                 arrowprops=dict(arrowstyle="->", lw=0.8, color="0.3"))
     ax.set_xlim(0, 100); ax.set_ylim(-55, 55)
     ax.set_xticks([0, 25, 50, 75, 100])
     ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=7)
     ax.set_ylabel("residual (cents)", fontsize=7)
-    ax.set_title("(a) residual, folded into one semitone", fontsize=7)
+    ax.set_title("(a) folded residual, EnCodec 3 kbps", fontsize=6.5)
     ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
 
     # (b) registration regression, as in analyze_detuning.py (gate scheme)
@@ -213,15 +228,15 @@ def fig_overview():
     se = float(np.sqrt(ss / max(len(offs) - 2, 1))) / float(np.sqrt(np.sum((offs - offs.mean()) ** 2)))
     rel, lo, hi = slope / 3.6, (slope - _tq(len(offs)) * se) / 3.6, (slope + _tq(len(offs)) * se) / 3.6
     ax2.plot([0, 100], [0, 360], color="0.55", ls="--", lw=1.2, label="slope 1: absolute grid")
-    ax2.axhline(0, color="0.55", ls=":", lw=1.2, label="slope 0: interval or artefact")
-    ax2.plot(offs, phases, "o", color="#D55E00", ms=4.5, label="measured")
+    ax2.axhline(0, color="0.55", ls=":", lw=1.2, label="slope 0: interval")
+    ax2.plot(offs, phases, "o", color="black", ms=3.5, label="measured")
     ax2.set_xlim(-3, 100); ax2.set_ylim(-20, 370)
     ax2.set_xlabel("reference detuning (cents)", fontsize=7)
-    ax2.set_ylabel("residual phase shift (deg)", fontsize=7)
-    ax2.set_title(f"(b) slope {rel:.4f} [{lo:.4f}, {hi:.4f}], $R^2$={r2b:.5f}",
+    ax2.set_ylabel("phase shift (deg)", fontsize=7)
+    ax2.set_title("(b) phase against detuning",
                   fontsize=7)
-    ax2.legend(fontsize=5.5, loc="upper left"); ax2.tick_params(labelsize=6); ax2.grid(alpha=0.2)
-    fig.tight_layout(); fig.savefig(FIG / "overview.png", dpi=200)
+    ax2.legend(fontsize=5.5, loc="upper left", frameon=False); ax2.tick_params(labelsize=6); ax2.grid(alpha=0.2)
+    fig.tight_layout(w_pad=0.4); _save(fig, "overview")
     print(f"  overview.png   (slope {rel:.4f} [{lo:.4f}, {hi:.4f}] R2 {r2b:.5f}, amp {amp:.2f})")
 
 
@@ -260,7 +275,9 @@ def fig_registration_all():
             ("detune_vowel_encodec", "EnCodec 24k, 3 kbps, vowels"),
             ("detune_dac24", "DAC 24k, tones"),
             ("detune_snac44", "SNAC 44k, tones")]
-    fig, axes = plt.subplots(2, 5, figsize=(12, 6.2), sharey=True)
+    fig, axes = plt.subplots(3, 4, figsize=(5.5, 4.9), sharey=True)
+    for ax in axes.ravel()[len(runs):]:
+        ax.set_visible(False)
     for ax, (name, label) in zip(axes.ravel(), runs):
         p = RES / f"{name}.csv"
         if not p.exists():
@@ -270,16 +287,16 @@ def fig_registration_all():
         offs, phases, amps, rel, lo, hi = _phase_regression(d, keep)
         ax.plot([0, 100], [0, 360], color="0.6", ls="--", lw=1.1)
         ax.axhline(0, color="0.6", ls=":", lw=1.1)
-        ax.plot(offs, phases, "o", color="#D55E00", ms=5)
-        ax.set_title(f"{label}\nslope {rel:.4f} [{lo:.4f}, {hi:.4f}]\namplitude {amps.mean():.2f} cents",
-                     fontsize=9)
-        ax.set_xlim(-3, 100); ax.set_ylim(-25, 375); ax.tick_params(labelsize=8); ax.grid(alpha=0.2)
-    for ax in axes[1]:
-        ax.set_xlabel("reference detuning (cents)", fontsize=9)
+        ax.plot(offs, phases, "o", color="black", ms=2.8)
+        ax.set_title(f"{label}\nslope {rel:.4f} [{lo:.4f}, {hi:.4f}]\namplitude {amps.mean():.2f} c",
+                     fontsize=5.5)
+        ax.set_xlim(-3, 100); ax.set_ylim(-25, 375); ax.tick_params(labelsize=5.5); ax.grid(alpha=0.2)
+        ax.set_xticks([0, 50, 100]); ax.set_yticks([0, 180, 360])
+    for ax in axes.ravel()[6:10]:
+        ax.set_xlabel("reference detuning (cents)", fontsize=6)
     for ax in axes[:, 0]:
-        ax.set_ylabel("phase shift (deg)", fontsize=9)
-    fig.tight_layout(); fig.savefig(FIG / "registration_all.png", dpi=170)
-    print("  registration_all.png")
+        ax.set_ylabel("phase shift (deg)", fontsize=6)
+    fig.tight_layout(h_pad=0.6, w_pad=0.4); _save(fig, "registration_all")
 
 
 def _hist(path):
@@ -294,11 +311,12 @@ def fig_mechanism():
     (b) bias against rate with the bypass floor and bootstrap intervals,
     (c) the per-frame residual on real music with per-bin intervals,
     (d) the causal experiment: fitted amplitude per seed for the three arms."""
-    fig, axes = plt.subplots(1, 4, figsize=(7.6, 2.05),
-                             gridspec_kw={"width_ratios": [1.25, 1, 1, 1.05]})
+    fig, axes = plt.subplots(2, 2, figsize=(5.5, 2.7))
+    axes = axes.ravel()
     ax = axes[0]
     runs = [("detune_encodec3", "EnCodec 3 kbps", "enc"), ("codec_mimi", "Mimi", "mimi"),
-            ("codec_dac16", "DAC 16k", "dac"), ("mech_bypass", "EnCodec, no quantiser", "grey")]
+            ("codec_dac16", "DAC 16k", "dac"), ("mech_bypass", "no quantiser", "grey")]
+    # legend labels carry the on-grid-reference amplitude of each fit
     gx = np.linspace(0, 100, 300)
     for name, label, ck in runs:
         p = RES / f"{name}.csv"
@@ -311,13 +329,14 @@ def fig_mechanism():
         amp, ph, _ = fit_sinusoid(theta[m], rc[m])
         ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)), color=OKABE[ck],
                 lw=1.8 if ck != "grey" else 1.8, ls="-" if ck != "grey" else "--",
-                label=f"{label} ({amp:.1f}c)")
+                label=f"{label} ({amp:.1f} c)")
     ax.axhline(0, color="0.7", lw=0.8)
     ax.set_xlim(0, 100); ax.set_xticks([0, 25, 50, 75, 100])
-    ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=6.4)
-    ax.set_ylabel("fitted residual (cents)", fontsize=6.4)
-    ax.set_title("(a) residual: same phase, four codecs", fontsize=6.6)
-    ax.legend(fontsize=5.2, loc="upper left", frameon=False); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
+    ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=7)
+    ax.set_ylabel("fitted residual (cents)", fontsize=7)
+    ax.set_title("(a) fitted residual, folded into one semitone", fontsize=7)
+    ax.set_ylim(-16, 27)
+    ax.legend(fontsize=6, loc="upper left", frameon=False, ncol=2, columnspacing=0.8, handlelength=1.6); ax.tick_params(labelsize=6.5); ax.grid(alpha=0.2)
 
     ax = axes[1]
     rates, biases, cis = [], [], []
@@ -336,18 +355,19 @@ def fig_mechanism():
     ax.errorbar(rates, biases, yerr=err, fmt="o-", color=OKABE["enc"], lw=1.6, ms=4.5,
                 capsize=2.5, elinewidth=0.9, label="EnCodec 24k, 95% CI")
     ax.axhline(floor, color=OKABE["grey"], ls="--", lw=1.3, label=f"no quantiser ({floor:.2f} c)")
+    ax.set_xlim(1.1, 33)
     ax.set_xscale("log"); ax.set_xticks(rates); ax.set_xticklabels([str(r) for r in rates])
-    ax.set_ylim(0, 12); ax.set_xlabel("bitrate (kbps)", fontsize=6.4); ax.set_ylabel("grid bias (cents)", fontsize=6.4)
-    ax.set_title("(b) bias vs rate, bypass floor", fontsize=6.6)
-    ax.legend(fontsize=5.2, frameon=False, loc="upper right"); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
+    ax.set_ylim(0, 12); ax.set_xlabel("bitrate (kbps)", fontsize=7); ax.set_ylabel("grid bias (cents)", fontsize=7)
+    ax.set_title("(b) grid bias against bitrate", fontsize=7)
+    ax.legend(fontsize=6, frameon=True, loc="upper right", framealpha=1.0, edgecolor="0.8"); ax.tick_params(labelsize=6.5); ax.grid(alpha=0.2)
 
     ax = axes[2]
     # (c) the transfer function on real polyphonic music: binned median residual
     # against input position within the semitone, from corpus_pull.py.
-    for name, label, ck, ls in [("corpus_pull_encodec3", "EnCodec 3 kbps, GTZAN", "enc", "-"),
-                                ("corpus_pull_saraga_encodec3", "EnCodec 3 kbps, Carnatic", "enc", ":"),
-                                ("corpus_pull_dac166", "DAC 16k, GTZAN", "dac", "-"),
-                                ("corpus_pull_opus12", "Opus 12 kbps, GTZAN", "grey", "--")]:
+    for name, label, ck, ls in [("corpus_pull_encodec3", "EnCodec, GTZAN", "enc", "-"),
+                                ("corpus_pull_saraga_encodec3", "EnCodec, Carnatic", "enc", ":"),
+                                ("corpus_pull_dac166", "DAC 16k", "dac", "-"),
+                                ("corpus_pull_opus12", "Opus 12 kbps", "opus", "--")]:
         p = RES / f"{name}.csv"
         if not p.exists():
             continue
@@ -356,27 +376,32 @@ def fig_mechanism():
         res = np.array([float(r["residual_cents"]) for r in rows])
         din = np.array([float(r["disagreement_in"]) for r in rows])
         dout = np.array([float(r["disagreement_out"]) for r in rows])
+        files = np.array([r["file"] for r in rows])
         k = (np.nan_to_num(din, nan=1e9) <= 20) & (np.nan_to_num(dout, nan=1e9) <= 20) & (np.abs(res) <= 200)
-        pos, res = pos[k], res[k]
+        pos, res, files = pos[k], res[k], files[k]
         edges = np.arange(0, 101, 10); xs, ys, los, his = [], [], [], []
         for a, b in zip(edges[:-1], edges[1:]):
             m = (pos >= a) & (pos < b)
             if m.sum() > 50:
-                lo, hi = _boot_ci(res[m], n_boot=500)
+                # per-bin interval from a bootstrap over CLIPS, the same
+                # recipe as the text's intervals (frames are autocorrelated)
+                lo, hi = _clip_ci(res[m], files[m])
                 xs.append(0.5 * (a + b)); ys.append(float(np.median(res[m]))); los.append(lo); his.append(hi)
         ax.fill_between(xs, los, his, color=OKABE[ck], alpha=0.12, lw=0)
         ax.plot(xs, ys, "o-", color=OKABE[ck], ls=ls, lw=1.5, ms=3.2, label=label)
     ax.axhline(0, color="0.7", lw=0.8)
-    ax.set_xlim(0, 100); ax.set_xticks([0, 25, 50, 75, 100]); ax.set_ylim(-6, 6)
-    ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=6.4)
-    ax.set_ylabel("median residual (cents)", fontsize=6.4)
-    ax.set_title("(c) real music, per-bin median, 95% CI", fontsize=6.6)
-    ax.legend(fontsize=4.6, frameon=False, loc="upper left", handlelength=1.8); ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2)
+    ax.set_xlim(0, 100); ax.set_xticks([0, 25, 50, 75, 100])
+    ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=7)
+    ax.set_ylabel("median residual (cents)", fontsize=7)
+    ax.set_title("(c) real music: per-bin median, clip-level 95% CI", fontsize=7)
+    ax.set_ylim(-6, 9.5)
+    ax.legend(fontsize=6, frameon=False, loc="upper left", ncol=2, handlelength=1.6, columnspacing=0.8); ax.tick_params(labelsize=6.5); ax.grid(alpha=0.2)
 
     ax = axes[3]
     # (d) the causal experiment: fitted amplitude per seed for the three arms.
-    arms = [("grid", "original", OKABE["enc"]), ("gridres", "+100 c", OKABE["dac"]),
-            ("flat", "flattened", OKABE["spt"])]
+    arms = [("grid", "original", "black"), ("gridres", "+100 c", "0.45"),
+            ("flat", "flattened", "black")]
+    markers = ["o", "s", "^"]
     for i, (arm, label, colour) in enumerate(arms):
         amps = []
         for seed in range(3):
@@ -388,18 +413,17 @@ def fig_mechanism():
             amps.append(float(_phase_regression(d, keep)[2].mean()))
         if not amps:
             continue
-        ax.scatter([i] * len(amps), amps, s=14, color=colour, zorder=3)
+        ax.scatter([i] * len(amps), amps, s=14, color=colour, marker=markers[i], zorder=3)
         ax.errorbar([i], [np.mean(amps)], yerr=[np.std(amps, ddof=1)] if len(amps) > 1 else None,
                     fmt="_", color="black", ms=14, capsize=4, elinewidth=0.9, zorder=4)
-        ax.text(i, np.mean(amps) + 0.22, f"{np.mean(amps):.2f}", ha="center", fontsize=5.4)
+        ax.text(i, np.mean(amps) + 0.3, f"{np.mean(amps):.2f}", ha="center", fontsize=6)
     ax.set_xticks(range(3)); ax.set_xticklabels([a[1] for a in arms], fontsize=5.6)
-    ax.set_xlabel("fine-tuning corpus", fontsize=6.4)
-    ax.set_xlim(-0.6, 2.6); ax.set_ylim(3.2, 5.1)
-    ax.set_ylabel("residual amplitude (cents)", fontsize=6.4)
-    ax.set_title("(d) decoder fine-tuning, 3 seeds", fontsize=6.6)
-    ax.tick_params(labelsize=5.6); ax.grid(alpha=0.2, axis="y")
-    fig.tight_layout(w_pad=0.6); fig.savefig(FIG / "mechanism.png", dpi=200)
-    print("  mechanism.png")
+    ax.set_xlabel("fine-tuning corpus", fontsize=7)
+    ax.set_xlim(-0.6, 2.6); ax.set_ylim(0, 5.4)
+    ax.set_ylabel("residual amplitude (cents)", fontsize=7)
+    ax.set_title("(d) decoder fine-tuning, 3 seeds per arm", fontsize=7)
+    ax.tick_params(labelsize=6.5); ax.grid(alpha=0.2, axis="y")
+    fig.tight_layout(w_pad=1.0, h_pad=1.0); _save(fig, "mechanism")
 
 
 if __name__ == "__main__":

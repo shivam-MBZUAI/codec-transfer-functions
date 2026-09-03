@@ -1,3 +1,8 @@
+> **Historical working notes.** This file records the experiment plan as it
+> evolved during the project and is kept for provenance. Where it disagrees
+> with the paper (language counts, experiment numbering, the state of the ASR
+> code), the paper and `FINDINGS.md` are current.
+
 # Experimental programme
 
 **This document is the plan. [FINDINGS.md](FINDINGS.md) is what happened.**

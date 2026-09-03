@@ -17,7 +17,7 @@ Exclusion scheme: the octave gate alone by default, which is what every number
 in the paper uses. Pass --exclusion=full to add the estimator cross-check, or
 --exclusion=none to fit with no exclusion at all (the check that the gate does
 not manufacture the slope; DAC 16k, which loses 65% of trials to the gate,
-still regresses at 0.98 [0.88, 1.08] without it).
+still regresses at 0.98 [0.86, 1.10] without it).
 
 Confidence intervals on the slope use the t quantile on n-2 degrees of freedom
 (ten conditions, so t(8) = 2.306), not 1.96.
@@ -55,9 +55,9 @@ from scipy import stats  # noqa: E402
 # relative to the pre-registration and the paper says so. The thresholds below
 # are the ones every reported table uses. Membership of the reported set is
 # insensitive to them: the ten measurable conditions have cv <= 0.21 and
-# retention >= 0.43, and the refusals have cv >= 0.41 (DAC 44k) or retention
-# 0.06 (SNAC 24k), so any cv limit in [0.21, 0.41) and any retention limit in
-# (0.06, 0.43] gives the same table (analysis/guard_sensitivity.py).
+# retention >= 0.35, and the refusals have cv >= 0.41 (DAC 44k) or retention
+# 0.07 (SNAC 24k), so any cv limit in [0.21, 0.41) and any retention limit in
+# (0.07, 0.35] gives the same table (analysis/guard_sensitivity.py).
 MAX_AMP_CV = 0.35        # sd/mean of amplitude across conditions
 MIN_RETENTION = 0.25     # fraction of trials surviving exclusions
 
@@ -107,8 +107,9 @@ def main() -> int:
     # to 0.08 with 90% of trials excluded.
     amps = np.array([r[1] for r in rows])
     cv = float(amps.std() / amps.mean()) if amps.mean() else float("inf")
-    total = int(np.sum(keep)) + int(np.sum(~keep))
-    retention = float(np.median([r[4] for r in rows])) / max(total / len(rows), 1)
+    # Retention is simply the share of trials that survive the exclusion
+    # scheme (kept / total), so that 1 - retention is the exclusion rate.
+    retention = float(np.mean(keep))
     if cv > MAX_AMP_CV or retention < MIN_RETENTION:
         print(f"  REFUSING TO FIT.")
         if cv > MAX_AMP_CV:
@@ -168,25 +169,29 @@ def main() -> int:
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
-        fig, (ax, ax2) = plt.subplots(1, 2, figsize=(9.5, 3.6))
+        fig, (ax, ax2) = plt.subplots(1, 2, figsize=(5.5, 2.2))
         ax.plot([0, 100], [0, 360], color="0.6", ls="--", lw=1.4,
                 label="locked to absolute grid (slope 1)")
         ax.axhline(0, color="0.6", ls=":", lw=1.4,
                    label="locked to interval / artefact (slope 0)")
-        ax.plot(offsets, phases, "o", color="#0072B2", ms=6, label="measured")
+        ax.plot(offsets, phases, "o", color="black", ms=4, label="measured")
         ax.set_xlabel("reference detuning (cents)")
         ax.set_ylabel("residual phase (degrees)")
         ax.set_title(f"slope {rel:.4f}  [{lo:.4f}, {hi:.4f}]   $R^2$={r2:.5f}",
-                     fontsize=9)
-        ax.legend(fontsize=7); ax.grid(alpha=0.25)
+                     fontsize=7.5)
+        ax.legend(fontsize=6.5); ax.grid(alpha=0.25)
 
-        ax2.plot(offsets, [r[1] for r in rows], "s", color="#D55E00", ms=5)
+        ax2.plot(offsets, [r[1] for r in rows], "s", color="black", ms=3.5)
         ax2.set_xlabel("reference detuning (cents)")
         ax2.set_ylabel("residual amplitude (cents)")
         ax2.set_ylim(0, max(r[1] for r in rows) * 1.35)
-        ax2.set_title("amplitude is flat: only the phase moves", fontsize=9)
+        ax2.set_title("amplitude across detuning conditions", fontsize=7.5)
         ax2.grid(alpha=0.25)
-        fig.tight_layout(); fig.savefig(argv[1], dpi=180)
+        for a_ in (ax, ax2):
+            a_.tick_params(labelsize=7); a_.xaxis.label.set_size(7.5); a_.yaxis.label.set_size(7.5)
+        fig.tight_layout()
+        out = Path(argv[1])
+        fig.savefig(out.with_suffix(".pdf")); fig.savefig(out.with_suffix(".png"), dpi=300)
         print(f"  wrote {argv[1]}")
     return 0
 

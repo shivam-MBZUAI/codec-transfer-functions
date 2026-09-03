@@ -73,9 +73,10 @@ amplitude 13.72 ± 0.16.
 ### The universality table, phase registration across codecs
 
 ```bash
-for c in encodec:3 encodec:24 encodec48:6 mimi:8 dac16:6 dac24:8 dac:4 snac snac32 snac44; do
+for pair in encodec:24=encodec24kbps encodec48:6=encodec48 mimi:8=mimi dac16:6=dac16 dac24:8=dac24 dac:4=dac44 snac=snac snac32=snac32 snac44=snac44; do
+  c=${pair%%=*}; stem=${pair##*=}
   python experiments/run_sweep.py --codec $c --reps 4 --references $REFS \
-      --out results/detune_${c/:/}.csv   # checked-in names: detune_encodec24kbps, detune_encodec48, detune_dac16, detune_dac24, detune_dac44, detune_snac, detune_snac32, detune_snac44
+      --out results/detune_$stem.csv     # the checked-in file names; the headline encodec:3 run above uses --reps 5
 done
 python analysis/summary_table.py
 ```
@@ -142,13 +143,15 @@ and Opus nothing.
 
 ---
 
-## Experiments 2 and 3
+## Experiment 2: the two speech tests
 
 ```bash
 python data/get_fleurs_pod.py                      # 21 languages, test splits
 python experiments/run_phonology.py --codec encodec:3 --per-language 150 \
     --out results/phon_encodec3_big.csv
 python analysis/analyze_phonology.py results/phon_encodec3_big.csv
+# Table 2 also reports Mimi and DAC 16k: repeat with --codec mimi:8 --out results/phon_mimi.csv
+# and --codec dac16:6 --out results/phon_dac16.csv (150 utterances per language each).
 
 python experiments/run_asr.py --codec encodec:3 --per-language 100 \
     --out results/asr_encodec3_n100.csv            # Whisper
@@ -245,3 +248,23 @@ make results        # RESULTS.md
 
 Neither reads anything but `results/`. If a figure cannot be regenerated this
 way it does not belong in the paper.
+
+## Accumulation under repeated coding
+
+Does the pull compound when audio is coded again and again? `encodec_iter:<kbps>@<n>`
+applies EnCodec n times in succession (decode, then encode the decoded audio).
+The headline sweep through 1, 2, 4 and 8 round trips runs on CPU in about
+fifteen minutes each:
+
+```bash
+for k in 1 2 4 8; do
+  python experiments/run_sweep.py --codec encodec_iter:3@$k --reps 5 --out results/iter_encodec3_k$k.csv
+  python analysis/analyze_sweep.py results/iter_encodec3_k$k.csv
+done
+```
+Expect all-trial grid biases of 8.88, 8.20, 7.39 and 7.26 cents at the on-grid
+reference, with the fitted amplitude between 13.0 and 13.9 cents and the phase
+within 3 degrees: the pull is applied once and then held, not accumulated.
+These four runs were produced on CPU (torch 2.8.0, transformers 5.16.1 pinned
+to the same checkpoint revision); the k = 1 run reproduces the GPU value 8.88
+of `rate_encodec_3.csv` exactly.
