@@ -88,15 +88,28 @@ def main() -> int:
         tq = stats.t.ppf(0.975, max(len(x) - 2, 1))
         return sl, sl - tq * se, sl + tq * se, 1 - ss / tot if tot else float("nan")
     pres = np.array([float(r["prompt_resultant"]) for r in rows])[ok]
-    for label, m in (("all clips", np.ones_like(d, bool)),
-                     ("prompt and continuation both concentrated (resultant > 0.3)", (pres > 0.3) & (res_c > 0.3))):
-        if m.sum() < 5:
-            continue
-        sl, lo, hi, r2 = slope_fit(pm[m], out[m])
-        print(f"  slope of continuation offset on measured prompt offset, {label} (n={m.sum()}): "
-              f"{sl:.3f} [{lo:.3f}, {hi:.3f}]  R2 {r2:.3f}   (1 = keeps the prompt's tuning, 0 = re-grids)")
-    sl, lo, hi, r2 = slope_fit(d, out)
-    print(f"  for the record, slope on the shift d itself: {sl:.3f} [{lo:.3f}, {hi:.3f}]")
+    # A linear slope of continuation offset on prompt offset is NOT the right
+    # summary: a pull toward the two grid points at 0 and 100 makes an S-shape
+    # whose least-squares slope can exceed 1. It is printed for completeness;
+    # the grid-directed displacement below is the statistic that matters.
+    sl, lo, hi, r2 = slope_fit(pm, out)
+    print(f"  (linear slope of continuation offset on measured prompt offset: {sl:.3f} [{lo:.3f}, {hi:.3f}], "
+          f"R2 {r2:.3f}; not a pull statistic, see comment)")
+    # The grid-directed component of the continuation's displacement from the
+    # prompt's tuning: positive means the continuation moved toward the grid.
+    delta_p = fold(pm)                      # prompt's signed distance to the grid
+    toward = -np.sign(delta_p) * rel
+    off = np.abs(delta_p) >= 20
+    rng2 = np.random.default_rng(0)
+    boots = [np.median(toward[off][rng2.integers(0, off.sum(), off.sum())]) for _ in range(4000)]
+    print(f"  grid-directed displacement of the continuation, prompts >= 20 cents off-grid (n={off.sum()}): "
+          f"median {np.median(toward[off]):+.2f} cents, 95% CI [{np.percentile(boots, 2.5):+.2f}, {np.percentile(boots, 97.5):+.2f}]"
+          f"  (median |prompt offset| in that set {np.median(np.abs(delta_p[off])):.1f} cents; "
+          f"pull fraction {np.median(toward[off]) / np.median(np.abs(delta_p[off])):.2f})")
+    on = np.abs(delta_p) < 20
+    boots = [np.median(toward[on][rng2.integers(0, on.sum(), on.sum())]) for _ in range(4000)]
+    print(f"  the same for prompts within 20 cents of the grid (n={on.sum()}): median {np.median(toward[on]):+.2f} "
+          f"[{np.percentile(boots, 2.5):+.2f}, {np.percentile(boots, 97.5):+.2f}]")
     print("\n  measured prompt offset vs continuation offset, per clip (both relative to the grid):")
     for pi, oi, ri, qi in sorted(zip(pm, absr, res_c, pres)):
         print(f"    prompt {pi:5.1f} (R {qi:.2f})   continuation {oi:+6.1f} (R {ri:.2f})")

@@ -268,3 +268,27 @@ within 3 degrees: the pull is applied once and then held, not accumulated.
 These four runs were produced on CPU (torch 2.8.0, transformers 5.16.1 pinned
 to the same checkpoint revision); the k = 1 run reproduces the GPU value 8.88
 of `rate_encodec_3.csv` exactly.
+
+## Downstream generation through MusicGen
+
+Does a token language model built on EnCodec inherit the grid? `experiments/musicgen_pull.py`
+generates with `facebook/musicgen-small` (EnCodec tokens, EnCodec decoder) and reads the
+output with the paper's blind estimator. Needs a GPU and the flattened corpus.
+
+```bash
+python experiments/musicgen_pull.py --mode text --n 60 --out results/musicgen_text.csv
+python experiments/musicgen_pull.py --mode continue --audio-root corpora/gtzan_detuned --n 80 \
+    --out results/musicgen_continue.csv
+python analysis/analyze_musicgen.py results/musicgen_text.csv       # peak/mean 4.28 at +3.6 cents
+python analysis/analyze_musicgen.py results/musicgen_continue.csv   # grid-directed pull +7.5 [4.3, 11.4] cents
+```
+Text-prompted output peaks at 4.28 times its mean within the semitone (GTZAN 1.79), 3.6 cents
+sharp of A440. Continuations of tuning-flattened prompts are pulled toward the grid by a median
+7.5 cents for prompts at least 20 cents off-grid, a pull fraction of 0.23. Neither test was
+pre-specified.
+
+## Five seeds and a magnitude-matched control (causal experiment)
+
+`bash infra/pod_run.sh causal5` fine-tunes four arms (original, +100 cents, mixed 0/100 cents,
+flattened) for seeds 0 to 4 and sweeps each; `python analysis/summary_causal.py results` prints
+the arm means, seed spreads and Welch tests.

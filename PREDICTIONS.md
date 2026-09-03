@@ -215,6 +215,15 @@ grid biases of 8.88, 8.20, 7.39 and 7.26 cents with constant amplitude and
 phase: the pull is applied once and held. Reported in the paper as
 exploratory.
 
+### Unregistered exploratory test (2026-09-03): downstream generation
+
+Not registered. MusicGen-small (EnCodec tokens, EnCodec decoder): text-prompted
+output has within-semitone density peak/mean 4.28 (GTZAN 1.79) at 3.6 cents
+sharp; continuations of tuning-flattened prompts are pulled toward the grid by a
+median 7.5 cents [4.3, 11.4] for prompts at least 20 cents off-grid. Reported in
+the paper as exploratory. A five-seed, four-arm rerun of the causal experiment
+with a magnitude-matched control arm was also added after review.
+
 ## Amendment 2 (2026-08-24): pull fraction added; P7 revised
 
 **Logged, not silently edited**, on the same terms as Amendment 1.

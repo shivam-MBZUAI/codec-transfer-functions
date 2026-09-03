@@ -320,7 +320,7 @@ def fig_mechanism():
     (b) bias against rate with the bypass floor and bootstrap intervals,
     (c) the per-frame residual on real music with per-bin intervals,
     (d) the causal experiment: fitted amplitude per seed for the three arms."""
-    fig, axes = plt.subplots(2, 2, figsize=(5.5, 3.9))
+    fig, axes = plt.subplots(2, 2, figsize=(5.5, 3.6))
     axes = axes.ravel()
     ax = axes[0]
     runs = [("detune_encodec3", "EnCodec 3k", "enc"), ("detune_mimi", "Mimi", "mimi"),

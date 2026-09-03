@@ -402,3 +402,15 @@ close to idempotent in pitch on its own output, so a generate-and-decode loop
 applies the pull once per decode rather than accumulating it. This test was
 not pre-registered; it answers the accumulation question the discussion had
 left open.
+
+## 16. A token language model on EnCodec sharpens the grid and pulls off-grid prompts
+
+`results/musicgen_text.csv`, `results/musicgen_continue.csv` (musicgen-small, not pre-specified).
+Text-prompted generations: within-semitone F0 density peak/mean 4.28 (GTZAN 1.79; flat-sampling
+floor 1.12), circular-mean position 3.6 cents above the 12-TET pitch, median per-clip resultant
+0.56. Continuations of tuning-flattened GTZAN prompts (5 s prompt, 10 s generated): displacement
+from the prompt's tuning has median +0.2 cents overall, but the grid-directed component is +7.5
+cents [4.3, 11.4] for the 49 prompts at least 20 cents off-grid (pull fraction 0.23) and +2.4
+[0.7, 6.0] for the 31 within 20 cents. The codec alone pulls these clips by 2.49 cents per pass.
+A linear slope of continuation offset on prompt offset (1.15) is not a pull statistic, because a
+pull toward two grid points makes an S-shaped map; it is printed but not used.
