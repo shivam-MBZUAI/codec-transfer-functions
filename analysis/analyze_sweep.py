@@ -87,8 +87,10 @@ def fit_sinusoid_se(theta: np.ndarray, r: np.ndarray
         return float("nan"), float("nan"), float("nan"), float("nan")
     w = 2.0 * math.pi / PERIOD
     design = np.column_stack([np.sin(w * theta), np.cos(w * theta), np.ones_like(theta)])
-    coef, *_ = np.linalg.lstsq(design, r, rcond=None)
-    pred = design @ coef
+    with np.errstate(all="ignore"):   # Accelerate BLAS warns on some shapes; the values are finite
+        with np.errstate(all="ignore"):
+            coef, *_ = np.linalg.lstsq(design, r, rcond=None)
+            pred = design @ coef
     amp = float(math.hypot(coef[0], coef[1]))
     phase = float(math.degrees(math.atan2(coef[1], coef[0])))
     ss_tot = float(np.sum((r - r.mean()) ** 2))
@@ -115,8 +117,9 @@ def fit_sawtooth(theta: np.ndarray, r: np.ndarray) -> tuple[float, float, float]
         shifted = theta + phi
         basis = grid(shifted) - shifted
         design = np.column_stack([basis, np.ones_like(theta)])
-        coef, *_ = np.linalg.lstsq(design, r, rcond=None)
-        pred = design @ coef
+        with np.errstate(all="ignore"):
+            coef, *_ = np.linalg.lstsq(design, r, rcond=None)
+            pred = design @ coef
         r2 = 1.0 - float(np.sum((r - pred) ** 2)) / ss_tot if ss_tot > 0 else float("nan")
         if r2 > best[2]:
             best = (float(abs(coef[0]) * 50.0), float(phi), r2)

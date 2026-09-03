@@ -412,7 +412,7 @@ applies the pull once per decode rather than accumulating it. This test was
 not pre-registered; it answers the accumulation question the discussion had
 left open.
 
-## 16. A token language model on EnCodec sharpens the grid and pulls off-grid prompts
+## 16. A token language model on EnCodec sharpens the grid; its continuations track the prompt with a grid-directed residual
 
 `results/musicgen_text.csv`, `results/musicgen_continue.csv` (musicgen-small, not pre-specified).
 Text-prompted generations: within-semitone F0 density peak/mean 4.28 (GTZAN 1.79; flat-sampling
@@ -423,3 +423,36 @@ cents [4.3, 11.4] for the 49 prompts at least 20 cents off-grid (pull fraction 0
 [0.7, 6.0] for the 31 within 20 cents. The codec alone pulls these clips by 2.49 cents per pass.
 A linear slope of continuation offset on prompt offset (1.15) is not a pull statistic, because a
 pull toward two grid points makes an S-shaped map; it is printed but not used.
+
+**Null models (added 2026-09-03 after review).** The bootstrap interval measures sampling noise,
+not grid attraction. Against a *shuffle* null (continuations permuted across prompts, i.e.
+prompt-ignoring reversion to MusicGen's own grid-peaked output) the statistic has mean 13.3
+cents, range [0.4, 23.5], and 83% of draws exceed the observed 7.5; against a dispersion-matched
+*tracking* null (continuation = prompt + resampled |residual| with random sign) it is 0 [-4.1,
+4.1] and the observed value exceeds all but 0.05% of draws; a uniform-tuning null spans
+[-13.6, 13.7]. Selecting prompts on the applied shift alone gives +6.9 [2.2, 10.3] against a
+shuffle null of 12.0. Continuations track the prompt (median 9.7 cents from it, 25.2 from the
+grid, Spearman 0.60, 29% end closer to the grid than to the prompt) with a grid-directed
+residual, but the statistic cannot separate a per-clip pull from partial reversion to the
+model's marginal, so the paper no longer reports a displacement magnitude for the generator or
+the "three times the codec" comparison (which also compared against the 24 kHz checkpoint,
+not MusicGen's 32 kHz one).
+
+## 17. The decoded fundamental does not move; the regenerated upper partials do
+
+`experiments/spectral_check.py` (added 2026-09-03 after a reviewer asked whether the F0 moves or
+a grid component is added). High-resolution spectra (0.1-cent bins) of the sweep's eight-partial
+tones at 440 and 220 Hz, detuned by 0 to ±40 cents, through EnCodec at 1.5, 3 and 24 kbps.
+Neither picture holds for the fundamental: the decoded line at f0 sits within 0.4 cents of the
+input at every bitrate and detuning, its width unchanged, with the level at the 12-TET frequency
+25 to 60 dB down. The same holds for every partial below a band edge that rises with bitrate:
+about 0.9 kHz at 1.5 kbps, 1.3 kHz at 3 kbps, 2.2 kHz at 24 kbps. Above it the line at the input
+frequency is 10 to 40 dB down and a new line sits near (in the cleanest cases exactly on) the
+harmonic of the nearest 12-TET fundamental; the partial at the band edge shows two lines. The
+paper's estimator on all eight partials reads -14.7 / +20.7 cents at δ = ±40 and 3 kbps (the
+sweep's off-grid bias); restricted to partials 1-2 it reads 0.0. At 24 kbps the reading is
+-5.9 / +7.3 (the rate dependence); at 220 Hz and 3 kbps -2.8 / +2.0 and at 24 kbps zero (the
+register dependence). So the "pitch pull" is the decoder laying the partials it regenerates on
+the grid's harmonic ladder, which a harmonic-fit estimator reads as a pitch shift; whether a
+listener hears it depends on how much of the pitch-dominant region lies above the band, which
+is not tested. Table A15 and Figure A6 in the paper.

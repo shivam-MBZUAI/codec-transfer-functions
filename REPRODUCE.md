@@ -284,12 +284,37 @@ python experiments/musicgen_pull.py --mode text --n 60 --out results/musicgen_te
 python experiments/musicgen_pull.py --mode continue --audio-root corpora/gtzan_detuned --n 80 \
     --out results/musicgen_continue.csv
 python analysis/analyze_musicgen.py results/musicgen_text.csv       # peak/mean 4.28 at +3.6 cents
-python analysis/analyze_musicgen.py results/musicgen_continue.csv   # grid-directed pull +7.5 [4.3, 11.4] cents
+python analysis/analyze_musicgen.py results/musicgen_continue.csv   # grid-directed +7.5 [4.3, 11.4] cents, then the null models
 ```
 Text-prompted output peaks at 4.28 times its mean within the semitone (GTZAN 1.79), 3.6 cents
-sharp of A440. Continuations of tuning-flattened prompts are pulled toward the grid by a median
-7.5 cents for prompts at least 20 cents off-grid, a pull fraction of 0.23. Neither test was
-pre-specified.
+sharp of A440. Continuations of tuning-flattened prompts move toward the grid by a median
+7.5 cents for prompts at least 20 cents off-grid, but the same script's null block shows a
+shuffle null (prompt-ignoring reversion to the model's grid-peaked output) of 13.3 [0.4, 23.5]
+cents and a direction-free tracking null of 0 [-4.1, 4.1]: the continuations track the prompt
+with a grid-directed residual, and the statistic does not separate a pull from reversion to the
+marginal. Neither test was pre-specified.
+
+## Which partials move (spectral check)
+
+```bash
+python experiments/spectral_check.py --kbps 3      # ~2 min on CPU; also --kbps 1.5 and 24
+```
+Prints, per partial, the location of the decoded line relative to the input partial at 440 and
+220 Hz for δ = 0, ±20, ±30, ±40 cents, the estimator's reading on all eight partials and on the
+first two, and writes `figures/spectral_check.pdf`. Expect the fundamental within 0.4 cents at
+every bitrate, and the first displaced partial at about 0.9 / 1.3 / 2.2 kHz for 1.5 / 3 / 24 kbps
+(Table A15 in the paper).
+
+## Table 1's adjusted intervals, phase errors and the DAC 16k gate profile
+
+```bash
+python analysis/summary_table.py results            # adds 99.5% (Bonferroni) CI, phase SE, strict pass/fail
+python analysis/analyze_detuning.py results/detune_dac16.csv --gate-profile
+```
+The strict rule passes exactly five conditions (four EnCodec, SNAC 32k). DAC 16k's gate rate is
+flat over the whole sweep (64 to 66%) and rises from 48% to 63% with grid distance at the
+on-grid reference; its off-grid bias with octave errors folded modulo 1200 cents is
+-0.14 [-0.27, 0.01].
 
 ## Five seeds and a magnitude-matched control (causal experiment)
 

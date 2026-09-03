@@ -224,6 +224,39 @@ median 7.5 cents [4.3, 11.4] for prompts at least 20 cents off-grid. Reported in
 the paper as exploratory. A five-seed, four-arm rerun of the causal experiment
 with a magnitude-matched control arm was also added after review.
 
+### Unregistered analyses (2026-09-03): review response
+
+Added after an external review of the full draft; none changes a registered
+prediction, and each is reported in the paper as post hoc.
+
+- **Pull count fixed at the pre-specified rule.** The count of conditions with a
+  resolvable pull is five under the rule as written (on-grid phase within 45
+  degrees of 180, Bonferroni-adjusted 99.5% off-grid bias interval above zero).
+  The looser rule anchored at 155 degrees with unadjusted intervals, which admits
+  Mimi, was written after the table was computed and is now reported only as a
+  sensitivity. Table 1 prints the adjusted intervals, the phase standard errors
+  and the pass/fail column (`summary_table.py`).
+- **Null models for the MusicGen continuation statistic.** The grid-directed
+  median displacement of continuations (+7.5 cents) is compared with a shuffle
+  null (continuations permuted across prompts: mean 13.3, range [0.4, 23.5]), a
+  dispersion-matched tracking null (mean 0, range [-4.1, 4.1]) and a uniform
+  null. The observed value does not exceed the shuffle null, so the paper no
+  longer reports it as a displacement magnitude or compares it with the codec's
+  own pull (`analyze_musicgen.py`).
+- **Gate profile for DAC 16k.** Octave-gate rate by grid distance, over the whole
+  sweep (flat) and at the on-grid reference (rising from 48% to 63%), with the
+  off-grid bias under no exclusion and with octave errors folded modulo 1200
+  cents (`analyze_detuning.py --gate-profile`).
+- **Spectral check of which partials move.** High-resolution spectra of decoded
+  tones at 1.5, 3 and 24 kbps. The decoded fundamental does not move; partials
+  above a bitrate-dependent band are regenerated near the harmonics of the
+  nearest 12-TET pitch (`spectral_check.py`). This is a mechanism finding, not a
+  registered prediction, and it reframes "pitch displacement" as a displacement
+  of the regenerated upper partials that a harmonic estimator reads as pitch.
+- **Flat-sampling nulls and the estimator's YIN stage** now have released scripts
+  (`flat_sampling_null.py`, `test_yin_bias.py`); the isolated-notes recipe of the
+  ecological table is released as `analyze_retune.py`.
+
 ## Amendment 2 (2026-08-24): pull fraction added; P7 revised
 
 **Logged, not silently edited**, on the same terms as Amendment 1.
