@@ -119,13 +119,18 @@ entire training set.
 
 ## 7. Causal: flattening the training grid weakens the lock (replicated, decoder-only)
 
-Replicated at three seeds with a control for the resampling operation
-(`ftm_*_s?`): original clips 4.53 / 4.45 / 4.36 cents (mean 4.45 +- 0.09);
-the same clips resampled by exactly one semitone, which keeps the grid peaked
-but carries the same tempo and spectral artefacts, 4.56 / 4.63 / 4.62 (4.60
-+- 0.04); flattened 3.73 / 3.81 / 3.64 (3.73 +- 0.09). Resampling does not
-weaken the pull; flattening does, by 16%, eight times the seed spread. All
-nine runs keep unit slope. Comparing checkpoints shows the fine-tuning
+Replicated at five seeds with two controls for the resampling operation
+(`ftm_*_s?`, `python analysis/summary_causal.py results`): original clips
+4.53 / 4.45 / 4.36 / 4.59 / 4.61 cents (mean 4.51 +- 0.11); the same clips
+resampled by exactly one semitone, which keeps the grid peaked but carries
+the same tempo and spectral artefacts, 4.56 / 4.63 / 4.62 / 4.59 / 4.60 (4.60
++- 0.03); each clip resampled by 0 or 100 cents, chosen per clip, which keeps
+the grid peaked and matches the flattened corpus's mean shift of 50 cents,
+4.74 / 4.65 / 4.65 / 4.68 / 4.75 (4.69 +- 0.05); flattened 3.73 / 3.81 / 3.64
+/ 3.80 / 3.71 (3.74 +- 0.07). Neither control weakens the pull; flattening
+does, by 17% against the original clips, 19% against the resampled control
+and 20% against the magnitude-matched control (Welch t 13.8, 26.5 and 25.8;
+all p < 1e-5). All twenty runs keep unit slope (0.995 to 1.001). Comparing checkpoints shows the fine-tuning
 changed ONLY the decoder: code assignment is an argmin, so no gradient reaches
 the encoder or the codebooks, and the `swap_*` sweeps confirm that a
 fine-tuned encoder with the stock decoder reproduces stock exactly. The

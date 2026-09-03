@@ -155,5 +155,5 @@ swap)
   for f in results/swap_*.csv; do echo "== $f"; python3 analysis/analyze_detuning.py "$f" | tail -n 5; done
   ;;
 *)
-  echo "usage: $0 {setup|classical|registers|corpus|asr|causal3|saraga|swap}"; exit 1 ;;
+  echo "usage: $0 {setup|classical|registers|corpus|asr|causal3|causal5|saraga|swap}"; exit 1 ;;
 esac

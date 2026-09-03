@@ -130,10 +130,13 @@ for arm in grid:gtzan flat:gtzan_detuned; do
       --reps 5 --references $REFS --out results/ftm_${arm%%:*}.csv
 done
 ```
-That is the single-seed original. The replicated version, three seeds and a
-whole-semitone resampling control, is `bash infra/pod_run.sh causal3`: expect
-4.45 +- 0.09 cents on the original clips, 4.60 +- 0.04 on the same clips
-resampled by exactly one semitone, and 3.73 +- 0.09 on the flattened corpus.
+That is the single-seed original. The replicated version, five seeds with a
+whole-semitone resampling control and a magnitude-matched 0/100-cent control,
+is `bash infra/pod_run.sh causal5` (about 2.5 hours on one A100): expect
+4.51 +- 0.11 cents on the original clips, 4.60 +- 0.03 on the same clips
+resampled by exactly one semitone, 4.69 +- 0.05 on the 0/100-cent mix, and
+3.74 +- 0.07 on the flattened corpus (`python analysis/summary_causal.py
+results`). The three-seed, three-arm subset is `causal3`.
 Note that this fine-tuning changes only the decoder (code assignment is an
 argmin, so no gradient reaches the encoder or codebooks); `bash
 infra/pod_run.sh swap` demonstrates it. The Carnatic measurement is
@@ -291,4 +294,15 @@ pre-specified.
 
 `bash infra/pod_run.sh causal5` fine-tunes four arms (original, +100 cents, mixed 0/100 cents,
 flattened) for seeds 0 to 4 and sweeps each; `python analysis/summary_causal.py results` prints
-the arm means, seed spreads and Welch tests.
+the arm means, seed spreads and Welch tests. Expected output:
+
+```
+  arm      seeds   amplitude (c)     sd     slope range
+  grid         5            4.51   0.11   [0.998, 1.001]
+  gridres      5            4.60   0.03   [0.995, 0.997]
+  gridmix      5            4.69   0.05   [0.995, 0.997]
+  flat         5            3.74   0.07   [0.997, 0.998]
+  flat vs grid     drop 17.1%   t = 13.79  df = 6.8
+  flat vs gridres  drop 18.8%   t = 26.50  df = 5.2
+  flat vs gridmix  drop 20.4%   t = 25.81  df = 7.2
+```

@@ -271,6 +271,28 @@ placeholder values.
 | `ftm_flat_s2` | encodec_ft_encodec_ftm_flat_s2 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.154 | 4.690 | 4.06 | 0.000 | [0.00, 0.26] | 0.54 | 0.43 | n/a, below floor |
 | `ftm_flat_s2` | encodec_ft_encodec_ftm_flat_s2 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.030 | 4.382 | 4.25 | 1.245 | [1.02, 1.48] | 0.54 | 0.42 | sinusoid |
 | `ftm_flat_s2` | encodec_ft_encodec_ftm_flat_s2 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.069 | 3.654 | 3.42 | 2.041 | [1.81, 2.22] | 0.55 | 0.44 | sinusoid |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.313 | 2.762 | 2.10 | 2.066 | [1.91, 2.22] | 0.60 | 0.49 | sinusoid |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.083 | 3.087 | 2.85 | 2.145 | [1.97, 2.37] | 0.60 | 0.45 | sinusoid |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.256 | 4.350 | 3.46 | 1.784 | [1.50, 2.08] | 0.60 | 0.47 | sinusoid |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.573 | 5.891 | 3.75 | 0.794 | [0.34, 1.26] | 0.59 | 0.47 | sinusoid |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 450.3Hz_+40.0c | 1205 | 8.9e-06 | 1.980 | 5.525 | 2.79 | -0.215 | [-0.66, 0.00] | 0.44 | 0.35 | n/a, below floor |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 1.833 | 3.163 | 1.73 | -1.764 | [-2.06, -1.44] | 0.52 | 0.39 | n/a, below floor |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 2.456 | 1.631 | 0.66 | -2.134 | [-2.29, -1.95] | 0.58 | 0.41 | n/a, below floor |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.062 | 3.510 | 1.70 | -1.340 | [-1.72, -0.98] | 0.53 | 0.40 | n/a, below floor |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.223 | 5.184 | 4.24 | 0.268 | [0.00, 0.61] | 0.55 | 0.44 | sinusoid |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.121 | 4.870 | 4.34 | 1.423 | [1.12, 1.67] | 0.54 | 0.42 | sinusoid |
+| `ftm_flat_s3` | encodec_ft_encodec_ftm_flat_s3 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.125 | 3.746 | 3.33 | 2.153 | [1.97, 2.36] | 0.59 | 0.47 | sinusoid |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.220 | 2.789 | 2.29 | 1.933 | [1.78, 2.14] | 0.60 | 0.49 | sinusoid |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.091 | 3.084 | 2.83 | 2.161 | [1.99, 2.35] | 0.59 | 0.45 | sinusoid |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.287 | 4.183 | 3.25 | 1.780 | [1.51, 2.01] | 0.59 | 0.46 | sinusoid |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.553 | 5.698 | 3.67 | 0.718 | [0.37, 1.23] | 0.58 | 0.47 | sinusoid |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 450.3Hz_+40.0c | 1205 | 8.9e-06 | 1.931 | 5.568 | 2.88 | -0.177 | [-0.69, 0.00] | 0.43 | 0.33 | n/a, below floor |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 1.845 | 3.171 | 1.72 | -1.775 | [-2.08, -1.34] | 0.49 | 0.37 | n/a, below floor |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 2.233 | 1.514 | 0.68 | -2.066 | [-2.24, -1.90] | 0.56 | 0.41 | n/a, below floor |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.031 | 3.301 | 1.63 | -1.245 | [-1.66, -0.92] | 0.53 | 0.41 | n/a, below floor |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.271 | 5.138 | 4.04 | 0.186 | [0.00, 0.52] | 0.54 | 0.44 | sinusoid |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.062 | 4.702 | 4.43 | 1.356 | [1.08, 1.63] | 0.55 | 0.43 | sinusoid |
+| `ftm_flat_s4` | encodec_ft_encodec_ftm_flat_s4 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.145 | 3.692 | 3.22 | 2.062 | [1.92, 2.29] | 0.57 | 0.46 | sinusoid |
 | `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.364 | 3.402 | 2.49 | 2.376 | [2.17, 2.61] | 0.59 | 0.49 | sinusoid |
 | `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 442.5Hz_+09.8c | 1205 | 4.5e-06 | 1.156 | 3.947 | 3.41 | 2.571 | [2.37, 2.80] | 0.59 | 0.46 | sinusoid |
 | `ftm_grid` | encodec_ft_encodec_ftm_grid | 3.0kbps | 445.1Hz_+20.0c | 1205 | 7.0e-06 | 1.401 | 5.142 | 3.67 | 2.116 | [1.77, 2.43] | 0.58 | 0.47 | sinusoid |
@@ -314,6 +336,83 @@ placeholder values.
 | `ftm_grid_s2` | encodec_ft_encodec_ftm_grid_s2 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.436 | 5.894 | 4.10 | 0.268 | [0.00, 0.74] | 0.54 | 0.45 | sinusoid |
 | `ftm_grid_s2` | encodec_ft_encodec_ftm_grid_s2 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.099 | 5.272 | 4.80 | 1.582 | [1.36, 1.94] | 0.55 | 0.43 | sinusoid |
 | `ftm_grid_s2` | encodec_ft_encodec_ftm_grid_s2 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.248 | 4.203 | 3.37 | 2.373 | [2.18, 2.57] | 0.55 | 0.45 | sinusoid |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.364 | 3.506 | 2.57 | 2.454 | [2.25, 2.64] | 0.61 | 0.50 | sinusoid |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.243 | 3.992 | 3.21 | 2.653 | [2.47, 2.86] | 0.60 | 0.47 | sinusoid |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.488 | 5.345 | 3.59 | 2.199 | [1.83, 2.47] | 0.60 | 0.48 | sinusoid |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.762 | 7.104 | 4.03 | 1.126 | [0.56, 1.57] | 0.59 | 0.49 | sinusoid |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 450.3Hz_+40.0c | 1204 | 8.9e-06 | 2.801 | 7.259 | 2.59 | -0.179 | [-0.70, 0.00] | 0.42 | 0.34 | n/a, below floor |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 2.481 | 3.983 | 1.61 | -2.062 | [-2.48, -1.68] | 0.49 | 0.39 | n/a, below floor |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 2.975 | 1.832 | 0.62 | -2.529 | [-2.75, -2.32] | 0.56 | 0.43 | n/a, below floor |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.327 | 4.442 | 1.91 | -1.391 | [-1.90, -1.02] | 0.52 | 0.42 | n/a, below floor |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.506 | 6.256 | 4.15 | 0.209 | [0.00, 0.75] | 0.56 | 0.46 | sinusoid |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.228 | 5.700 | 4.64 | 1.743 | [1.36, 2.06] | 0.57 | 0.45 | sinusoid |
+| `ftm_grid_s3` | encodec_ft_encodec_ftm_grid_s3 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.327 | 4.475 | 3.37 | 2.629 | [2.39, 2.91] | 0.57 | 0.47 | sinusoid |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.398 | 3.454 | 2.47 | 2.452 | [2.28, 2.66] | 0.60 | 0.49 | sinusoid |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.314 | 4.124 | 3.14 | 2.685 | [2.47, 2.87] | 0.59 | 0.46 | sinusoid |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.416 | 5.444 | 3.84 | 2.193 | [1.93, 2.46] | 0.59 | 0.47 | sinusoid |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.751 | 7.183 | 4.10 | 1.067 | [0.52, 1.59] | 0.59 | 0.49 | sinusoid |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 450.3Hz_+40.0c | 1204 | 8.9e-06 | 2.642 | 7.557 | 2.86 | -0.209 | [-0.86, 0.00] | 0.42 | 0.32 | n/a, below floor |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 2.801 | 4.268 | 1.52 | -2.052 | [-2.55, -1.62] | 0.49 | 0.39 | n/a, below floor |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 3.110 | 1.896 | 0.61 | -2.527 | [-2.70, -2.34] | 0.55 | 0.42 | n/a, below floor |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.476 | 4.655 | 1.88 | -1.404 | [-1.92, -0.91] | 0.51 | 0.41 | n/a, below floor |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.402 | 6.517 | 4.65 | 0.352 | [0.00, 0.76] | 0.55 | 0.46 | sinusoid |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.166 | 5.793 | 4.97 | 1.775 | [1.45, 2.04] | 0.57 | 0.45 | sinusoid |
+| `ftm_grid_s4` | encodec_ft_encodec_ftm_grid_s4 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.249 | 4.451 | 3.56 | 2.559 | [2.36, 2.80] | 0.57 | 0.47 | sinusoid |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.426 | 3.662 | 2.57 | 2.559 | [2.36, 2.78] | 0.61 | 0.50 | sinusoid |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.307 | 4.282 | 3.27 | 2.813 | [2.62, 3.07] | 0.60 | 0.46 | sinusoid |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.483 | 5.582 | 3.76 | 2.254 | [1.96, 2.52] | 0.60 | 0.49 | sinusoid |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.840 | 7.392 | 4.02 | 1.271 | [0.69, 1.78] | 0.60 | 0.50 | sinusoid |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 450.3Hz_+40.0c | 1204 | 8.9e-06 | 2.573 | 7.423 | 2.88 | -0.046 | [-0.70, 0.00] | 0.43 | 0.34 | n/a, below floor |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 2.798 | 4.492 | 1.61 | -2.071 | [-2.84, -1.47] | 0.50 | 0.40 | n/a, below floor |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 3.226 | 1.907 | 0.59 | -2.630 | [-2.88, -2.45] | 0.55 | 0.42 | n/a, below floor |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.616 | 4.600 | 1.76 | -1.454 | [-1.94, -1.09] | 0.54 | 0.43 | n/a, below floor |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.540 | 6.257 | 4.06 | 0.311 | [0.00, 0.75] | 0.56 | 0.47 | sinusoid |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.253 | 5.772 | 4.61 | 1.826 | [1.52, 2.06] | 0.57 | 0.46 | sinusoid |
+| `ftm_gridmix_s0` | encodec_ft_encodec_ftm_gridmix_s0 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.304 | 4.587 | 3.52 | 2.769 | [2.46, 2.96] | 0.58 | 0.48 | sinusoid |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.434 | 3.651 | 2.55 | 2.556 | [2.34, 2.71] | 0.62 | 0.52 | sinusoid |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.212 | 4.150 | 3.43 | 2.724 | [2.55, 2.89] | 0.61 | 0.47 | sinusoid |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.397 | 5.424 | 3.88 | 2.256 | [1.94, 2.51] | 0.60 | 0.49 | sinusoid |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.713 | 7.293 | 4.26 | 1.252 | [0.64, 1.66] | 0.60 | 0.50 | sinusoid |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 450.3Hz_+40.0c | 1204 | 8.9e-06 | 2.569 | 7.434 | 2.89 | -0.094 | [-0.76, 0.00] | 0.42 | 0.33 | n/a, below floor |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 2.644 | 4.201 | 1.59 | -2.151 | [-2.70, -1.58] | 0.51 | 0.40 | n/a, below floor |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 3.137 | 1.870 | 0.60 | -2.516 | [-2.72, -2.36] | 0.56 | 0.43 | n/a, below floor |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.392 | 4.705 | 1.97 | -1.506 | [-1.92, -1.11] | 0.54 | 0.42 | n/a, below floor |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.479 | 6.270 | 4.24 | 0.241 | [0.00, 0.78] | 0.56 | 0.48 | sinusoid |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.269 | 5.691 | 4.48 | 1.721 | [1.45, 2.05] | 0.57 | 0.46 | sinusoid |
+| `ftm_gridmix_s1` | encodec_ft_encodec_ftm_gridmix_s1 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.266 | 4.487 | 3.54 | 2.696 | [2.42, 2.95] | 0.58 | 0.48 | sinusoid |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.492 | 3.674 | 2.46 | 2.516 | [2.25, 2.71] | 0.61 | 0.52 | sinusoid |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.285 | 4.127 | 3.21 | 2.740 | [2.48, 2.94] | 0.60 | 0.47 | sinusoid |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.490 | 5.472 | 3.67 | 2.206 | [1.94, 2.55] | 0.60 | 0.49 | sinusoid |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.784 | 7.351 | 4.12 | 1.276 | [0.67, 1.71] | 0.60 | 0.50 | sinusoid |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 450.3Hz_+40.0c | 1204 | 8.9e-06 | 2.619 | 7.372 | 2.81 | 0.000 | [-0.56, 0.00] | 0.43 | 0.34 | n/a, below floor |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 2.632 | 4.489 | 1.71 | -2.196 | [-2.81, -1.48] | 0.51 | 0.40 | n/a, below floor |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 3.108 | 1.855 | 0.60 | -2.531 | [-2.71, -2.38] | 0.56 | 0.43 | n/a, below floor |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.363 | 4.403 | 1.86 | -1.422 | [-1.86, -1.05] | 0.53 | 0.43 | n/a, below floor |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.502 | 6.240 | 4.16 | 0.254 | [0.00, 0.73] | 0.56 | 0.47 | sinusoid |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.290 | 5.682 | 4.41 | 1.775 | [1.51, 2.00] | 0.57 | 0.46 | sinusoid |
+| `ftm_gridmix_s2` | encodec_ft_encodec_ftm_gridmix_s2 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.240 | 4.509 | 3.64 | 2.613 | [2.36, 2.91] | 0.58 | 0.48 | sinusoid |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.438 | 3.645 | 2.54 | 2.558 | [2.35, 2.74] | 0.62 | 0.52 | sinusoid |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.234 | 4.125 | 3.34 | 2.728 | [2.56, 2.95] | 0.61 | 0.47 | sinusoid |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.442 | 5.444 | 3.78 | 2.257 | [1.96, 2.48] | 0.60 | 0.48 | sinusoid |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.747 | 7.333 | 4.20 | 1.253 | [0.68, 1.61] | 0.60 | 0.50 | sinusoid |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 450.3Hz_+40.0c | 1204 | 8.9e-06 | 2.483 | 7.483 | 3.01 | -0.107 | [-0.70, 0.00] | 0.42 | 0.33 | n/a, below floor |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 2.544 | 4.387 | 1.72 | -2.100 | [-2.73, -1.46] | 0.51 | 0.39 | n/a, below floor |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 3.346 | 1.839 | 0.55 | -2.622 | [-2.83, -2.36] | 0.56 | 0.43 | n/a, below floor |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.422 | 4.555 | 1.88 | -1.460 | [-1.93, -1.02] | 0.53 | 0.42 | n/a, below floor |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.458 | 6.201 | 4.25 | 0.332 | [0.00, 0.77] | 0.56 | 0.47 | sinusoid |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.226 | 5.649 | 4.61 | 1.811 | [1.47, 2.00] | 0.57 | 0.46 | sinusoid |
+| `ftm_gridmix_s3` | encodec_ft_encodec_ftm_gridmix_s3 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.270 | 4.537 | 3.57 | 2.678 | [2.47, 2.86] | 0.58 | 0.48 | sinusoid |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.502 | 3.720 | 2.48 | 2.609 | [2.39, 2.84] | 0.61 | 0.51 | sinusoid |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.326 | 4.199 | 3.17 | 2.833 | [2.63, 3.07] | 0.61 | 0.47 | sinusoid |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.477 | 5.656 | 3.83 | 2.303 | [1.98, 2.55] | 0.60 | 0.49 | sinusoid |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.925 | 7.590 | 3.94 | 1.238 | [0.68, 1.75] | 0.60 | 0.50 | sinusoid |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 450.3Hz_+40.0c | 1204 | 8.9e-06 | 2.782 | 7.752 | 2.79 | -0.046 | [-0.78, 0.00] | 0.41 | 0.32 | n/a, below floor |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 2.812 | 4.425 | 1.57 | -2.125 | [-2.75, -1.48] | 0.51 | 0.40 | n/a, below floor |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 3.333 | 1.953 | 0.59 | -2.644 | [-2.92, -2.44] | 0.56 | 0.43 | n/a, below floor |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.297 | 4.812 | 2.10 | -1.373 | [-1.85, -0.97] | 0.53 | 0.43 | n/a, below floor |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.540 | 6.426 | 4.17 | 0.325 | [0.00, 0.72] | 0.56 | 0.47 | sinusoid |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.307 | 5.861 | 4.49 | 1.870 | [1.52, 2.15] | 0.57 | 0.46 | sinusoid |
+| `ftm_gridmix_s4` | encodec_ft_encodec_ftm_gridmix_s4 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.336 | 4.717 | 3.53 | 2.743 | [2.49, 2.95] | 0.58 | 0.48 | sinusoid |
 | `ftm_gridres_s0` | encodec_ft_encodec_ftm_gridres_s0 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.427 | 3.589 | 2.52 | 2.561 | [2.31, 2.69] | 0.61 | 0.51 | sinusoid |
 | `ftm_gridres_s0` | encodec_ft_encodec_ftm_gridres_s0 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.267 | 4.142 | 3.27 | 2.658 | [2.49, 2.94] | 0.60 | 0.46 | sinusoid |
 | `ftm_gridres_s0` | encodec_ft_encodec_ftm_gridres_s0 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.407 | 5.292 | 3.76 | 2.198 | [1.90, 2.42] | 0.59 | 0.49 | sinusoid |
@@ -347,6 +446,28 @@ placeholder values.
 | `ftm_gridres_s2` | encodec_ft_encodec_ftm_gridres_s2 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.435 | 6.319 | 4.40 | 0.216 | [0.00, 0.70] | 0.56 | 0.46 | sinusoid |
 | `ftm_gridres_s2` | encodec_ft_encodec_ftm_gridres_s2 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.294 | 5.787 | 4.47 | 1.673 | [1.32, 1.97] | 0.56 | 0.46 | sinusoid |
 | `ftm_gridres_s2` | encodec_ft_encodec_ftm_gridres_s2 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.327 | 4.578 | 3.45 | 2.625 | [2.38, 2.85] | 0.58 | 0.47 | sinusoid |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.428 | 3.665 | 2.57 | 2.461 | [2.25, 2.67] | 0.61 | 0.51 | sinusoid |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.230 | 4.006 | 3.26 | 2.757 | [2.53, 2.96] | 0.60 | 0.47 | sinusoid |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.379 | 5.311 | 3.85 | 2.210 | [1.95, 2.45] | 0.60 | 0.49 | sinusoid |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.678 | 7.217 | 4.30 | 1.268 | [0.75, 1.70] | 0.59 | 0.49 | sinusoid |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 450.3Hz_+40.0c | 1205 | 8.9e-06 | 2.382 | 7.347 | 3.08 | -0.004 | [-0.62, 0.00] | 0.42 | 0.33 | n/a, below floor |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 2.436 | 4.279 | 1.76 | -1.926 | [-2.61, -1.29] | 0.51 | 0.39 | n/a, below floor |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 3.308 | 1.892 | 0.57 | -2.614 | [-2.78, -2.38] | 0.55 | 0.42 | n/a, below floor |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.282 | 4.516 | 1.98 | -1.318 | [-1.77, -1.00] | 0.53 | 0.43 | n/a, below floor |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.512 | 6.042 | 4.00 | 0.220 | [0.00, 0.61] | 0.56 | 0.46 | sinusoid |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.259 | 5.625 | 4.47 | 1.774 | [1.39, 2.01] | 0.56 | 0.45 | sinusoid |
+| `ftm_gridres_s3` | encodec_ft_encodec_ftm_gridres_s3 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.314 | 4.443 | 3.38 | 2.642 | [2.41, 2.87] | 0.57 | 0.47 | sinusoid |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.406 | 3.622 | 2.58 | 2.496 | [2.30, 2.69] | 0.61 | 0.51 | sinusoid |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 442.5Hz_+10.0c | 1205 | 8.2e-06 | 1.233 | 4.070 | 3.30 | 2.761 | [2.49, 3.00] | 0.60 | 0.47 | sinusoid |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 445.1Hz_+20.0c | 1205 | 8.3e-06 | 1.431 | 5.261 | 3.68 | 2.238 | [1.98, 2.48] | 0.59 | 0.48 | sinusoid |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 447.7Hz_+30.0c | 1205 | 4.5e-06 | 1.664 | 7.125 | 4.28 | 1.119 | [0.74, 1.64] | 0.59 | 0.49 | sinusoid |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 450.3Hz_+40.0c | 1205 | 8.9e-06 | 2.405 | 7.050 | 2.93 | -0.106 | [-0.62, 0.00] | 0.43 | 0.34 | n/a, below floor |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.1e-06 | 2.335 | 4.014 | 1.72 | -2.012 | [-2.59, -1.49] | 0.50 | 0.39 | n/a, below floor |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 455.5Hz_+60.0c | 1205 | 4.7e-06 | 3.328 | 1.981 | 0.60 | -2.605 | [-2.78, -2.38] | 0.55 | 0.42 | n/a, below floor |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 458.2Hz_+70.0c | 1205 | 8.1e-06 | 2.388 | 4.534 | 1.90 | -1.210 | [-1.83, -0.88] | 0.54 | 0.43 | n/a, below floor |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.538 | 6.091 | 3.96 | 0.343 | [0.00, 0.72] | 0.55 | 0.46 | sinusoid |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.217 | 5.619 | 4.62 | 1.747 | [1.47, 2.04] | 0.56 | 0.45 | sinusoid |
+| `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.280 | 4.560 | 3.56 | 2.627 | [2.37, 2.86] | 0.57 | 0.47 | sinusoid |
 | `ftvowel_12tet` | encodec_ft_encodec_ft_12tet | 3.0kbps | 220Hz_ongrid | 1168 | 1.6e-05 | 0.148 | 0.193 | 1.31 | 0.027 | [4.6e-03, 0.05] | 0.05 | 0.04 | sinusoid |
 | `ftvowel_12tet` | encodec_ft_encodec_ft_12tet | 3.0kbps | 226.4Hz_+49.6c | 1169 | 2.7e-05 | 0.294 | 0.276 | 0.94 | -0.018 | [-0.04, 0.00] | 0.02 | 0.02 | n/a, below floor |
 | `ftvowel_53tet` | encodec_ft_encodec_ft_53tet | 3.0kbps | 220Hz_ongrid | 1172 | 1.6e-05 | 0.141 | 0.171 | 1.21 | 0.013 | [0.00, 0.03] | 0.02 | 0.02 | sinusoid |
@@ -444,7 +565,7 @@ placeholder values.
 | `vowel_speechtok` | speechtokenizer | Q8 | 220Hz_ongrid | 964 | 3.6e-05 | 0.971 | 0.784 | 0.81 | 0.000 | [-0.04, 0.00] | 0.03 | 0.03 | n/a, below floor |
 | `vowel_speechtok` | speechtokenizer | Q8 | 226.4Hz_+49.6c | 963 | 3.4e-05 | 1.057 | 1.022 | 0.97 | 0.033 | [0.00, 0.17] | 0.05 | 0.04 | sinusoid |
 
-**Skipped:** `asr_encodec3` (no usable rows), `asr_encodec3_n100` (no usable rows), `asr_encodec3_v2` (no usable rows), `asr_mms_encodec3` (no usable rows), `asr_mms_encodec3_n100` (no usable rows), `asr_mms_mimi` (no usable rows), `asr_mms_mimi_n100` (no usable rows), `corpus_pull_dac166` (no usable rows), `corpus_pull_encodec3` (no usable rows), `corpus_pull_opus12` (no usable rows), `corpus_pull_opus6` (no usable rows), `corpus_pull_saraga_dac166` (no usable rows), `corpus_pull_saraga_encodec3` (no usable rows), `corpus_pull_saraga_opus12` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `phon_dac16` (no usable rows), `phon_encodec3` (no usable rows), `phon_encodec3_big` (no usable rows), `phon_mimi` (no usable rows), `probe_encodec3` (no usable rows), `retune_dac16` (no usable rows), `retune_encodec3` (no usable rows), `retune_encodec3_big` (no usable rows), `retune_synthetic` (no usable rows)
+**Skipped:** `asr_encodec3` (no usable rows), `asr_encodec3_n100` (no usable rows), `asr_encodec3_v2` (no usable rows), `asr_mms_encodec3` (no usable rows), `asr_mms_encodec3_n100` (no usable rows), `asr_mms_mimi` (no usable rows), `asr_mms_mimi_n100` (no usable rows), `corpus_pull_dac166` (no usable rows), `corpus_pull_encodec3` (no usable rows), `corpus_pull_opus12` (no usable rows), `corpus_pull_opus6` (no usable rows), `corpus_pull_saraga_dac166` (no usable rows), `corpus_pull_saraga_encodec3` (no usable rows), `corpus_pull_saraga_opus12` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `hist_musicgen_continue` (no usable rows), `hist_musicgen_text` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `musicgen_continue` (no usable rows), `musicgen_text` (no usable rows), `phon_dac16` (no usable rows), `phon_encodec3` (no usable rows), `phon_encodec3_big` (no usable rows), `phon_mimi` (no usable rows), `probe_encodec3` (no usable rows), `retune_dac16` (no usable rows), `retune_encodec3` (no usable rows), `retune_encodec3_big` (no usable rows), `retune_synthetic` (no usable rows)
 
 **Reading this table.** `floor` is the estimator's own error on uncoded stimuli in the same run: no effect below it means anything. `grid bias` is positive when the codec moved an interval *toward* the Western semitone grid, which is the directional claim; a symmetric residual of the same magnitude is ordinary degradation. `sine R2` against `saw R2` discriminates the two candidate mechanisms: a density correction predicts a sinusoid, coarse cell assignment predicts a sawtooth, and they scale differently with rate.
 
