@@ -40,6 +40,12 @@ def main() -> int:
                         "interpolation, so the tempo change and interpolation "
                         "artefacts of the flat arm are present but the tuning "
                         "grid stays exactly as peaked as the original.")
+    p.add_argument("--mixed-semitones", action="store_true",
+                   help="SECOND CONTROL, matched in mean resampling magnitude "
+                        "to the flat arm: shift each clip by 0 or exactly 100 "
+                        "cents with equal probability (mean 50 cents, like the "
+                        "flat arm's uniform offsets), so the grid stays peaked "
+                        "while the average resampling ratio matches.")
     args = p.parse_args()
 
     rng = np.random.default_rng(args.seed)
@@ -59,7 +65,12 @@ def main() -> int:
             x = x.mean(axis=1)
         # Offset uniform over the full semitone: individually a normal tuning
         # reference, in aggregate a flat within-semitone density.
-        offset = 100.0 if args.whole_semitones else float(rng.uniform(0.0, 100.0))
+        if args.whole_semitones:
+            offset = 100.0
+        elif args.mixed_semitones:
+            offset = float(rng.choice([0.0, 100.0]))
+        else:
+            offset = float(rng.uniform(0.0, 100.0))
         ratio = 2.0 ** (offset / 1200.0)
         idx = np.arange(0, len(x) - 1, ratio)
         lo = idx.astype(int)

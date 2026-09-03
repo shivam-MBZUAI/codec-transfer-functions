@@ -92,6 +92,41 @@ causal3)
   wait
   for f in results/ftm_*_s?.csv; do echo "== $f"; python3 analysis/analyze_detuning.py "$f" | tail -n 5; done
   ;;
+causal5)
+  # Four arms, five seeds: the three arms above plus gridmix, a control matched
+  # to the flat arm in MEAN resampling magnitude (each clip shifted by 0 or
+  # exactly 100 cents, mean 50 cents) that keeps the grid peaked. Two
+  # fine-tunes run concurrently on an 80 GB GPU; sweeps follow each checkpoint.
+  R=$(refs 440)
+  [ -d corpora/gtzan_gridres ] || python3 experiments/make_detuned_corpus.py --src corpora/gtzan \
+      --dst corpora/gtzan_gridres --max-files 400 --whole-semitones
+  [ -d corpora/gtzan_gridmix ] || python3 experiments/make_detuned_corpus.py --src corpora/gtzan \
+      --dst corpora/gtzan_gridmix --max-files 400 --mixed-semitones
+  jobs_list=()
+  for seed in 0 1 2 3 4; do
+    for arm in grid:gtzan flat:gtzan_detuned gridres:gtzan_gridres gridmix:gtzan_gridmix; do
+      jobs_list+=("${arm}:${seed}")
+    done
+  done
+  run_one () {
+    local arm=$1 src=$2 seed=$3 tag="ftm_${1}_s${3}"
+    if [ ! -f "checkpoints/encodec_${tag}/config.json" ]; then
+      python3 experiments/finetune_encodec.py --audio-root "corpora/${src}" --steps 4000 \
+          --seed $seed --out "checkpoints/encodec_${tag}" > "logs/${tag}_train.log" 2>&1
+    fi
+    [ -f "results/${tag}.csv" ] || python3 experiments/run_sweep.py \
+        --codec "encodec_ft:checkpoints/encodec_${tag}@3.0" \
+        --reps 5 --references $R --out "results/${tag}.csv" > "logs/${tag}.log" 2>&1
+  }
+  i=0
+  for job in "${jobs_list[@]}"; do
+    arm=${job%%:*}; rest=${job#*:}; src=${rest%%:*}; seed=${rest#*:}
+    run_one "$arm" "$src" "$seed" &
+    i=$((i+1)); if [ $((i % 2)) -eq 0 ]; then wait; fi
+  done
+  wait
+  python3 analysis/summary_causal.py results
+  ;;
 saraga)
   python3 - <<'PY'
 import mirdata
