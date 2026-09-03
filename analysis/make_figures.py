@@ -410,11 +410,11 @@ def fig_mechanism():
     ax = axes[3]
     # (d) the causal experiment: fitted amplitude per seed for the three arms.
     arms = [("grid", "original", "black"), ("gridres", "+100 c", "0.45"),
-            ("flat", "flattened", "black")]
-    markers = ["o", "s", "^"]
+            ("gridmix", "0/100 c", "0.45"), ("flat", "flattened", "black")]
+    markers = ["o", "s", "D", "^"]
     for i, (arm, label, colour) in enumerate(arms):
         amps = []
-        for seed in range(3):
+        for seed in range(5):
             p = RES / f"ftm_{arm}_s{seed}.csv"
             if not p.exists():
                 continue
@@ -427,9 +427,9 @@ def fig_mechanism():
         ax.errorbar([i], [np.mean(amps)], yerr=[np.std(amps, ddof=1)] if len(amps) > 1 else None,
                     fmt="_", color="black", ms=14, capsize=4, elinewidth=0.9, zorder=4)
         ax.text(i, np.mean(amps) + 0.3, f"{np.mean(amps):.2f}", ha="center", fontsize=6)
-    ax.set_xticks(range(3)); ax.set_xticklabels([a[1] for a in arms], fontsize=5.6)
+    ax.set_xticks(range(4)); ax.set_xticklabels([a[1] for a in arms], fontsize=6)
     ax.set_xlabel("fine-tuning corpus", fontsize=7)
-    ax.set_xlim(-0.6, 2.6); ax.set_ylim(0, 5.4)
+    ax.set_xlim(-0.6, 3.6); ax.set_ylim(0, 5.4)
     ax.set_ylabel("residual amplitude (cents)", fontsize=7)
     ax.set_title("(d) decoder fine-tuning", fontsize=7)
     ax.tick_params(labelsize=6.5); ax.grid(alpha=0.2, axis="y")
