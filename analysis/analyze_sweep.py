@@ -70,10 +70,21 @@ def load(path: Path) -> dict:
 def fit_sinusoid(theta: np.ndarray, r: np.ndarray) -> tuple[float, float, float]:
     """Least squares fit of a*sin(2pi*theta/100) + b*cos(...). Returns
     (amplitude, phase in degrees, fraction of variance explained)."""
+    return fit_sinusoid_se(theta, r)[:3]
+
+
+def fit_sinusoid_se(theta: np.ndarray, r: np.ndarray
+                    ) -> tuple[float, float, float, float]:
+    """fit_sinusoid plus the standard error of the phase, in degrees.
+
+    The fit is OLS on [sin, cos, 1], so the coefficient covariance is
+    sigma^2 (X'X)^-1 with sigma^2 the residual variance on n-3 degrees of
+    freedom. The phase is atan2(b, a); its gradient in (a, b) is
+    (-b, a) / (a^2 + b^2), and the delta method gives var(phase) = g' Cov g."""
     ok = np.isfinite(theta) & np.isfinite(r)
     theta, r = theta[ok], r[ok]
     if r.size < 3:
-        return float("nan"), float("nan"), float("nan")
+        return float("nan"), float("nan"), float("nan"), float("nan")
     w = 2.0 * math.pi / PERIOD
     design = np.column_stack([np.sin(w * theta), np.cos(w * theta), np.ones_like(theta)])
     coef, *_ = np.linalg.lstsq(design, r, rcond=None)
@@ -81,8 +92,14 @@ def fit_sinusoid(theta: np.ndarray, r: np.ndarray) -> tuple[float, float, float]
     amp = float(math.hypot(coef[0], coef[1]))
     phase = float(math.degrees(math.atan2(coef[1], coef[0])))
     ss_tot = float(np.sum((r - r.mean()) ** 2))
-    r2 = 1.0 - float(np.sum((r - pred) ** 2)) / ss_tot if ss_tot > 0 else float("nan")
-    return amp, phase, r2
+    ss_res = float(np.sum((r - pred) ** 2))
+    r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
+    phase_se = float("nan")
+    if r.size > 3 and amp > 0:
+        cov = ss_res / (r.size - 3) * np.linalg.inv(design.T @ design)
+        g = np.array([-coef[1], coef[0]]) / (amp * amp)
+        phase_se = float(math.degrees(math.sqrt(g @ cov[:2, :2] @ g)))
+    return amp, phase, r2, phase_se
 
 
 def fit_sawtooth(theta: np.ndarray, r: np.ndarray) -> tuple[float, float, float]:
@@ -106,21 +123,36 @@ def fit_sawtooth(theta: np.ndarray, r: np.ndarray) -> tuple[float, float, float]
     return best
 
 
-def bootstrap_median_ci(v: np.ndarray, n_boot: int = 4000, seed: int = 0
-                        ) -> tuple[float, float]:
+def bootstrap_medians(v: np.ndarray, n_boot: int = 4000, seed: int = 0) -> np.ndarray:
+    """Bootstrap draws of the MEDIAN, resampling trials with replacement.
+    Returned as an array so that intervals at several levels (the 95% one and
+    the Bonferroni-adjusted one) come from the same draws. Empty when there
+    are too few trials for a median to mean anything."""
+    v = v[np.isfinite(v)]
+    if v.size < 8:
+        return np.array([])
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, v.size, size=(n_boot, v.size))
+    return np.median(v[idx], axis=1)
+
+
+def percentile_ci(draws: np.ndarray, level: float = 0.95) -> tuple[float, float]:
+    """Two-sided percentile interval of bootstrap draws at the given level."""
+    if draws.size == 0:
+        return float("nan"), float("nan")
+    tail = (100.0 - 100.0 * level) / 2.0
+    return float(np.percentile(draws, tail)), float(np.percentile(draws, 100.0 - tail))
+
+
+def bootstrap_median_ci(v: np.ndarray, n_boot: int = 4000, seed: int = 0,
+                        level: float = 0.95) -> tuple[float, float]:
     """Percentile bootstrap CI for the MEDIAN, resampling trials with
     replacement. This is not the same thing as the 2.5/97.5 percentiles of the
     values themselves: those describe how spread the per-trial biases are, and
     are wide by construction even when the median is pinned down. Reporting the
     latter as a confidence interval would overstate the uncertainty on the
     quantity actually being claimed."""
-    v = v[np.isfinite(v)]
-    if v.size < 8:
-        return float("nan"), float("nan")
-    rng = np.random.default_rng(seed)
-    idx = rng.integers(0, v.size, size=(n_boot, v.size))
-    meds = np.median(v[idx], axis=1)
-    return float(np.percentile(meds, 2.5)), float(np.percentile(meds, 97.5))
+    return percentile_ci(bootstrap_medians(v, n_boot, seed), level)
 
 
 def summarise(theta, r_coded, r_uncoded, keep, label: str) -> dict:

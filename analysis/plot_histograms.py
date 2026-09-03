@@ -53,7 +53,8 @@ for ax, (fname, label, colour) in zip(axes[0], SETS):
     if ax is axes[0][-1]:
         ax.legend(fontsize=6, loc="upper center")
     ax.grid(alpha=0.2, axis="y")
-axes[0][0].set_ylabel("relative density", fontsize=7)
+axes[0][0].set_ylim(0, max(a.get_ylim()[1] for a in axes[0]) * 1.12)   # headroom above the tallest bar
+axes[0][0].set_ylabel("relative density (mean = 1)", fontsize=7)
 fig.supxlabel("cents above the 12-TET pitch below", fontsize=7, y=0.04)
 fig.tight_layout(rect=(0, 0.05, 1, 1))
 out = ROOT / "figures" / "pitch_histograms.pdf"

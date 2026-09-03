@@ -33,6 +33,9 @@ REVISIONS = {
     "hubertsiuzdak/snac_24khz": "d73ad176a12188fcf4f360ba3bf2c2fbbe8f58ec",
     "hubertsiuzdak/snac_32khz": "c84c6ac842dc7a44a6fb0f3b576ce94b48a7780f",
     "hubertsiuzdak/snac_44khz": "873ebef9718b89660340c6f55a2b515e98cfa1d9",
+    # downstream generator and the 32 kHz EnCodec it decodes with (musicgen_pull.py)
+    "facebook/musicgen-small": "4c8334b02c6ec4e8664a91979669a501ec497792",
+    "facebook/encodec_32khz": "d0c45384f6c44db055f78200cfdcb9c1c8706727",
 }
 
 REPOS = [

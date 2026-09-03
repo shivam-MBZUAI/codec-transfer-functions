@@ -13,6 +13,12 @@ bias with a bootstrap interval, which for a pull is positive. Conditions whose
 amplitude is a cent or two register without a resolvable direction, and the
 paper says so rather than calling every registered condition a pull. The
 octave-gate exclusion rate is listed per run because it is not zero everywhere.
+
+The last three columns are the strict pull test: the Bonferroni-adjusted 99.5%
+bias interval (0.05/10 two-sided over the ten reported conditions, same
+bootstrap draws as the 95% one), the delta-method standard error of the on-grid
+phase, and PASS/FAIL under the rule "phase within 45 degrees of 180 and the
+adjusted interval above zero". The rule itself lives in analyze_detuning.py.
 """
 from __future__ import annotations
 
@@ -27,7 +33,7 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from analyze_sweep import bootstrap_median_ci, fit_sinusoid, load  # noqa: E402
+from analyze_detuning import ADJUSTED_LEVEL, direction, load  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -52,25 +58,12 @@ RUNS = [
 ]
 
 
-def direction(name: str) -> dict:
-    """On-grid phase, off-grid grid bias with interval, and gate exclusion."""
+def gated_direction(name: str) -> dict:
+    """direction() under the octave gate alone, the scheme the table uses."""
     d = load(ROOT / "results" / f"{name}.csv")
-    theta, rc = d["theta_cents"], d["residual_coded_cents"]
-    keep = d["octave_flag"] < 0.5 if "octave_flag" in d else np.ones_like(theta, dtype=bool)
-    # The on-grid reference proper (440 Hz), not the 100-cent point that folds
-    # onto it in the phase regression: the bias is a 440 Hz number in the paper.
-    f1 = d["f1_nominal"]
-    offs = (1200.0 * np.log2(f1 / 440.0)) % 100.0
-    base = (np.round(offs, 3) == 0)
-    on = base & (f1 < f1[base].min() + 0.01) & keep & np.isfinite(rc)
-    amp, ph, _ = fit_sinusoid(theta[on], rc[on])
-    g = 100.0 * np.round(theta[on] / 100.0)
-    delta = theta[on] - g
-    off = np.abs(delta) >= 30
-    b = -np.sign(delta[off]) * rc[on][off]
-    lo, hi = bootstrap_median_ci(b)
-    return {"phase": ph, "bias": float(np.median(b)), "lo": lo, "hi": hi,
-            "excl": 1.0 - float(keep.mean())}
+    keep = (d["octave_flag"] < 0.5 if "octave_flag" in d
+            else np.ones_like(d["theta_cents"], dtype=bool))
+    return direction(d, keep)
 
 
 def parse(name: str):
@@ -100,9 +93,11 @@ def parse(name: str):
     return got or None
 
 
+ADJ = f"{100 * ADJUSTED_LEVEL:.1f}% CI (adj)"
 print(f"{'codec':<20}{'rate':<10}{'stimulus':<9}{'amp (c)':>12}{'slope':>9}"
-      f"{'95% CI':>18}{'R2':>9}{'phase':>7}{'off-grid bias (c)':>24}{'gated':>7}")
-print("-" * 126)
+      f"{'95% CI':>18}{'R2':>9}{'phase':>7}{'off-grid bias (c)':>24}{'gated':>7}"
+      f"{ADJ:>18}{'phase SE':>10}{'strict':>8}")
+print("-" * 162)
 for name, codec, rate, stim in RUNS:
     g = parse(name)
     if not g:
@@ -112,16 +107,23 @@ for name, codec, rate, stim in RUNS:
         print(f"{codec:<20}{rate:<10}{stim:<9}"
               f"{'NOT MEASURABLE: ' + g['refused']:>49}")
         continue
-    dd = direction(name)
+    dd = gated_direction(name)
+    adj = f"[{dd['lo_adj']:+.2f}, {dd['hi_adj']:+.2f}]"
     print(f"{codec:<20}{rate:<10}{stim:<9}{g['amp']:8.2f}+-{g['amp_sd']:<4.2f}"
           f"{g['slope']:9.4f}{'[' + g['ci'] + ']':>18}{g['r2']:9.5f}{dd['phase']:+7.0f}"
-          f"{dd['bias']:+8.2f} [{dd['lo']:+.2f}, {dd['hi']:+.2f}]{100*dd['excl']:6.1f}%")
+          f"{dd['bias']:+8.2f} [{dd['lo']:+.2f}, {dd['hi']:+.2f}]{100*dd['excl']:6.1f}%"
+          f"{adj:>18}{dd['phase_se']:10.1f}{'PASS' if dd['strict'] else 'FAIL':>8}")
 print("\n  slope 1.0 = residual locked to the absolute 12-TET grid")
 print("  slope 0.0 = locked to the interval, i.e. an analysis artefact")
 print("  phase = on-grid-reference phase of the fitted residual; a pull toward the")
 print("  grid sits near +155 deg (EnCodec). off-grid bias = median grid bias over")
 print("  |delta| >= 30 cents at the on-grid reference, bootstrap 95% interval.")
 print("  gated = share of trials the octave gate removes.")
+print(f"  {ADJ} = Bonferroni-adjusted bias interval, 0.05/10 two-sided over the")
+print("  ten reported conditions, from the same bootstrap draws as the 95% one.")
+print("  phase SE = delta-method standard error of the on-grid phase, degrees.")
+print("  strict = PASS when the phase is within 45 deg of 180 AND the adjusted")
+print("  interval lies above zero (analyze_detuning.py prints the rule per run).")
 print("\n  NOT MEASURABLE means the guard refused to fit: either the amplitude")
 print("  swings across conditions when the theory says it should be flat, or")
 print("  too few trials survive for the phases to mean anything. A slope fitted")

@@ -21,6 +21,17 @@ still regresses at 0.98 [0.86, 1.10] without it).
 
 Confidence intervals on the slope use the t quantile on n-2 degrees of freedom
 (ten conditions, so t(8) = 2.306), not 1.96.
+
+After the regression the script prints the direction test at the on-grid
+reference: the fitted on-grid phase with its delta-method standard error, the
+off-grid median grid bias with the 95% bootstrap interval and the
+Bonferroni-adjusted 99.5% interval (0.05/10 two-sided over the ten reported
+conditions, same bootstrap draws), and the strict and loose pull rules the
+paper applies to them.
+
+Pass --gate-profile to print the octave-gate exclusion rate per 10-cent bin
+of distance to the nearest grid point, and the off-grid bias with and without
+the gate (the check that the gate does not manufacture the bias).
 """
 
 from __future__ import annotations
@@ -35,7 +46,8 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from analyze_sweep import DISAGREE_CENTS, fit_sinusoid, load  # noqa: E402
+from analyze_sweep import (DISAGREE_CENTS, bootstrap_medians, fit_sinusoid,  # noqa: E402
+                           fit_sinusoid_se, grid, load, percentile_ci)
 from scipy import stats  # noqa: E402
 
 
@@ -61,6 +73,113 @@ from scipy import stats  # noqa: E402
 MAX_AMP_CV = 0.35        # sd/mean of amplitude across conditions
 MIN_RETENTION = 0.25     # fraction of trials surviving exclusions
 
+# The pull rules. Registration (unit slope) and pull (a grid-directed sign) are
+# different claims. The strict rule asks for an on-grid phase within 45 degrees
+# of 180 (the residual points at the grid) AND an off-grid bias whose
+# Bonferroni-adjusted interval clears zero: 0.05/10 two-sided over the ten
+# conditions in the paper's table, i.e. a 99.5% percentile interval from the
+# same bootstrap draws as the 95% one. The looser rule, printed for reference,
+# centres the phase window on the EnCodec attractor, 180 - 3.6 * 7 = 155
+# degrees (a 7-cent attractor offset), and uses the unadjusted 95% interval.
+N_CONDITIONS = 10
+ADJUSTED_LEVEL = 1.0 - 0.05 / N_CONDITIONS
+PHASE_TOL = 45.0
+STRICT_PHASE = 180.0
+LOOSE_PHASE = 180.0 - 3.6 * 7.0
+
+
+def angle_from(phase: float, target: float) -> float:
+    """Unsigned angular distance in degrees, on the circle."""
+    return abs((phase - target + 180.0) % 360.0 - 180.0)
+
+
+def on_grid_reference(d: dict) -> np.ndarray:
+    """Trials at the on-grid reference proper (440 Hz), not the 100-cent point
+    that folds onto it in the phase regression: the bias is a 440 Hz number in
+    the paper."""
+    f1 = d["f1_nominal"]
+    offs = (1200.0 * np.log2(f1 / 440.0)) % 100.0
+    base = (np.round(offs, 3) == 0)
+    return base & (f1 < f1[base].min() + 0.01)
+
+
+def off_grid_bias(theta: np.ndarray, rc: np.ndarray) -> np.ndarray:
+    """Grid bias, sign(g - theta) * residual, over |delta| >= 30 cents."""
+    delta = theta - grid(theta)
+    off = np.abs(delta) >= 30
+    return -np.sign(delta[off]) * rc[off]
+
+
+def direction(d: dict, keep: np.ndarray) -> dict:
+    """On-grid phase with its SE, off-grid grid bias with the 95% and the
+    adjusted intervals, the two pull rules, and the exclusion rate."""
+    theta, rc = d["theta_cents"], d["residual_coded_cents"]
+    on = on_grid_reference(d) & keep & np.isfinite(rc)
+    amp, ph, _, ph_se = fit_sinusoid_se(theta[on], rc[on])
+    b = off_grid_bias(theta[on], rc[on])
+    draws = bootstrap_medians(b)
+    lo, hi = percentile_ci(draws, 0.95)
+    lo_adj, hi_adj = percentile_ci(draws, ADJUSTED_LEVEL)
+    strict_ph = angle_from(ph, STRICT_PHASE) <= PHASE_TOL
+    loose_ph = angle_from(ph, LOOSE_PHASE) <= PHASE_TOL
+    return {"phase": ph, "phase_se": ph_se, "n_on": int(on.sum()),
+            "bias": float(np.median(b)), "n_off": int(b.size),
+            "lo": lo, "hi": hi, "lo_adj": lo_adj, "hi_adj": hi_adj,
+            "strict_phase": bool(strict_ph), "strict_ci": bool(lo_adj > 0),
+            "strict": bool(strict_ph and lo_adj > 0),
+            "loose_phase": bool(loose_ph), "loose_ci": bool(lo > 0),
+            "loose": bool(loose_ph and lo > 0),
+            "excl": 1.0 - float(keep.mean())}
+
+
+def print_direction(dd: dict) -> None:
+    yn = {True: "yes", False: "no"}
+    pf = {True: "PASS", False: "FAIL"}
+    print(f"\n  on-grid phase    {dd['phase']:+.1f} +/- {dd['phase_se']:.1f} deg   "
+          f"(delta-method SE of the OLS sinusoid fit, n={dd['n_on']})")
+    print(f"  off-grid bias    {dd['bias']:+.2f} cents   95% CI [{dd['lo']:+.2f}, {dd['hi']:+.2f}]   "
+          f"{100*ADJUSTED_LEVEL:.1f}% CI [{dd['lo_adj']:+.2f}, {dd['hi_adj']:+.2f}]   "
+          f"(Bonferroni 0.05/{N_CONDITIONS}, same bootstrap draws; n={dd['n_off']})")
+    print(f"  strict pull rule: {pf[dd['strict']]} "
+          f"(phase within {PHASE_TOL:.0f} deg of {STRICT_PHASE:.0f}: {yn[dd['strict_phase']]}; "
+          f"adjusted interval above zero: {yn[dd['strict_ci']]})")
+    print(f"  loose pull rule:  {pf[dd['loose']]} "
+          f"(phase within {PHASE_TOL:.0f} deg of {LOOSE_PHASE:.0f}: {yn[dd['loose_phase']]}; "
+          f"95% interval above zero: {yn[dd['loose_ci']]})")
+
+
+def gate_profile(d: dict) -> None:
+    """Octave-gate exclusion rate per 10-cent bin of |delta|, over all trials
+    and at the on-grid reference, then the off-grid bias with and without the
+    gate. A gate that fired preferentially off-grid could manufacture the bias
+    on its own, so both are shown rather than assumed away."""
+    theta, rc = d["theta_cents"], d["residual_coded_cents"]
+    gated = (d["octave_flag"] >= 0.5 if "octave_flag" in d
+             else np.zeros_like(theta, dtype=bool))
+    dist = np.abs(theta - grid(theta))
+    ref = on_grid_reference(d)
+    print(f"  octave gate by |delta| (cents to nearest grid point)")
+    print(f"  {'bin':>7} {'all trials':>18} {'on-grid reference':>20}")
+    for lo in range(0, 50, 10):
+        m = (dist >= lo) & ((dist < lo + 10) if lo < 40 else (dist <= 50))
+        print(f"  {lo:2d}-{lo + 10:<3d} {100*gated[m].mean():8.1f}% (n={m.sum():5d})"
+              f" {100*gated[m & ref].mean():8.1f}% (n={(m & ref).sum():5d})")
+    print(f"  {'all':>7} {100*gated.mean():8.1f}% (n={gated.size:5d})"
+          f" {100*gated[ref].mean():8.1f}% (n={ref.sum():5d})")
+
+    # Gated trials carry octave errors (residuals near +/-1200 cents), so the
+    # ungated median runs through those; the folded line removes the octave
+    # error and keeps the trial, which is the fairer no-gate comparison.
+    ok = ref & np.isfinite(rc)
+    folded = (rc + 600.0) % 1200.0 - 600.0
+    print(f"\n  off-grid bias at the on-grid reference (|delta| >= 30), median with 95% CI")
+    for label, m, r in (("with octave gate (paper)", ok & ~gated, rc),
+                        ("without gate, all trials", ok, rc),
+                        ("without gate, residual folded mod 1200", ok, folded)):
+        b = off_grid_bias(theta[m], r[m])
+        lo, hi = percentile_ci(bootstrap_medians(b), 0.95)
+        print(f"  {label:<40} {np.median(b):+7.2f} cents  [{lo:+.2f}, {hi:+.2f}]  n={b.size}")
+
 
 def main() -> int:
     # Optional second positional: exclusion scheme. Some codecs alter harmonic
@@ -73,6 +192,9 @@ def main() -> int:
         if a.startswith("--exclusion="):
             scheme = a.split("=", 1)[1]
     d = load(Path(argv[0]))
+    if "--gate-profile" in sys.argv[1:]:
+        gate_profile(d)
+        print()
     theta, rc = d["theta_cents"], d["residual_coded_cents"]
     labels = d["reference_label"]
     dis = np.maximum(np.abs(d.get("disagreement_f1_cents", np.zeros_like(theta))),
@@ -164,6 +286,7 @@ def main() -> int:
     print(f"  guards           amplitude cv {cv:.3f} (limit {MAX_AMP_CV}), "
           f"retention {retention:.2f} (limit {MIN_RETENTION})")
     print(f"  exclusion        {100*excl:.1f}% of trials removed by the '{scheme}' scheme")
+    print_direction(direction(d, keep))
 
     if len(argv) > 1:
         import matplotlib
@@ -179,7 +302,7 @@ def main() -> int:
         ax.set_ylabel("residual phase (degrees)")
         ax.set_title(f"slope {rel:.4f}  [{lo:.4f}, {hi:.4f}]   $R^2$={r2:.5f}",
                      fontsize=7.5)
-        ax.legend(fontsize=6.5, loc="lower right"); ax.grid(alpha=0.25)
+        ax.legend(fontsize=6.5, loc="upper left"); ax.grid(alpha=0.25)
 
         ax2.plot(offsets, [r[1] for r in rows], "s", color="black", ms=3.5)
         ax2.set_xlabel("reference detuning (cents)")

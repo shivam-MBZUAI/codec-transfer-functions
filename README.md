@@ -128,7 +128,7 @@ The pipeline is built around the ways this measurement can lie.
 | Detuned reference | an effect locked to the interval rather than absolute pitch |
 | Per-sample-rate noise floor | estimator error read as codec error |
 | Blind estimation | ground truth leaking into the estimate and suppressing the effect |
-| Octave gate at 200 cents | estimator failures, without suppressing a real effect (max measurable is 50 cents). **The only exclusion in the primary analysis**. It fires on 0% of trials on the headline EnCodec run and on 0 to 9% of most reported runs, but on 65% of DAC 16k's (`analysis/guard_sensitivity.py` lists every run); the DAC 16k registration slope is 0.98 [0.86, 1.10] with the gate removed (`--exclusion=none`), so the gate does not manufacture it |
+| Octave gate at 200 cents | estimator failures, without suppressing a real effect (max measurable is 50 cents). **The only exclusion in the primary analysis**. It fires on 3 of 13,255 trials (0.02%) of the headline EnCodec run and on 0 to 9% of most reported runs, but on 65% of DAC 16k's (`analysis/guard_sensitivity.py` lists every run); the DAC 16k registration slope is 0.98 [0.86, 1.10] with the gate removed (`--exclusion=none`), so the gate does not manufacture it |
 | Estimator cross-check (`--exclusion=full`) | reported as a robustness variant, never as the primary number: it fires preferentially 30 to 50 cents from a grid point |
 | Exclusion-vs-grid-distance | an exclusion rule manufacturing the effect |
 | Sawtooth vs sinusoid fit | confusing a density correction with coarse cell assignment |

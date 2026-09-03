@@ -90,8 +90,9 @@ def circular_summary(pos: np.ndarray) -> tuple[float, float]:
 def load_model(model_id: str, device: str):
     import torch
     from transformers import AutoProcessor, MusicgenForConditionalGeneration
-    proc = AutoProcessor.from_pretrained(model_id)
-    model = MusicgenForConditionalGeneration.from_pretrained(model_id).to(device).eval()
+    from codec_zoo import _rev   # pinned Hugging Face revision (data/fetch_checkpoints.py)
+    proc = AutoProcessor.from_pretrained(model_id, revision=_rev(model_id))
+    model = MusicgenForConditionalGeneration.from_pretrained(model_id, revision=_rev(model_id)).to(device).eval()
     return proc, model, torch
 
 

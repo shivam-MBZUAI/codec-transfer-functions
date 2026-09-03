@@ -23,7 +23,11 @@ produced it.
 | `phon_*` | Experiment 2 (phonological contrasts), three codecs |
 | `asr_*_n100` | Experiment 2 (downstream recognition) at 100 utterances per language, two codecs, two recognisers. **The reported runs** |
 | `corpus_pull_*` | the transfer function on whole polyphonic clips: tuning-flattened GTZAN, and (`corpus_pull_saraga_*`) untouched Carnatic recordings from Saraga. EnCodec pulls both toward the Western grid by about 2.5 cents, Opus neither |
-| `ftm_{grid,gridres,flat}_s{0,1,2}` | **the causal experiment, replicated**: three arms (original clips, resampled by exactly one semitone, tuning-flattened) at three seeds; `swap_*` are the encoder/decoder swap sweeps that show the fine-tuning changed only the decoder |
+| `ftm_{grid,gridres,gridmix,flat}_s{0..4}` | **the causal experiment, replicated**: four arms (original clips, resampled by exactly one semitone, resampled by 0 or 100 cents per clip, tuning-flattened) at five seeds, all on one GPU instance; `replication/` holds an earlier instance's runs of seeds 0 to 2 for the first three arms (arm means agree within 0.05 cents); `swap_*` are the encoder/decoder swap sweeps that show the fine-tuning changed only the decoder |
+| `iter_encodec3_k{1,2,4,8}` | the accumulation test: the headline sweep through EnCodec 1, 2, 4 and 8 times (CPU run, transformers 4.57.6; the k=1 bias reproduces the headline run) |
+| `musicgen_text`, `musicgen_continue`, `hist_musicgen_*` | the downstream-generation test: MusicGen-small text-prompted output and audio-prompted continuations of tuning-flattened GTZAN clips, with their within-semitone densities |
+| `codec_{dac16,dac24,dac44,encodec48,mimi}` | single-reference pitch sweeps per codec, the pilot format that preceded the registration sweeps; superseded by `detune_*` |
+| `pilot_encodec3` | the 2-cent pilot sweep that fixed the 5-cent step |
 | `detune_opus*`, `detune_mp3*` | classical codecs through the registration sweep: the control for "learned" |
 | `detune_encodec3_220`, `detune_encodec3_880` | registration at other registers |
 | `octaves_opus6` | octave test for the one classical condition with a measurable residual |

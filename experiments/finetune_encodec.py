@@ -57,7 +57,7 @@ def main() -> int:
                         "This is the design that works: broad audio means the "
                         "codec cannot overfit the stimulus family, so the "
                         "training pitch density is the only thing that varies.")
-    p.add_argument("--steps", type=int, default=3000)
+    p.add_argument("--steps", type=int, default=4000)   # the paper's runs (infra/pod_run.sh causal5)
     p.add_argument("--batch", type=int, default=16)
     p.add_argument("--lr", type=float, default=1e-5)
     p.add_argument("--bandwidth", type=float, default=3.0)

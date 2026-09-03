@@ -15,7 +15,7 @@ trained with quantiser dropout and degrade gracefully; Mimi and SpeechTokenizer
 were not trained the same way, so verify their low-rate behaviour with a smoke
 test before reading anything into those points.
 
-REAL rate ranges, which differ from the ones currently in the paper's Table 2:
+Rate ranges each checkpoint exposes (these are the values the paper reports):
   encodec_24khz    1.5, 3, 6, 12, 24 kbps   (75 Hz frames, D=128, 1024 codes)
   encodec_48khz    3, 6, 12, 24 kbps        (150 Hz frames, stereo, music model)
   dac_44khz        up to ~8 kbps only       (86 Hz frames, 9 codebooks)
