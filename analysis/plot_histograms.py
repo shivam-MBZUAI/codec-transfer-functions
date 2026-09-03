@@ -53,7 +53,7 @@ for ax, (fname, label, colour) in zip(axes[0], SETS):
         ax.legend(fontsize=6, loc="lower center")
     ax.grid(alpha=0.2, axis="y")
 axes[0][0].set_ylabel("relative density", fontsize=7)
-fig.supxlabel("cents from nearest 12-TET pitch", fontsize=7, y=0.04)
+fig.supxlabel("cents above the 12-TET pitch below", fontsize=7, y=0.04)
 fig.tight_layout(rect=(0, 0.05, 1, 1))
 out = ROOT / "figures" / "pitch_histograms.pdf"
 out.parent.mkdir(exist_ok=True)

@@ -54,10 +54,10 @@ from scipy import stats  # noqa: E402
 # slope of -0.92 from per-condition fits that were noise; they are post hoc
 # relative to the pre-registration and the paper says so. The thresholds below
 # are the ones every reported table uses. Membership of the reported set is
-# insensitive to them: the ten measurable conditions have cv <= 0.21 and
-# retention >= 0.35, and the refusals have cv >= 0.41 (DAC 44k) or retention
-# 0.07 (SNAC 24k), so any cv limit in [0.21, 0.41) and any retention limit in
-# (0.07, 0.35] gives the same table (analysis/guard_sensitivity.py).
+# insensitive to them: the ten measurable conditions have cv <= 0.208 and
+# retention >= 0.349, and the refusals have cv >= 0.407 (DAC 44k) or retention
+# 0.07 (SNAC 24k), so any cv limit in [0.208, 0.407) and any retention limit
+# in (0.068, 0.349] gives the same table (analysis/guard_sensitivity.py).
 MAX_AMP_CV = 0.35        # sd/mean of amplitude across conditions
 MIN_RETENTION = 0.25     # fraction of trials surviving exclusions
 
@@ -179,7 +179,7 @@ def main() -> int:
         ax.set_ylabel("residual phase (degrees)")
         ax.set_title(f"slope {rel:.4f}  [{lo:.4f}, {hi:.4f}]   $R^2$={r2:.5f}",
                      fontsize=7.5)
-        ax.legend(fontsize=6.5); ax.grid(alpha=0.25)
+        ax.legend(fontsize=6.5, loc="lower right"); ax.grid(alpha=0.25)
 
         ax2.plot(offsets, [r[1] for r in rows], "s", color="black", ms=3.5)
         ax2.set_xlabel("reference detuning (cents)")

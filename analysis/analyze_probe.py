@@ -33,6 +33,18 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
 
 
 
+def _rayleigh(ang: np.ndarray) -> float:
+    R = np.hypot(np.cos(ang).mean(), np.sin(ang).mean())
+    n = len(ang); Z = n * R * R
+    return float(np.exp(-Z) * (1 + (2 * Z - Z * Z) / (4 * n)))
+
+
+def _chisq(pos: np.ndarray, bins: int = 10) -> float:
+    from scipy import stats
+    counts = np.histogram(pos, bins=bins, range=(0.0, 100.0))[0]
+    return float(stats.chisquare(counts).pvalue)
+
+
 def main() -> int:
     path = Path(sys.argv[1])
     rows = list(csv.DictReader(path.open()))
@@ -73,7 +85,13 @@ def main() -> int:
         # Rayleigh test for uniformity on the circle.
         Z = n * R * R
         p_val = float(np.exp(-Z) * (1 + (2 * Z - Z * Z) / (4 * n)))
-        print(f"  {q:>6} {n:11d} {dist.mean():21.2f} {p_val:11.2e}")
+        # A codebook with two cells per semitone puts boundaries near 25 and 75
+        # cents, an antipodal pattern the Rayleigh test cannot see (R ~ 0).
+        # Doubling the angle folds antipodes together and exposes it; a
+        # chi-square over ten bins assumes no functional form at all.
+        p2 = _rayleigh(2 * ang)
+        p_chi = _chisq(pos)
+        print(f"  {q:>6} {n:11d} {dist.mean():21.2f} {p_val:11.2e}   doubled-angle p {p2:.2e}   chi2(10 bins) p {p_chi:.2e}")
 
     if all_pos:
         pos = np.concatenate(all_pos)
@@ -88,6 +106,10 @@ def main() -> int:
               f"(uniform expects 25.0)")
         print(f"    resultant length R                   {R:.4f} (0 = uniform)")
         print(f"    Rayleigh p                           {p_val:.3e}")
+        print(f"    doubled-angle Rayleigh p             {_rayleigh(2 * ang):.3e}  (two cells per semitone)")
+        print(f"    chi-square, ten 10-cent bins, p      {_chisq(pos):.3e}")
+        print("    (pooled boundaries are not independent across levels; the per-level")
+        print("     rows above are the primary tests)")
         print(f"    mean position within semitone        {mean_ang/3.6:.1f} cents")
         hist, edges = np.histogram(pos, bins=10, range=(0, 100))
         print(f"\n    position within semitone (10-cent bins):")

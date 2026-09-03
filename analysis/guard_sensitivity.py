@@ -68,7 +68,7 @@ def main() -> int:
     r_hi = min(r for _, _, r in passed)
     r_lo = max(r for _, _, r in refused if r < MIN_RETENTION) if any(r < MIN_RETENTION for _, _, r in refused) else 0.0
     print(f"\n  the same set of conditions is measurable for any cv limit in "
-          f"[{cv_lo:.2f}, {cv_hi:.2f}) and any retention limit in ({r_lo:.2f}, {r_hi:.2f}]")
+          f"[{cv_lo:.3f}, {cv_hi:.3f}) and any retention limit in ({r_lo:.3f}, {r_hi:.3f}]")
     return 0
 
 

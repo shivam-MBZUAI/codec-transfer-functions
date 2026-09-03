@@ -466,10 +466,6 @@ placeholder values.
 
 ![overview](figures/overview.png)
 
-### `pilot_encodec3.png`
-
-![pilot_encodec3](figures/pilot_encodec3.png)
-
 ### `pitch_histograms.png`
 
 ![pitch_histograms](figures/pitch_histograms.png)
@@ -485,10 +481,6 @@ placeholder values.
 ### `residual_shape.png`
 
 ![residual_shape](figures/residual_shape.png)
-
-### `selftest.png`
-
-![selftest](figures/selftest.png)
 
 ## Programme status
 

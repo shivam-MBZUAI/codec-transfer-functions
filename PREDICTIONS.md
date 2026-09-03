@@ -316,9 +316,9 @@ not an embarrassment, and reporting the misses is what makes the hits credible.
 | ID | Predicted | Range | Measured | In range? |
 |---|---|---|---|---|
 | P1 | 2.5x | 1.5 to 4 | 3.27x (EnCodec 3 kbps, off-grid/on-grid median error) | yes |
-| P8 | 50 cents phase shift | 35 to 65 | 50.05 cents (relative slope 1.0010, CI [0.9935, 1.0085]) | yes |
+| P8 | 50 cents phase shift | 35 to 65 | 50.05 cents (relative slope 1.0010, t(8) CI [0.9922, 1.0099]) | yes |
 | P2 | 12 cents | 5 to 20 | 8.88 cents | yes |
-| P3 | 15 cents | 8 to 30 | makam audio is access-restricted. On 200 untouched Carnatic recordings (Saraga) the off-grid median pull is +2.63 cents [2.27, 2.97], amplitude 3.05; on tuning-flattened Western music +2.49 [2.21, 2.81]. The registered quantity was a per-scale-degree displacement on makam, which was not measured; the per-frame corpus measure on Carnatic is well below the registered range | below range (different quantity) |
+| P3 | 15 cents | 8 to 30 | makam audio is access-restricted. On 200 untouched Carnatic recordings (Saraga) the off-grid median pull is +2.63 cents [2.17, 3.14] (bootstrap over clips), amplitude 3.05; on tuning-flattened Western music +2.49 [2.05, 2.98]. The registered quantity was a per-scale-degree displacement on makam, which was not measured; the per-frame corpus measure on Carnatic is well below the registered range | below range (different quantity) |
 | P4 | 1.6x | 1.2 to 2.5 | 1.048x (EnCodec), 0.921x (Mimi), 1.041x (DAC 16k) | **falsified** at the point estimate (all below 1.1); the interval [0.86, 1.25] excludes 1.6 but not 1.1, so the paper adds that the test is underpowered against the grid mechanism specifically |
 | P5 | 1.4x | 1.1 to 2 | no pharyngeal group could be formed; ejective LSD ratio 1.080x, CI [0.91, 1.15] | below range, not falsified; interval includes 1 |
 | P6 | 31% / 9% | 15-50 / 4-15 | at 100 utterances per language: tone 28.1% vs control 77.6% (Whisper, English 28.6%); 32.7% vs 64.8% (MMS); 67.8% vs 154.0% (Mimi, MMS) | **falsified** as registered (relative WER): tone increase is 0.36x, 0.50x and 0.44x the control, not 1.5x. The paper reports this verdict, then notes as an exploratory caveat that the unregistered absolute and headroom normalisations run the other way |
