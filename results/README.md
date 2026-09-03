@@ -19,7 +19,7 @@ produced it.
 | `hist_*` | within-semitone F₀ density of the training corpora |
 | `ftm_grid`, `ftm_flat` | **the causal experiment**: EnCodec fine-tuned on real music, tuning grid present versus flattened |
 | `vib_*` | vibrato sweep, which refuted the out-of-distribution account |
-| `retune_*` | ecological test on real instrument recordings; `retune_synthetic` is its protocol control |
+| `retune_*` | ecological test on isolated NSynth notes; `retune_synthetic` is its protocol control. Analysed by `analysis/analyze_retune.py` |
 | `phon_*` | Experiment 2 (phonological contrasts), three codecs |
 | `asr_*_n100` | Experiment 2 (downstream recognition) at 100 utterances per language, two codecs, two recognisers. **The reported runs** |
 | `corpus_pull_*` | the transfer function on whole polyphonic clips: tuning-flattened GTZAN, and (`corpus_pull_saraga_*`) untouched Carnatic recordings from Saraga. EnCodec pulls both toward the Western grid by about 2.5 cents, Opus neither |

@@ -305,6 +305,23 @@ first two, and writes `figures/spectral_check.pdf`. Expect the fundamental withi
 every bitrate, and the first displaced partial at about 0.9 / 1.3 / 2.2 kHz for 1.5 / 3 / 24 kbps
 (Table A15 in the paper).
 
+## The flat-sampling nulls, the YIN stage, and the isolated-notes recipe
+
+```bash
+python analysis/flat_sampling_null.py                 # 1.070 at 53,678 samples (speech), 1.037 at 180,859 (music)
+python experiments/test_yin_bias.py                   # plain YIN vs the refined estimator on 721 synthetic fundamentals
+python analysis/analyze_retune.py results/retune_encodec3.csv   # 884/3455 usable, +0.007 [-0.232, +0.260]
+```
+`test_yin_bias.py` shows the YIN stage used by the histograms, the MusicGen readings and the
+phonology contours is about 0.2 to 0.3 cents sharp on clean tones and flat across the
+within-semitone position; on MusicGen's polyphonic output it and the refined estimator agree on
+the density's peak/mean (4.28 vs 4.27) but differ by about 2 cents on its absolute offset. Point it
+at a directory of wavs with `--audio-dir` to repeat that comparison. `analyze_retune.py` is the
+recipe behind the isolated-notes rows of the ecological table (usable: both coarse-seeded readings
+agree within 50 cents and the shift is within the 60-cent window; statistic: median shift toward
+the grid for notes 30 cents or more from a grid pitch minus that for notes within 10 cents;
+bootstrap over readings); `--sensitivity` shows the null holds under every gate and split.
+
 ## Table 1's adjusted intervals, phase errors and the DAC 16k gate profile
 
 ```bash

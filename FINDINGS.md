@@ -342,13 +342,21 @@ tones, where the interval sweep puts the effect at 13.7 cents:
 
 | Protocol run on | Displacement | 95% CI |
 |---|---|---|
-| Synthetic tones | **+6.600c** | [+4.237, +9.840] |
-| Real instrument notes, EnCodec | +0.011c | [−0.199, +0.265] |
-| Real instrument notes, DAC | +0.010c | [−0.019, +0.036] |
+| Synthetic tones | **+7.07c** | [+4.71, +10.25] |
+| Real instrument notes, EnCodec | +0.007c | [−0.232, +0.260] |
+| Real instrument notes, DAC | +0.011c | [−0.018, +0.036] |
+
+(Values regenerated 2026-09-03 by the released `analysis/analyze_retune.py`: usable = both
+coarse-seeded readings agree within 50 cents and shift within the 60-cent window, giving the
+original 884/3455, 932/3443 and 355/2000 counts exactly; statistic = median shift toward the grid
+for notes 30 cents or more from a grid pitch minus that for notes within 10 cents; 4000-draw
+bootstrap over readings. The original FINDINGS values, +6.600 / +0.011 / +0.010, came from an
+uncommitted variant of the split; the null is unchanged under every gate and split the script's
+`--sensitivity` table tries.)
 
 The protocol detects the effect where it exists and finds nothing on real
 recordings. The null is a property of the audio, and the interval bounds the
-effect at **at least 24 times smaller** on real instruments than on synthetic
+effect at **at least 18 times smaller** on real instruments than on synthetic
 tones.
 
 We therefore report it as an unexplained boundary rather than attributing it to
