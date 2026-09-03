@@ -31,9 +31,10 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
 ROOT = Path(__file__).resolve().parent.parent
 SETS = [("hist_gtzan.csv", "GTZAN (Western music)", "#0072B2"),
         ("hist_gtzan_detuned.csv", "GTZAN, tuning flattened", "#009E73"),
-        ("hist_librispeech.csv", "LibriSpeech (speech)", "#D55E00")]
+        ("hist_librispeech.csv", "LibriSpeech (speech)", "#D55E00"),
+        ("hist_musicgen_text.csv", "MusicGen output (text-prompted)", "#CC79A7")]
 
-fig, axes = plt.subplots(1, len(SETS), figsize=(5.5, 2.6), sharey=True, squeeze=False)
+fig, axes = plt.subplots(1, len(SETS), figsize=(5.5, 2.4), sharey=True, squeeze=False)
 for ax, (fname, label, colour) in zip(axes[0], SETS):
     p = ROOT / "results" / fname
     if not p.exists():
