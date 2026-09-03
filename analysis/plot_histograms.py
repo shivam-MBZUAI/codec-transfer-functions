@@ -29,10 +29,10 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
 
 
 ROOT = Path(__file__).resolve().parent.parent
-SETS = [("hist_gtzan.csv", "GTZAN (Western music)", "#0072B2"),
-        ("hist_gtzan_detuned.csv", "GTZAN, tuning flattened", "#009E73"),
-        ("hist_librispeech.csv", "LibriSpeech (speech)", "#D55E00"),
-        ("hist_musicgen_text.csv", "MusicGen output (text-prompted)", "#CC79A7")]
+SETS = [("hist_gtzan.csv", "GTZAN", "#0072B2"),
+        ("hist_gtzan_detuned.csv", "GTZAN, flattened", "#009E73"),
+        ("hist_librispeech.csv", "LibriSpeech", "#D55E00"),
+        ("hist_musicgen_text.csv", "MusicGen output", "#CC79A7")]
 
 fig, axes = plt.subplots(1, len(SETS), figsize=(5.5, 2.4), sharey=True, squeeze=False)
 for ax, (fname, label, colour) in zip(axes[0], SETS):
@@ -50,8 +50,8 @@ for ax, (fname, label, colour) in zip(axes[0], SETS):
     ax.axhline(1.0, color="0.4", ls="--", lw=1.2, label="flat (no grid structure)")
     ax.set_title(f"{label}\npeak/mean {d.max():.2f}", fontsize=7)
     ax.tick_params(labelsize=6.5)
-    if ax is axes[0][1]:
-        ax.legend(fontsize=6, loc="lower center")
+    if ax is axes[0][-1]:
+        ax.legend(fontsize=6, loc="upper center")
     ax.grid(alpha=0.2, axis="y")
 axes[0][0].set_ylabel("relative density", fontsize=7)
 fig.supxlabel("cents above the 12-TET pitch below", fontsize=7, y=0.04)
