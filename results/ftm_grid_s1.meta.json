@@ -23,7 +23,7 @@
     "noise_db": null,
     "vowel": false,
     "seed": 20260826,
-    "out": "results/ftm_grid_s1.csv"
+    "out": "results/resweep/ftm_grid_s1.csv"
   },
   "codec": "encodec_ft_encodec_ftm_grid_s1",
   "rate_label": "3.0kbps",

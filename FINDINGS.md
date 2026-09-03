@@ -121,16 +121,20 @@ entire training set.
 
 Replicated at five seeds with two controls for the resampling operation
 (`ftm_*_s?`, `python analysis/summary_causal.py results`): original clips
-4.53 / 4.45 / 4.36 / 4.59 / 4.61 cents (mean 4.51 +- 0.11); the same clips
+4.41 / 4.50 / 4.45 / 4.59 / 4.61 cents (mean 4.51 +- 0.09); the same clips
 resampled by exactly one semitone, which keeps the grid peaked but carries
-the same tempo and spectral artefacts, 4.56 / 4.63 / 4.62 / 4.59 / 4.60 (4.60
-+- 0.03); each clip resampled by 0 or 100 cents, chosen per clip, which keeps
+the same tempo and spectral artefacts, 4.65 / 4.68 / 4.60 / 4.59 / 4.60 (4.62
++- 0.04); each clip resampled by 0 or 100 cents, chosen per clip, which keeps
 the grid peaked and matches the flattened corpus's mean shift of 50 cents,
-4.74 / 4.65 / 4.65 / 4.68 / 4.75 (4.69 +- 0.05); flattened 3.73 / 3.81 / 3.64
-/ 3.80 / 3.71 (3.74 +- 0.07). Neither control weakens the pull; flattening
+4.74 / 4.65 / 4.65 / 4.68 / 4.75 (4.69 +- 0.05); flattened 3.91 / 3.68 / 3.64
+/ 3.80 / 3.71 (3.75 +- 0.11). Neither control weakens the pull; flattening
 does, by 17% against the original clips, 19% against the resampled control
-and 20% against the magnitude-matched control (Welch t 13.8, 26.5 and 25.8;
-all p < 1e-5). All twenty runs keep unit slope (0.995 to 1.001). Comparing checkpoints shows the fine-tuning
+and 20% against the magnitude-matched control (Welch t 12.4, 17.0 and 17.9;
+all p < 1e-5). All twenty runs keep unit slope (0.995 to 0.999). All twenty
+were run on one GPU instance; `results/replication/` holds an earlier
+instance's runs of seeds 0 to 2 for the first three arms (4.45 +- 0.09, 4.60
++- 0.04, 3.73 +- 0.08), fine-tuning not being bitwise deterministic across
+GPUs. Arm means agree within 0.05 cents; single seeds move by up to 0.2. Comparing checkpoints shows the fine-tuning
 changed ONLY the decoder: code assignment is an argmin, so no gradient reaches
 the encoder or the codebooks, and the `swap_*` sweeps confirm that a
 fine-tuned encoder with the stock decoder reproduces stock exactly. The

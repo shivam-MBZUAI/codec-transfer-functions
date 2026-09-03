@@ -1,6 +1,6 @@
 {
   "args": {
-    "codec": "encodec_ft:checkpoints/encodec_ftm_grid_s2@3.0",
+    "codec": "encodec_ft:checkpoints/encodec_ftm_grid_s1@3.0",
     "references": [
       440.0,
       442.5489,
@@ -23,9 +23,9 @@
     "noise_db": null,
     "vowel": false,
     "seed": 20260826,
-    "out": "results/resweep/ftm_grid_s2.csv"
+    "out": "results/ftm_grid_s1.csv"
   },
-  "codec": "encodec_ft_encodec_ftm_grid_s2",
+  "codec": "encodec_ft_encodec_ftm_grid_s1",
   "rate_label": "3.0kbps",
   "sample_rate": 24000,
   "python": "3.12.3",
