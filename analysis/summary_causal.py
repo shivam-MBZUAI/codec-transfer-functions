@@ -12,11 +12,16 @@ Arms:
   gridmix  each clip shifted by 0 or 100 cents, mean 50 (magnitude-matched control)
   flat     each clip shifted by a uniform offset in [0, 100) cents (flattened grid)
 
-    python summary_causal.py ../results
+    python summary_causal.py ../results                  # EnCodec arms, results/ftm_*
+    python summary_causal.py ../results --prefix dacftm  # DAC 16 kHz arms, results/dacftm_*
+
+Arms that have no files are skipped, so a prefix with only grid and flat
+reports those two and the single flat-vs-grid test.
 """
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from pathlib import Path
@@ -56,10 +61,18 @@ def amplitude_and_slope(path: Path) -> tuple[float, float]:
 
 
 def main() -> int:
-    res = Path(sys.argv[1]) if len(sys.argv) > 1 else _ROOT / "results"
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("results", nargs="?", type=Path, default=_ROOT / "results")
+    ap.add_argument("--prefix", default="ftm",
+                    help="file prefix: reads <prefix>_<arm>_s<seed>.csv (default ftm; "
+                         "dacftm for the DAC 16 kHz arms)")
+    opts = ap.parse_args()
+    res = opts.results
     per_arm: dict[str, dict[int, tuple[float, float]]] = {a: {} for a in ARMS}
-    for p in sorted(res.glob("ftm_*_s*.csv")):
-        m = re.match(r"ftm_([a-z]+)_s(\d+)\.csv", p.name)
+    pat = re.compile(rf"{re.escape(opts.prefix)}_([a-z]+)_s(\d+)\.csv")
+    for p in sorted(res.glob(f"{opts.prefix}_*_s*.csv")):
+        m = pat.match(p.name)
         if not m or m.group(1) not in per_arm:
             continue
         per_arm[m.group(1)][int(m.group(2))] = amplitude_and_slope(p)

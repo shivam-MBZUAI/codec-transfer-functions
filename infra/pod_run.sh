@@ -6,6 +6,9 @@
 #   bash infra/pod_run.sh registers    # EnCodec registration at 220 and 880 Hz (CPU)
 #   bash infra/pod_run.sh corpus       # transfer function on real polyphonic music
 #   bash infra/pod_run.sh asr          # Whisper and MMS at 100 utterances per language (GPU)
+#   bash infra/pod_run.sh causal5      # EnCodec decoder fine-tune, four arms x five seeds (GPU)
+#   bash infra/pod_run.sh causal_dac   # the same on DAC 16 kHz Q6, arms grid and flat (GPU)
+#   bash infra/pod_run.sh mgswap       # MusicGen tokens decoded by stock / grid / flat EnCodec 32k (GPU)
 #
 # Every step writes to results/ with a .meta.json sidecar and can be re-run.
 set -euo pipefail
@@ -154,6 +157,66 @@ swap)
   wait
   for f in results/swap_*.csv; do echo "== $f"; python3 analysis/analyze_detuning.py "$f" | tail -n 5; done
   ;;
+causal_dac)
+  # Second codec family for the causal contrast: DAC 16 kHz at Q6, decoder-only
+  # fine-tune (experiments/finetune_dac.py), arms grid and flat, five seeds, on
+  # the same references and reps as causal5. Fine-tunes run two at a time,
+  # then the sweeps four at a time. The stock model is swept on the same
+  # references as well: results/detune_dac16.csv was run on a different
+  # reference list (ten pitches to 90 cents, four reps), so it is not the
+  # matched baseline and is left as it is.
+  R=$(refs 440)
+  ft_one () {
+    local arm=$1 src=$2 seed=$3 tag="dac_ftm_${1}_s${3}"
+    [ -f "checkpoints/${tag}/config.json" ] || python3 experiments/finetune_dac.py \
+        --audio-root "corpora/${src}" --steps 4000 --seed $seed \
+        --out "checkpoints/${tag}" > "logs/${tag}_train.log" 2>&1
+  }
+  sweep_one () {   # $1 codec spec, $2 result tag
+    [ -f "results/${2}.csv" ] || python3 experiments/run_sweep.py --codec "$1" --reps 5 \
+        --references $R --out "results/${2}.csv" > "logs/${2}.log" 2>&1
+  }
+  i=0
+  for seed in 0 1 2 3 4; do
+    for arm in grid:gtzan flat:gtzan_detuned; do
+      ft_one "${arm%%:*}" "${arm#*:}" "$seed" &
+      i=$((i+1)); if [ $((i % 2)) -eq 0 ]; then wait; fi
+    done
+  done
+  wait
+  sweep_one dac16:6 dacftm_stock &
+  i=1
+  for seed in 0 1 2 3 4; do
+    for arm in grid flat; do
+      sweep_one "dac_ft:checkpoints/dac_ftm_${arm}_s${seed}@6" "dacftm_${arm}_s${seed}" &
+      i=$((i+1)); if [ $((i % 4)) -eq 0 ]; then wait; fi
+    done
+  done
+  wait
+  echo "== stock dac16:6"; python3 analysis/analyze_detuning.py results/dacftm_stock.csv | tail -n 5
+  python3 analysis/summary_causal.py results --prefix dacftm
+  ;;
+mgswap)
+  # Same MusicGen tokens through three EnCodec 32 kHz decoders. The decoder is
+  # fine-tuned (decoder-only, as in causal5) on GTZAN (grid) and on tuning-
+  # flattened GTZAN (flat); encodec_32khz supports only 2.2 kbps, which
+  # finetune_encodec.py picks up from the config. The token ids are cached so
+  # a re-run with another decoder decodes the very same generations.
+  for arm in grid:gtzan flat:gtzan_detuned; do
+    name=${arm%%:*}; src=${arm#*:}; tag="encodec32_ftm_${name}_s0"
+    if [ ! -f "checkpoints/${tag}/config.json" ]; then
+      python3 experiments/finetune_encodec.py --model-id facebook/encodec_32khz --audio-root "corpora/${src}" \
+          --steps 4000 --seed 0 --out "checkpoints/${tag}" > "logs/${tag}_train.log" 2>&1 &
+    fi
+  done
+  wait
+  python3 experiments/musicgen_swap.py --n 40 --generate-seconds 10 --seed 0 \
+      --decoders stock=stock grid=checkpoints/encodec32_ftm_grid_s0 flat=checkpoints/encodec32_ftm_flat_s0 \
+      --tokens-cache /workspace/musicgen_tokens --save-audio /workspace/musicgen_swap_audio \
+      --out results/musicgen_swap.csv > logs/musicgen_swap.log 2>&1
+  tail -n 3 logs/musicgen_swap.log
+  python3 analysis/analyze_musicgen_swap.py results/musicgen_swap.csv
+  ;;
 *)
-  echo "usage: $0 {setup|classical|registers|corpus|asr|causal3|causal5|saraga|swap}"; exit 1 ;;
+  echo "usage: $0 {setup|classical|registers|corpus|asr|causal3|causal5|causal_dac|saraga|swap|mgswap}"; exit 1 ;;
 esac

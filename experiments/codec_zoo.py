@@ -499,6 +499,8 @@ REGISTRY = {
     "encodec_untrained": lambda **kw: encodec_untrained(),
     # A fine-tuned EnCodec: build("encodec_ft:/path/to/dir@3.0")
     "encodec_ft": None,
+    # A fine-tuned DAC: build("dac_ft:/path/to/dir@6") (finetune_dac.py output)
+    "dac_ft": None,
     "encodec_shuffled": encodec_shuffled,
     # Iterated round trips: build("encodec_iter:<kbps>@<n>")
     "encodec_iter": None,
@@ -537,6 +539,10 @@ def build(spec: str) -> Codec:
         c = encodec(bandwidth_kbps=float(bw or 3.0), model_id=path)
         return Codec(f"encodec_ft_{Path(path).name}", c.sample_rate,
                      c.rate_label, c.fn)
+    elif name == "dac_ft":
+        path, _, nq = arg.partition("@")
+        c = dac(n_quantizers=int(nq or 6), model_id=path)
+        return Codec(f"dac_ft_{Path(path).name}", c.sample_rate, c.rate_label, c.fn)
     elif name == "encodec_iter":
         bw, _, n = arg.partition("@")
         return encodec_iter(int(n or 2), float(bw or 3.0))

@@ -60,7 +60,14 @@ def main() -> int:
     p.add_argument("--steps", type=int, default=4000)   # the paper's runs (infra/pod_run.sh causal5)
     p.add_argument("--batch", type=int, default=16)
     p.add_argument("--lr", type=float, default=1e-5)
-    p.add_argument("--bandwidth", type=float, default=3.0)
+    p.add_argument("--bandwidth", type=float, default=3.0,
+                   help="must be one of the model's config.target_bandwidths; "
+                        "otherwise the model's first (lowest) bandwidth is used and "
+                        "reported. encodec_32khz supports only 2.2 kbps.")
+    p.add_argument("--model-id", default="facebook/encodec_24khz",
+                   help="checkpoint to fine-tune: facebook/encodec_24khz (the causal "
+                        "experiment) or facebook/encodec_32khz (the decoder MusicGen "
+                        "uses, for musicgen_swap.py)")
     p.add_argument("--wave-weight", type=float, default=10.0)
     p.add_argument("--seed", type=int, default=0,
                    help="seeds torch and the batch sampler; replicate seeds are "
@@ -73,9 +80,22 @@ def main() -> int:
         raise SystemExit("give exactly one of --distribution or --audio-root")
 
     from transformers import EncodecModel
+    from codec_zoo import _rev   # pinned Hugging Face revision (data/fetch_checkpoints.py)
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    model = EncodecModel.from_pretrained("facebook/encodec_24khz").to(dev)
+    model = EncodecModel.from_pretrained(args.model_id, revision=_rev(args.model_id)).to(dev)
     sr = model.config.sampling_rate
+    # The bandwidth must be one the checkpoint was trained at (encode() raises
+    # otherwise). encodec_24khz offers 1.5-24 kbps and the default 3.0 is kept
+    # as is; encodec_32khz offers only 2.2 kbps, so a default not in the list
+    # falls back to the model's first entry and says so.
+    supported = [float(b) for b in model.config.target_bandwidths]
+    bandwidth = float(args.bandwidth)
+    if bandwidth not in supported:
+        bandwidth = supported[0]
+        print(f"bandwidth {args.bandwidth} not supported by {args.model_id} "
+              f"(supported: {supported}); using {bandwidth}", flush=True)
+    args.bandwidth = bandwidth
+    print(f"model {args.model_id}: {sr} Hz, bandwidth {bandwidth} kbps", flush=True)
     model.train()
 
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr)
@@ -124,9 +144,15 @@ def main() -> int:
 
     for step in range(1, args.steps + 1):
         x = next_batch()
-        enc = model.encode(x, bandwidth=args.bandwidth)
-        y = model.decode(enc.audio_codes, enc.audio_scales,
-                         last_frame_pad_length=enc.last_frame_pad_length).audio_values
+        enc = model.encode(x, bandwidth=bandwidth)
+        # audio_scales is a list with one entry per chunk; for a model with
+        # normalize=False (encodec_32khz) the entries are None, and decode()
+        # indexes the list, so a bare None is expanded to [None] per chunk.
+        scales = enc.audio_scales
+        if scales is None:
+            scales = [None] * int(enc.audio_codes.shape[0])
+        pad = getattr(enc, "last_frame_pad_length", None) or 0
+        y = model.decode(enc.audio_codes, scales, last_frame_pad_length=pad).audio_values
         y = y[..., : x.shape[-1]]
         loss = stft_loss(y, x) + args.wave_weight * F.l1_loss(y, x)
         opt.zero_grad(set_to_none=True)
