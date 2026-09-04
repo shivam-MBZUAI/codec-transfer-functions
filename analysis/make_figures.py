@@ -320,7 +320,7 @@ def fig_mechanism():
     (b) bias against rate with the bypass floor and bootstrap intervals,
     (c) the per-frame residual on real music with per-bin intervals,
     (d) the causal experiment: fitted amplitude per seed for the three arms."""
-    fig, axes = plt.subplots(1, 3, figsize=(5.5, 1.7), gridspec_kw={"width_ratios": [1.2, 1.2, 0.95]})
+    fig, axes = plt.subplots(2, 2, figsize=(5.5, 3.5))
     axes = axes.ravel()
     for a_ in axes:
         a_.spines["top"].set_visible(False); a_.spines["right"].set_visible(False)
@@ -349,7 +349,7 @@ def fig_mechanism():
     ax.set_ylim(-16, 36)
     ax.legend(fontsize=5.5, loc="upper left", frameon=False, ncol=2, handlelength=1.2, columnspacing=0.6, labelspacing=0.3); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
 
-    ax = plt.figure().add_subplot(111)   # bitrate panel now lives in fig_rate (appendix)
+    ax = axes[1]
     rates, biases, cis = [], [], []
     for kb in ("1.5", "3", "6", "12", "24"):
         p = RES / f"rate_encodec_{kb}.csv"
@@ -372,9 +372,8 @@ def fig_mechanism():
     ax.set_title("(b) bias vs bitrate", fontsize=7, loc="left")
     ax.legend(fontsize=5.5, frameon=False, loc="lower left", handlelength=1.4); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
 
-    plt.close(ax.figure); plt.figure(fig.number)
-    ax = axes[1]
-    # (b) the transfer function on real polyphonic music: binned median residual
+    ax = axes[2]
+    # (c) the transfer function on real polyphonic music: binned median residual
     # against input position within the semitone, from corpus_pull.py.
     for name, label, ck, ls in [("corpus_pull_encodec3", "EnCodec, GTZAN", "enc", "-"),
                                 ("corpus_pull_saraga_encodec3", "EnCodec, Carnatic", "enc", ":"),
@@ -405,12 +404,12 @@ def fig_mechanism():
     ax.set_xlim(0, 100); ax.set_xticks([0, 25, 50, 75, 100])
     ax.set_xlabel("cents above 12-TET pitch", fontsize=6.5)
     ax.set_ylabel("median residual (cents)", fontsize=6.5)
-    ax.set_title("(b) real music", fontsize=7, loc="left")
+    ax.set_title("(c) real music", fontsize=7, loc="left")
     ax.set_ylim(-6, 13)
     ax.legend(fontsize=5.5, frameon=False, loc="upper left", ncol=2, handlelength=1.2, columnspacing=0.6, labelspacing=0.3); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
 
-    ax = axes[2]
-    # (c) the causal experiment: fitted amplitude per seed for the three arms.
+    ax = axes[3]
+    # (d) the causal experiment: fitted amplitude per seed for the three arms.
     arms = [("grid", "orig.", "black"), ("gridres", "+100", "0.45"),
             ("gridmix", "mix", "0.45"), ("flat", "flat", "black")]
     markers = ["o", "s", "D", "^"]
@@ -433,9 +432,9 @@ def fig_mechanism():
     ax.set_xlabel("fine-tuning corpus (cents)", fontsize=6.5)
     ax.set_xlim(-0.7, 3.7); ax.set_ylim(0, 5.6)
     ax.set_ylabel("amplitude (cents)", fontsize=6.5)
-    ax.set_title("(c) fine-tuned decoder", fontsize=7, loc="left")
+    ax.set_title("(d) fine-tuned decoder", fontsize=7, loc="left")
     ax.tick_params(labelsize=6); ax.grid(alpha=0.2, axis="y")
-    fig.tight_layout(w_pad=0.6); _save(fig, "mechanism")
+    fig.tight_layout(w_pad=1.0, h_pad=0.8); _save(fig, "mechanism")
 
 
 if __name__ == "__main__":
