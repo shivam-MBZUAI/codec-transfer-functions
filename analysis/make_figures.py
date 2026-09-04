@@ -320,7 +320,7 @@ def fig_mechanism():
     (b) bias against rate with the bypass floor and bootstrap intervals,
     (c) the per-frame residual on real music with per-bin intervals,
     (d) the causal experiment: fitted amplitude per seed for the three arms."""
-    fig, axes = plt.subplots(2, 2, figsize=(5.5, 3.5))
+    fig, axes = plt.subplots(2, 2, figsize=(5.5, 2.3))
     axes = axes.ravel()
     for a_ in axes:
         a_.spines["top"].set_visible(False); a_.spines["right"].set_visible(False)
@@ -337,15 +337,22 @@ def fig_mechanism():
         theta, rc = d["theta_cents"], d["residual_coded_cents"]
         m = keep_mask(d) & np.isfinite(rc) & base_reference_mask(d)
         amp, ph, r2 = fit_sinusoid(theta[m], rc[m])
+        # binned medians of the trials behind each fit (5-cent bins folded into one semitone)
+        fold = theta[m] % 100.0
+        edges = np.arange(0, 101, 5)
+        bx = [0.5 * (a + b) for a, b in zip(edges[:-1], edges[1:])]
+        by = [float(np.median(rc[m][(fold >= a) & (fold < b)])) if ((fold >= a) & (fold < b)).sum() > 5 else np.nan
+              for a, b in zip(edges[:-1], edges[1:])]
+        ax.plot(bx, by, "o", color=OKABE[ck], ms=1.8, alpha=0.7 if r2 >= 0.1 else 0.35, zorder=2)
         # fits explaining under 10% of the trial variance are drawn faint
         ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)), color=OKABE[ck],
-                lw=1.8, ls="-" if ck != "grey" else "--", alpha=1.0 if r2 >= 0.1 else 0.45,
-                label=label)
+                lw=1.6, ls="-" if ck != "grey" else "--", alpha=1.0 if r2 >= 0.1 else 0.45,
+                label=label, zorder=3)
     ax.axhline(0, color="0.7", lw=0.8)
     ax.set_xlim(0, 100); ax.set_xticks([0, 25, 50, 75, 100])
     ax.set_xlabel("cents above 12-TET pitch", fontsize=6.5)
     ax.set_ylabel("fitted residual (cents)", fontsize=6.5)
-    ax.set_title("(a) residual, one semitone", fontsize=7, loc="left")
+    ax.set_title("(a) residual, one semitone: binned medians and fits", fontsize=7, loc="left")
     ax.set_ylim(-16, 36)
     ax.legend(fontsize=5.5, loc="upper left", frameon=False, ncol=2, handlelength=1.2, columnspacing=0.6, labelspacing=0.3); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
 
@@ -430,7 +437,8 @@ def fig_mechanism():
         ax.text(i, np.mean(amps) + 0.3, f"{np.mean(amps):.2f}", ha="center", fontsize=5.5)
     ax.set_xticks(range(4)); ax.set_xticklabels([a[1] for a in arms], fontsize=6)
     ax.set_xlabel("fine-tuning corpus (cents)", fontsize=6.5)
-    ax.set_xlim(-0.7, 3.7); ax.set_ylim(0, 5.6)
+    ax.axhline(13.72, color="0.5", lw=0.9, ls="--"); ax.text(3.6, 13.0, "stock 13.72", ha="right", fontsize=5.5, color="0.35")
+    ax.set_xlim(-0.7, 3.7); ax.set_ylim(0, 15)
     ax.set_ylabel("amplitude (cents)", fontsize=6.5)
     ax.set_title("(d) fine-tuned decoder", fontsize=7, loc="left")
     ax.tick_params(labelsize=6); ax.grid(alpha=0.2, axis="y")

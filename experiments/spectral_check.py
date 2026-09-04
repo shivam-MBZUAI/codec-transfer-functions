@@ -323,7 +323,7 @@ def main() -> int:
             ax.tick_params(labelsize=6); ax.grid(alpha=0.25)
             ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
         axes[0].set_ylabel("dB re input peak", fontsize=6.5)
-        axes[1].legend(fontsize=5.5, loc="upper right", frameon=False)
+        axes[0].legend(fontsize=5.5, loc="upper left", frameon=False)
         fig.tight_layout()
         out = Path(args.figure)
         out.parent.mkdir(parents=True, exist_ok=True)
