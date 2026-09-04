@@ -52,7 +52,7 @@ from stimuli import _raised_cosine_ramp, cents_to_ratio, harmonic_tone  # noqa: 
 
 FIELDS = ["codec", "rate_label", "sample_rate", "stimulus", "reference_hz",
           "delta_cents", "rep", "f_in_hz", "k", "f_k_hz", "peak_shift_cents",
-          "in_peak_cents", "width_cents", "zero_level_db", "grid_level_db",
+          "in_peak_cents", "in_level_db", "width_cents", "zero_level_db", "grid_level_db",
           "second_cents", "second_level_db", "est8_cents", "est2_cents"]
 
 SEED = 20260826
@@ -149,6 +149,7 @@ def analyse_tone(codec, x: np.ndarray, f_in: float, nfft: int) -> list[dict]:
     est2 = cents_between(estimate_f0(steady, sr, n_partials=2)[0], f_in)
 
     rows = []
+    ref_db = analyse_partial(db_in, df, f_in)["peak_db"]   # input fundamental's level
     for k in partials_for(f_in, sr):
         ri = analyse_partial(db_in, df, k * f_in)
         ro = analyse_partial(db_out, df, k * f_in)
@@ -157,6 +158,7 @@ def analyse_tone(codec, x: np.ndarray, f_in: float, nfft: int) -> list[dict]:
             f_in_hz=round(f_in, 4), k=k, f_k_hz=round(k * f_in, 3),
             peak_shift_cents=round(ro["peak_cents"], 4),
             in_peak_cents=round(ri["peak_cents"], 4),
+            in_level_db=round(ri["peak_db"] - ref_db, 2),   # input partial level re its fundamental
             width_cents=round(ro["width_cents"], 3),
             zero_level_db=round(ro["zero_level_db"], 3),
             grid_level_db=round(ro["grid_level_db"], 3),

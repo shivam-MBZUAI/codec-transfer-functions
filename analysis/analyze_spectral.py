@@ -50,7 +50,7 @@ EDGE_CENTS = 10.0     # a partial that moved this far is "shifted"
 FLAT_CENTS = 2.0      # a partial that moved less than this is "in place"
 FONT = 7
 
-TEXT_COLS = ("codec", "rate_label", "stimulus")
+TEXT_COLS = ("codec", "rate_label", "stimulus", "sample_rate")
 SUMMARY_FIELDS = ["codec", "rate_label", "stimulus", "sample_rate", "n_tones", "n_partials",
                   "edge_hz", "edge_first_fk_hz", "first_cross_hz", "frac_flat_below", "frac_shifted_above",
                   "n_shifted", "grid_fraction", "est8_m40", "est8_p40", "est2_m40", "est2_p40",
@@ -69,7 +69,7 @@ def load(path: Path) -> dict:
             cols[name] = np.array(vals)
         else:
             cols[name] = np.array([float(v) if v not in ("", "nan") else np.nan for v in vals])
-    cols["label"] = np.array([f"{c} {r}" for c, r in zip(cols["codec"], cols["rate_label"])])
+    cols["label"] = np.array([f"{c} {r} @{int(float(sr))} Hz" for c, r, sr in zip(cols["codec"], cols["rate_label"], cols["sample_rate"])])
     cols["shift"] = cols["peak_shift_cents"] - cols["in_peak_cents"]
     return cols
 
@@ -287,10 +287,16 @@ def main() -> int:
                     help="summary CSV (default: <csv stem>_summary.csv next to the input)")
     ap.add_argument("--figdir", type=Path, default=ROOT / "figures")
     ap.add_argument("--show-bins", action="store_true")
+    ap.add_argument("--min-level-db", type=float, default=None,
+                    help="keep only partials whose input level is within this many dB of the fundamental (needs the in_level_db column)")
     ap.add_argument("--no-figure", action="store_true")
     args = ap.parse_args()
 
     cols = load(args.csv)
+    if args.min_level_db is not None:
+        if "in_level_db" not in cols:
+            raise SystemExit("--min-level-db needs the in_level_db column; rerun spectral_sweep.py")
+        cols = select(cols, cols["in_level_db"] >= -abs(args.min_level_db))
     if args.stimulus != "all":
         cols = select(cols, cols["stimulus"] == args.stimulus)
         if cols["k"].size == 0:
