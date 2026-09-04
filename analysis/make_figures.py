@@ -194,7 +194,7 @@ def fig_overview():
     f1 = d["f1_nominal"]
     offsets_all = (1200.0 * np.log2(f1 / 440.0)) % 100.0
 
-    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(5.5, 2.6),
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(5.5, 2.15),
                                   gridspec_kw={"width_ratios": [1.15, 1]})
     # (a) folded residual, on-grid reference
     m = keep & (np.round(offsets_all, 3) == 0.0)
@@ -320,7 +320,7 @@ def fig_mechanism():
     (b) bias against rate with the bypass floor and bootstrap intervals,
     (c) the per-frame residual on real music with per-bin intervals,
     (d) the causal experiment: fitted amplitude per seed for the three arms."""
-    fig, axes = plt.subplots(1, 3, figsize=(5.5, 1.9), gridspec_kw={"width_ratios": [1.2, 1.2, 0.95]})
+    fig, axes = plt.subplots(1, 3, figsize=(5.5, 1.7), gridspec_kw={"width_ratios": [1.2, 1.2, 0.95]})
     axes = axes.ravel()
     for a_ in axes:
         a_.spines["top"].set_visible(False); a_.spines["right"].set_visible(False)

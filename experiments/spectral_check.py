@@ -307,25 +307,23 @@ def main() -> int:
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
 
-        fig, axes = plt.subplots(2, 2, figsize=(7.0, 4.6), sharey=True, sharex=True)
-        for row, k in enumerate((1, 3)):
-            for ax, delta in zip(axes[row], (-40.0, 40.0)):
-                cents, s_in, s_out = spectra[(440.0, delta, k)]
-                ax.plot(cents, s_in, color="0.6", lw=1.0, label="input")
-                ax.plot(cents, s_out, color="C3", lw=1.0, label=f"EnCodec {args.kbps:g} kbps")
-                ax.axvline(0.0, color="k", lw=0.6, ls=":")
-                # Where this partial would sit if the whole tone were at the
-                # nearest 12-TET fundamental: k * f_grid, i.e. -delta cents.
-                ax.axvline(-delta, color="C0", lw=0.8, ls="--",
-                           label="partial of nearest 12-TET F0")
-                ax.set_xlim(-100, 100)
-                ax.set_ylim(-70, 5)
-                ax.set_title(f"440 Hz, δ = {delta:+.0f} c, partial {k}", fontsize=9)
-                ax.grid(alpha=0.25)
-            axes[row][0].set_ylabel("dB re input peak")
-        for ax in axes[1]:
-            ax.set_xlabel("cents from input partial")
-        axes[0][1].legend(fontsize=7, loc="upper right", frameon=False)
+        # one row: partial 1 and partial 3 at delta = +40 c (the -40 c case
+        # is the mirror image); 5.5 x 1.7 in for a full-width figure at 7 pt
+        fig, axes = plt.subplots(1, 2, figsize=(5.5, 1.5), sharey=True)
+        for ax, k in zip(axes, (1, 3)):
+            delta = 40.0
+            cents, s_in, s_out = spectra[(440.0, delta, k)]
+            ax.plot(cents, s_in, color="0.6", lw=0.9, label="input")
+            ax.plot(cents, s_out, color="C3", lw=0.9, label=f"EnCodec {args.kbps:g} kbps")
+            ax.axvline(0.0, color="k", lw=0.6, ls=":")
+            ax.axvline(-delta, color="C0", lw=0.8, ls="--", label="harmonic of nearest 12-TET $f_0$")
+            ax.set_xlim(-100, 100); ax.set_ylim(-70, 5)
+            ax.set_title(f"({'ab'[k == 3]}) partial {k}, 440 Hz, δ = +40 c", fontsize=7, loc="left")
+            ax.set_xlabel("cents from input partial", fontsize=6.5)
+            ax.tick_params(labelsize=6); ax.grid(alpha=0.25)
+            ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
+        axes[0].set_ylabel("dB re input peak", fontsize=6.5)
+        axes[1].legend(fontsize=5.5, loc="upper right", frameon=False)
         fig.tight_layout()
         out = Path(args.figure)
         out.parent.mkdir(parents=True, exist_ok=True)
