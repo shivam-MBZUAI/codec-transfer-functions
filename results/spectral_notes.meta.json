@@ -1,0 +1,180 @@
+{
+  "runs": [
+    {
+      "args": {
+        "codecs": [
+          "encodec:3",
+          "encodec:24",
+          "dac16:6",
+          "mimi:8"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": "corpora/nsynth",
+        "n_notes": 60,
+        "out": "results/spectral_notes.csv"
+      },
+      "codec_spec": "encodec:3",
+      "codec": "encodec",
+      "rate_label": "3.0kbps",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 52.7,
+      "finished": "2026-09-04T09:25:04",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:3",
+          "encodec:24",
+          "dac16:6",
+          "mimi:8"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": "corpora/nsynth",
+        "n_notes": 60,
+        "out": "results/spectral_notes.csv"
+      },
+      "codec_spec": "encodec:24",
+      "codec": "encodec",
+      "rate_label": "24.0kbps",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 43.7,
+      "finished": "2026-09-04T09:25:48",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:3",
+          "encodec:24",
+          "dac16:6",
+          "mimi:8"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": "corpora/nsynth",
+        "n_notes": 60,
+        "out": "results/spectral_notes.csv"
+      },
+      "codec_spec": "dac16:6",
+      "codec": "dac",
+      "rate_label": "Q6",
+      "sample_rate": 16000,
+      "rows": 657,
+      "seconds": 31.4,
+      "finished": "2026-09-04T09:26:20",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:3",
+          "encodec:24",
+          "dac16:6",
+          "mimi:8"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": "corpora/nsynth",
+        "n_notes": 60,
+        "out": "results/spectral_notes.csv"
+      },
+      "codec_spec": "mimi:8",
+      "codec": "mimi",
+      "rate_label": "Q8",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 34.1,
+      "finished": "2026-09-04T09:26:54",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    }
+  ]
+}

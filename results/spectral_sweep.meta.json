@@ -1,0 +1,649 @@
+{
+  "runs": [
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "encodec:1.5",
+      "codec": "encodec",
+      "rate_label": "1.5kbps",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 46.4,
+      "finished": "2026-09-04T09:15:52",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "encodec:3",
+      "codec": "encodec",
+      "rate_label": "3.0kbps",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 37.3,
+      "finished": "2026-09-04T09:16:29",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "encodec:6",
+      "codec": "encodec",
+      "rate_label": "6.0kbps",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 50.7,
+      "finished": "2026-09-04T09:17:20",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "encodec:12",
+      "codec": "encodec",
+      "rate_label": "12.0kbps",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 38.4,
+      "finished": "2026-09-04T09:17:59",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "encodec:24",
+      "codec": "encodec",
+      "rate_label": "24.0kbps",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 43.2,
+      "finished": "2026-09-04T09:18:42",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "dac16:6",
+      "codec": "dac",
+      "rate_label": "Q6",
+      "sample_rate": 16000,
+      "rows": 657,
+      "seconds": 17.4,
+      "finished": "2026-09-04T09:19:00",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "dac24:8",
+      "codec": "dac",
+      "rate_label": "Q8",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 32.2,
+      "finished": "2026-09-04T09:19:32",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "mimi:8",
+      "codec": "mimi",
+      "rate_label": "Q8",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 38.0,
+      "finished": "2026-09-04T09:20:10",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "snac32",
+      "codec": "snac",
+      "rate_label": "32khz",
+      "sample_rate": 32000,
+      "rows": 720,
+      "seconds": 29.7,
+      "finished": "2026-09-04T09:20:40",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "encodec48:6",
+      "codec": "encodec",
+      "rate_label": "6.0kbps",
+      "sample_rate": 48000,
+      "rows": 720,
+      "seconds": 69.9,
+      "finished": "2026-09-04T09:21:50",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec:1.5",
+          "encodec:3",
+          "encodec:6",
+          "encodec:12",
+          "encodec:24",
+          "dac16:6",
+          "dac24:8",
+          "mimi:8",
+          "snac32",
+          "encodec48:6",
+          "encodec_bypass"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "encodec_bypass",
+      "codec": "encodec_bypass",
+      "rate_label": "no-quantiser",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 41.9,
+      "finished": "2026-09-04T09:22:33",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec_ft:checkpoints/encodec_ftm_grid_s0@3.0",
+          "encodec_ft:checkpoints/encodec_ftm_flat_s0@3.0"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "encodec_ft:checkpoints/encodec_ftm_grid_s0@3.0",
+      "codec": "encodec_ft_encodec_ftm_grid_s0",
+      "rate_label": "3.0kbps",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 50.8,
+      "finished": "2026-09-04T09:23:26",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    },
+    {
+      "args": {
+        "codecs": [
+          "encodec_ft:checkpoints/encodec_ftm_grid_s0@3.0",
+          "encodec_ft:checkpoints/encodec_ftm_flat_s0@3.0"
+        ],
+        "references": [
+          110.0,
+          220.0,
+          440.0,
+          880.0
+        ],
+        "deltas": [
+          -40.0,
+          -20.0,
+          0.0,
+          20.0,
+          40.0
+        ],
+        "reps": 3,
+        "duration": 1.0,
+        "partials": 12,
+        "nfft": 1048576,
+        "notes": null,
+        "n_notes": 60,
+        "out": "results/spectral_sweep.csv"
+      },
+      "codec_spec": "encodec_ft:checkpoints/encodec_ftm_flat_s0@3.0",
+      "codec": "encodec_ft_encodec_ftm_flat_s0",
+      "rate_label": "3.0kbps",
+      "sample_rate": 24000,
+      "rows": 717,
+      "seconds": 42.5,
+      "finished": "2026-09-04T09:24:09",
+      "python": "3.12.3",
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.18.1",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.16.1"
+      }
+    }
+  ]
+}
