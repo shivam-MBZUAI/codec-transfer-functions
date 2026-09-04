@@ -1,0 +1,319 @@
+{
+  "args": {
+    "model": "facebook/musicgen-small",
+    "n": 40,
+    "generate_seconds": 10.0,
+    "seed": 0,
+    "guidance_scale": 3.0,
+    "decoders": [
+      "stock=stock",
+      "grid=checkpoints/encodec32_ftm_grid_s0",
+      "flat=checkpoints/encodec32_ftm_flat_s0"
+    ],
+    "out": "results/musicgen_swap.csv",
+    "save_audio": "/workspace/musicgen_swap_audio",
+    "tokens_cache": "/workspace/musicgen_tokens"
+  },
+  "model": "facebook/musicgen-small",
+  "sample_rate": 32000,
+  "frame_rate": 50.0,
+  "decoders": {
+    "stock": "stock",
+    "grid": "checkpoints/encodec32_ftm_grid_s0",
+    "flat": "checkpoints/encodec32_ftm_flat_s0"
+  },
+  "estimators": {
+    "yin": "musicgen_pull.positions_within_semitone (64 ms frames, 32 ms hop, 70-1200 Hz)",
+    "refined": "estimator.estimate_f0, same framing, seeds within 20.0 cents"
+  },
+  "identity_check": [
+    {
+      "prompt_index": 0,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 1,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 2,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 3,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 4,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 5,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 6,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 7,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 8,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 9,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 10,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 11,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 12,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 13,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 14,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 15,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 16,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 17,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 18,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 19,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 20,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 21,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 22,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 23,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 24,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 25,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 26,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 27,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 28,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 29,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 30,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 31,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 32,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 33,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 34,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 35,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 36,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 37,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 38,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    },
+    {
+      "prompt_index": 39,
+      "decoder": "stock",
+      "max_abs_diff": 0.0,
+      "len_generate": 318080,
+      "len_redecode": 318080
+    }
+  ],
+  "identity_check_max": 0.0,
+  "python": "3.12.3",
+  "packages": {
+    "torch": "2.8.0+cu128",
+    "transformers": "5.16.1",
+    "numpy": "2.1.2",
+    "scipy": "1.18.1"
+  }
+}
