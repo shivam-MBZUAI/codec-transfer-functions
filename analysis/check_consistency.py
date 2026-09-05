@@ -807,6 +807,21 @@ def main() -> int:
                     f"caption for {lab.group(1) if lab else name} runs "
                     f"{len(flat)/104:.1f} lines; the cap is three")
 
+    # --- the bibliography ships with the supplement, so an entry nothing
+    # cites is either a dropped citation or padding. Five had accumulated;
+    # two supported claims already in the text and were cited, three went.
+    bibf = ROOT / "refs.bib"
+    if bibf.exists():
+        entries = set(re.findall(r"@\w+\{([^,]+),", bibf.read_text()))
+        allsrc = " ".join(tex.values())
+        cited = {k.strip() for m in re.finditer(
+            r"\\cite[tp]?\*?(?:\[[^\]]*\])?\{([^}]*)\}", allsrc)
+            for k in m.group(1).split(",")}
+        for k in sorted(entries - cited):
+            fails.append(f"refs.bib carries {k!r}, which nothing cites")
+        for k in sorted(cited - entries):
+            fails.append(f"{k!r} is cited but absent from refs.bib")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -902,6 +917,7 @@ def main() -> int:
     print("  - the between-run table reproduces from its five runs")
     print("  - every table using a dash says what a dash means")
     print("  - no caption runs past three lines")
+    print("  - every bibliography entry is cited, and every citation is in the bib")
     return 0
 
 
