@@ -337,6 +337,31 @@ def main() -> int:
                 fails.append(f"confirmatory prose: {m.group(0)!r} but {crossing} "
                              f"of the tabulated intervals cross a boundary")
 
+    # --- the non-Western flip arithmetic: the two corpus counts must sum to
+    # the total, the control split must sum to its own total, and the task
+    # change must be the tabulated gain and loss over sixty recordings.
+    m = re.search(r"(\d+)\s*\nrecordings change which fits better.*?(\d+)\s*\n?of 200 "
+                  r"Saraga.*?flips (\d+) of 60.*?the (\w+) control\s*\n?flips[^.]*?"
+                  r"split (\w+) toward and (\w+) away", apx, re.S)
+    if m is None:
+        fails.append("flip arithmetic: the Saraga/makam sentence did not parse")
+    else:
+        total, saraga, makam = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        ctrl, toward, away = (count_word(x) for x in m.group(4, 5, 6))
+        if saraga + makam != total:
+            fails.append(f"flip arithmetic: {saraga} + {makam} != {total} flips")
+        if toward + away != ctrl:
+            fails.append(f"flip arithmetic: control split {toward}+{away} != {ctrl}")
+    m = re.search(r"(\w+) of sixty recordings losing their class and (\w+)\s*\n?"
+                  r"gaining one.*?\$(-\d+)/60\$ against", apx, re.S)
+    if m is None:
+        fails.append("flip arithmetic: the makam task-level sentence did not parse")
+    else:
+        lost, gained, net = count_word(m.group(1)), count_word(m.group(2)), int(m.group(3))
+        if gained - lost != net:
+            fails.append(f"flip arithmetic: {gained} gained minus {lost} lost is "
+                         f"{gained - lost}/60, but {net}/60 is reported")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -415,6 +440,7 @@ def main() -> int:
     print("  - the appendix contents list matches the appendix")
     print("  - every float label matches its environment")
     print("  - every count the prose draws from the confirmatory table")
+    print("  - the non-Western flip counts add up")
     return 0
 
 
