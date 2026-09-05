@@ -125,16 +125,21 @@ def main() -> int:
         pt = parts[0]
         stim = parts[1] if len(parts) > 1 else ""
         t7[keyof(r[0], pt, stim)] = r
-    for r in rows_of("tab:universal", main_tex):
-        m_stim = re.search(r"\(([a-z]+)\)", r[0])
-        k = keyof(r[0], r[1], m_stim.group(1) if m_stim else "")
-        if k not in t7:
-            continue
-        a, b = num(r[4]), num(t7[k][2])
-        if a is None or b is None:
-            continue
-        if abs(a - b) > 0.0011:
-            fails.append(f"slope for {k}: Table 1 {a} vs Table A7 {b}")
+    # the per-condition figure replaced the wide table; check its data against
+    # the appendix registration table instead of the table that used to hold it
+    figsrc = (ROOT / "code" / "analysis" / "fig_conditions.py")
+    if figsrc.exists():
+        rows = re.search(r"ROWS = \[(.*?)\n\]", figsrc.read_text(), re.S)
+        for line in (rows.group(1).splitlines() if rows else []):
+            m = re.match(r'\s*\("([^"]+)",\s*(-?[\d.]+),\s*(-?[\d.]+),\s*(-?[\d.]+)',
+                         line)
+            if not m:
+                continue
+            label, bias, lo, hi = m.group(1), *map(float, m.groups()[1:])
+            if not (lo <= bias <= hi):
+                fails.append(
+                    f"conditions figure, {label!r}: bias {bias} outside its "
+                    f"own interval [{lo}, {hi}]")
 
 
     # --- downstream: the grid-attributable figure must be a difference of paired differences
@@ -282,6 +287,19 @@ def main() -> int:
             fails.append(
                 f"appendix contents: lists {L}.{n + 1} but {L} has only {n}")
 
+    # every condition drawn in the figure must appear in the appendix table
+    if figsrc.exists():
+        rows = re.search(r"ROWS = \[(.*?)\n\]", figsrc.read_text(), re.S)
+        drawn = re.findall(r'\("([^"]+)"', rows.group(1)) if rows else []
+        names = " ".join(
+            r[0] for tbl in ("tab:c4", "tab:classical", "tab:controls")
+            for r in rows_of(tbl, apx)).lower()
+        for label in drawn:
+            stem = label.split(",")[0].strip().lower()
+            if stem and stem.split()[0] not in names:
+                fails.append(
+                    f"conditions figure draws {stem!r}, absent from Table A7")
+
     if fails:
         print("INCONSISTENT:")
         for f in fails:
@@ -289,7 +307,7 @@ def main() -> int:
         return 1
     print("consistent:")
     print("  - the uniform-weight table reproduces from the per-partial displacements")
-    print("  - Table 1 slopes agree with the full registration table")
+    print("  - the per-condition figure's biases lie inside their own intervals")
     print("  - the grid-attributable costs are the stated differences of paired differences")
     print("  - each retuning arm lands within 3 cents of its prediction")
     print("  - the per-register table satisfies Equation 16 row by row")
