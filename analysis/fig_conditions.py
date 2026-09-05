@@ -63,7 +63,7 @@ def main() -> int:
            else Path(__file__).resolve().parents[2] / "figures" / "conditions.pdf")
     y = np.arange(len(ROWS))[::-1]
     fig, (axb, axl) = plt.subplots(
-        1, 2, figsize=(5.5, 2.75), sharey=True,
+        1, 2, figsize=(5.5, 2.58), sharey=True,
         gridspec_kw={"width_ratios": [1.55, 1.0], "wspace": 0.06})
     style(axb); style(axl)
 
