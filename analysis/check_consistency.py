@@ -207,7 +207,7 @@ def main() -> int:
                 f"table says {bunif}")
     if reg_bias:
         lo, hi = min(reg_bias), max(reg_bias)
-        m = re.search(r"([\d.]+)\s+to\s+([\d.]+)\s+across\s+four\s+registers",
+        m = re.search(r"([\d.]+)\s+to\s+([\d.]+)\s+across\s+four\s+octaves",
                       " ".join((ROOT / "main.tex").read_text().split()))
         if not m:
             fails.append("abstract: no register range found")
@@ -221,9 +221,8 @@ def main() -> int:
     for r in rows_of("tab:confirmatory", apx):
         edge = num(r[2])
         above = r[3].split()[0] if r[3] else ""
-        lbar, bias = num(r[4]), num(r[6])
-        tab_bunif = num(r[5])
-        assigned = r[8].lower() if len(r) > 8 else ""
+        lbar, bias, tab_bunif = num(r[4]), None, None
+        assigned = r[6].lower() if len(r) > 6 else ""
         if edge is None or not above.isdigit() or lbar is None:
             continue
         want_above = len([k for k in range(1, 9) if k * 440.0 >= edge * 1000])
