@@ -742,6 +742,26 @@ def main() -> int:
                         f"guard grid at cv<={cvlim}, retention>={retlim} says "
                         f"{int(got)}; the exclusion table gives {want}")
 
+    # --- the between-run table's last column is derivable from the three
+    # before it: Combined = sqrt(Within^2 + (2 Sd)^2). All three rows follow
+    # that rule, but the caption said only "in quadrature", so a reader
+    # combining Within with Sd directly gets 0.18 where the table says 0.22.
+    for r in rows_of("tab:betweenrun", apx):
+        if len(r) < 6:
+            continue
+        runs = [float(x) for x in re.findall(r"-?\d+\.?\d*", subst(r[1]))]
+        vals = [num(subst(c)) for c in r[2:6]]
+        if len(runs) < 5 or any(v is None for v in vals):
+            continue
+        mean, sd, within, comb = vals
+        if abs(sum(runs) / len(runs) - mean) > 0.005:
+            fails.append(f"between-run {r[0]!r}: five runs average "
+                         f"{sum(runs)/len(runs):.4f}, table says {mean}")
+        want = (within ** 2 + (2 * sd) ** 2) ** 0.5
+        if abs(want - comb) > 0.006:
+            fails.append(f"between-run {r[0]!r}: sqrt({within}^2 + (2*{sd})^2) "
+                         f"= {want:.4f}, table says {comb}")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -834,6 +854,7 @@ def main() -> int:
     print("  - the paper counts three statistics everywhere")
     print("  - the reproducibility file counts match the repository")
     print("  - the guard grid follows from the exclusion table")
+    print("  - the between-run table reproduces from its five runs")
     return 0
 
 
