@@ -762,6 +762,22 @@ def main() -> int:
             fails.append(f"between-run {r[0]!r}: sqrt({within}^2 + (2*{sd})^2) "
                          f"= {want:.4f}, table says {comb}")
 
+    # --- a dash in a table cell means three different things in this paper
+    # (not defined, not applicable, not reported), so every table that uses
+    # one must say which in its caption. Table A2 additionally had two of its
+    # four columns empty for two thirds of its rows; that sweep is prose now.
+    for m in re.finditer(r"\\begin\{table\}.*?\\end\{table\}", apx, re.S):
+        blk = m.group(0)
+        body = blk[blk.find("\\toprule"):]
+        n = len(re.findall(r"&\s*--\s*(?=&|\\\\)", body))
+        if not n:
+            continue
+        lab = re.search(r"\\label\{(tab:[^}]+)\}", blk)
+        cap = re.search(r"\\caption\{(.*?)\}\s*\n?\\label", blk, re.S)
+        if not (cap and "dash" in cap.group(1).lower()):
+            fails.append(f"{lab.group(1) if lab else 'a table'} uses {n} dash "
+                         f"cells without saying in its caption what a dash means")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -855,6 +871,7 @@ def main() -> int:
     print("  - the reproducibility file counts match the repository")
     print("  - the guard grid follows from the exclusion table")
     print("  - the between-run table reproduces from its five runs")
+    print("  - every table using a dash says what a dash means")
     return 0
 
 
