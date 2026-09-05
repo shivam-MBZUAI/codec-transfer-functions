@@ -19,7 +19,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
-EXP, RES, FIG = ROOT / "experiments", ROOT / "results", ROOT / "figures"
+# FIG must be the *paper's* figures directory, not code/figures. It was the
+# latter for many rounds, so every figure this script produced was written
+# somewhere main.tex does not read: eight of them had silently diverged from
+# the copies the paper was compiling, some by more than a day.
+PAPER = ROOT.parent
+EXP, RES, FIG = ROOT / "experiments", ROOT / "results", PAPER / "figures"
 FIG.mkdir(exist_ok=True)
 sys.path.insert(0, str(EXP))
 _ROOT = Path(__file__).resolve().parent.parent
@@ -230,7 +235,7 @@ def fig_overview():
     f1 = d["f1_nominal"]
     offsets_all = (1200.0 * np.log2(f1 / 440.0)) % 100.0
 
-    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(5.5, 1.45),
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(5.5, 1.58),
                                   gridspec_kw={"width_ratios": [1.15, 1]})
     # (a) folded residual, on-grid reference
     m = keep & (np.round(offsets_all, 3) == 0.0)
@@ -240,13 +245,17 @@ def fig_overview():
     amp, ph, r2 = fit_sinusoid(theta[m], rc[m])
     gx = np.linspace(0, 100, 300)
     ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)), color="black", lw=1.7)
-    ax.annotate("pulled up toward\nnext semitone", xy=(80, 13), xytext=(52, 36),
-                fontsize=6.5, ha="center",
-                arrowprops=dict(arrowstyle="->", lw=0.8, color="0.3"))
-    ax.annotate("pulled down toward\nprevious semitone", xy=(30, -13), xytext=(50, -44),
-                fontsize=6.5, ha="center",
-                arrowprops=dict(arrowstyle="->", lw=0.8, color="0.3"))
-    ax.set_xlim(0, 100); ax.set_ylim(-55, 55)
+    # the corners the scatter does not reach; at x = 50 these annotations
+    # printed straight over the densest part of the cloud and the fitted curve
+    ax.annotate("pulled up", xy=(82, 14), xytext=(93, 41),
+                fontsize=6.4, ha="center", color="0.25",
+                arrowprops=dict(arrowstyle="->", lw=0.7, color="0.45",
+                                shrinkB=2))
+    ax.annotate("pulled down", xy=(32, -14), xytext=(19, -43),
+                fontsize=6.4, ha="center", color="0.25",
+                arrowprops=dict(arrowstyle="->", lw=0.7, color="0.45",
+                                shrinkB=2))
+    ax.set_xlim(0, 100); ax.set_ylim(-58, 58)
     ax.set_xticks([0, 25, 50, 75, 100])
     ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=8)
     ax.set_ylabel("residual (cents)", fontsize=8)
@@ -280,7 +289,10 @@ def fig_overview():
     ax2.set_ylabel("phase shift (deg)", fontsize=8)
     ax2.set_title("(b) phase against detuning",
                   fontsize=8)
-    ax2.legend(fontsize=6.5, loc="upper left", frameon=False); ax2.tick_params(labelsize=7); ax2.grid(alpha=0.2)
+    ax2.legend(fontsize=6.4, loc="upper left", frameon=True, framealpha=0.92,
+               edgecolor="none", facecolor="white", borderpad=0.25,
+               labelspacing=0.3, handlelength=1.5)
+    ax2.tick_params(labelsize=7); ax2.grid(alpha=0.2)
     fig.tight_layout(w_pad=0.4); _save(fig, "overview")
     print(f"  overview.png   (slope {rel:.4f} [{lo:.4f}, {hi:.4f}] R2 {r2b:.5f}, amp {amp:.2f})")
 

@@ -506,6 +506,27 @@ def main() -> int:
                 fails.append(f"conditions figure: {name} draws ladder {l} against "
                              f"a sign mean of {(flat + sharp) / 2:.3f}")
 
+    # --- there must be exactly one figures directory, and it must be the one
+    # main.tex reads. make_figures.py wrote to code/figures for many rounds
+    # while the paper compiled figures/, so eight figures had silently
+    # diverged from the copies being generated; regenerating fixed nothing
+    # because the output never reached the paper.
+    stray = ROOT / "code" / "figures"
+    if stray.exists():
+        fails.append("code/figures exists: a second figures directory means "
+                     "regenerated figures need not be the ones the paper uses")
+    figdir = ROOT / "figures"
+    included = set(re.findall(r"\\includegraphics\[[^\]]*\]\{figures/([^}]+)\}",
+                              "\n".join(tex.values())))
+    for name in sorted(included):
+        if not (figdir / name).exists():
+            fails.append(f"main.tex includes figures/{name}, which does not exist")
+    for f in sorted(figdir.glob("*.pdf")):
+        png = f.with_suffix(".png")
+        if png.exists() and png.stat().st_mtime < f.stat().st_mtime - 1:
+            fails.append(f"figures/{png.name} is older than its PDF; a preview "
+                         f"read from it will not be what the paper shows")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -588,6 +609,7 @@ def main() -> int:
     print("  - the word before every reference matches its label")
     print("  - every named external resource is cited")
     print("  - the conditions figure matches the tables it is drawn from")
+    print("  - one figures directory, and every included figure is in it")
     return 0
 
 
