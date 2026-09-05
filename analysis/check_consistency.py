@@ -202,7 +202,8 @@ def main() -> int:
                 f"table says {bunif}")
     if reg_bias:
         lo, hi = min(reg_bias), max(reg_bias)
-        m = re.search(r"([\d.]+) to ([\d.]+) across four registers", (ROOT / "main.tex").read_text())
+        m = re.search(r"([\d.]+)\s+to\s+([\d.]+)\s+across\s+four\s+registers",
+                      " ".join((ROOT / "main.tex").read_text().split()))
         if not m:
             fails.append("abstract: no register range found")
         elif abs(float(m.group(1)) - lo) > 0.06 or abs(float(m.group(2)) - hi) > 0.06:
