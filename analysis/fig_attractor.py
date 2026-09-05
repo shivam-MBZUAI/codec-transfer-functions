@@ -73,7 +73,7 @@ def panel_move(ax):
     ax.set_xticks([0, 10, 20, 30, 40])
     ax.set_xlabel("residual's zero crossing: where the decoder's grid sits (cents)",
                   fontsize=6.8, color="0.2")
-    ax.set_title("(a) retuning the corpus moves the grid with it",
+    ax.set_title("retuning the corpus moves the grid with it",
                  fontsize=7.2, loc="left", color="0.12")
     ax.grid(axis="x", alpha=0.14, lw=0.6)
 
@@ -105,12 +105,10 @@ def panel_decompose(ax):
 def main() -> int:
     out = (Path(sys.argv[1]) if len(sys.argv) > 1
            else Path(__file__).resolve().parents[2] / "figures" / "attractor.pdf")
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(5.5, 1.95),
-                                   gridspec_kw={"width_ratios": [1.42, 1.0]})
-    style(ax1); style(ax2)
+    fig, ax1 = plt.subplots(1, 1, figsize=(5.5, 1.72))
+    style(ax1)
     panel_move(ax1)
-    panel_decompose(ax2)
-    fig.tight_layout(w_pad=1.6)
+    fig.tight_layout()
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out); fig.savefig(out.with_suffix(".png"), dpi=220)
     print(f"wrote {out}")

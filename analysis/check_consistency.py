@@ -185,6 +185,31 @@ def main() -> int:
         if abs(got - (base + 33)) > 3.0:
             fails.append(f"retune row {r[0]!r}: crossing {got} against {base + 33:.1f} predicted")
 
+    # --- the per-register table must satisfy Equation 16 row by row, and its
+    # bias column must be the range the abstract quotes
+    reg_bias = []
+    for r in rows_of("tab:registeredge", apx):
+        above = r[2].split()[0] if r[2] else ""
+        lbar, bunif, meas = num(r[3]), num(r[4]), num(r[5])
+        if meas is not None:
+            reg_bias.append(meas)
+        if lbar is None or bunif is None or not above.isdigit():
+            continue
+        want = 40.0 * lbar * int(above) / 8.0
+        if abs(want - bunif) > 0.15:
+            fails.append(
+                f"register row {r[0]!r}: 40*{lbar}*{above}/8 = {want:.1f}, "
+                f"table says {bunif}")
+    if reg_bias:
+        lo, hi = min(reg_bias), max(reg_bias)
+        m = re.search(r"([\d.]+) to ([\d.]+) across four registers", (ROOT / "main.tex").read_text())
+        if not m:
+            fails.append("abstract: no register range found")
+        elif abs(float(m.group(1)) - lo) > 0.06 or abs(float(m.group(2)) - hi) > 0.06:
+            fails.append(
+                f"abstract quotes {m.group(1)} to {m.group(2)} across registers, "
+                f"the table gives {lo:.2f} to {hi:.2f}")
+
     if fails:
         print("INCONSISTENT:")
         for f in fails:
@@ -195,6 +220,8 @@ def main() -> int:
     print("  - Table 1 slopes agree with the full registration table")
     print("  - the grid-attributable costs are the stated differences of paired differences")
     print("  - each retuning arm lands within 3 cents of its prediction")
+    print("  - the per-register table satisfies Equation 16 row by row")
+    print("  - the abstract's register range is that table's bias column")
     return 0
 
 
