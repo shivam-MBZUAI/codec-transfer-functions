@@ -300,6 +300,19 @@ def main() -> int:
                 fails.append(
                     f"conditions figure draws {stem!r}, absent from Table A7")
 
+    # --- a float's label prefix must match the environment it sits in, or
+    # prose that writes "Table \\ref{...}" will render "Table 3" for a figure
+    for src, name in ((main_tex, "results"), (apx, "appendix"),
+                      ((ROOT / "sections" / "03_method.tex").read_text(), "method")):
+        for m in re.finditer(r"\\begin\{(figure|table)\}\*?(.*?)\\end\{\1\}", src, re.S):
+            env, body = m.group(1), m.group(2)
+            for lbl in re.findall(r"\\label\{((?:tab|fig):[^}]+)\}", body):
+                want = "fig" if env == "figure" else "tab"
+                if not lbl.startswith(want):
+                    fails.append(
+                        f"{name}: {lbl!r} labels a {env}; prose citing it will "
+                        f"print the wrong float word")
+
     if fails:
         print("INCONSISTENT:")
         for f in fails:
@@ -315,6 +328,7 @@ def main() -> int:
     print("  - the confirmatory table's edges, tiers and ratios all cohere")
     print("  - every table and figure is cited from prose")
     print("  - the appendix contents list matches the appendix")
+    print("  - every float label matches its environment")
     return 0
 
 
