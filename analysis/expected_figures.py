@@ -143,21 +143,16 @@ def panel_partials(ax):
 def main() -> int:
     out = (Path(sys.argv[1]) if len(sys.argv) > 1
            else Path(__file__).resolve().parent.parent / "figures" / "band_edge_expected.pdf")
-    fig = plt.figure(figsize=(5.5, 2.85))
-    gs = fig.add_gridspec(2, 2, height_ratios=[1.05, 1.25],
-                          width_ratios=[1.0, 1.05], hspace=0.95, wspace=0.62)
-    axp = fig.add_subplot(gs[0, :])
+    fig = plt.figure(figsize=(5.5, 2.45))
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.15, 1.0], hspace=0.85)
+    axp = fig.add_subplot(gs[0, 0])
     axa = fig.add_subplot(gs[1, 0])
-    axb = fig.add_subplot(gs[1, 1])
-    style(axp); style(axa); style(axb)
+    style(axp); style(axa)
     panel_partials(axp)
     panel_a(axa)
-    panel_b(axb)
     axa.set_title("(b) how much of the spectrum is invented",
                   fontsize=7, loc="left", color="0.12")
-    axb.set_title("(c) where the partials land", fontsize=7, loc="left",
-                  color="0.12")
-    fig.subplots_adjust(left=0.125, right=0.985, top=0.93, bottom=0.17)
+    fig.subplots_adjust(left=0.125, right=0.985, top=0.93, bottom=0.19)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out)
     fig.savefig(out.with_suffix(".png"), dpi=220)
