@@ -259,6 +259,29 @@ def main() -> int:
     for orphan in sorted(labels - cited):
         fails.append(f"float {orphan!r} is never cited outside its own caption")
 
+    # --- the appendix contents list must match the appendix's own sectioning
+    letter, seen = None, {}
+    for mm in re.finditer(r"\\(section|subsection)\{([^}]*)\}", apx):
+        if mm.group(1) == "section":
+            letter = chr(ord("A") + len(seen)); seen[letter] = 0
+        elif letter:
+            seen[letter] += 1
+    listing = (ROOT / "main.tex").read_text()
+    a = listing.find("\\section*{Appendix contents}")
+    b = listing.find("Where to find each claim")
+    block = listing[a:b] if a >= 0 and b > a else ""
+    for L, n in seen.items():
+        if n == 0:
+            continue
+        want = f"{L}.{n} "
+        if want not in block:
+            fails.append(
+                f"appendix contents: {L} has {n} subsections but the list "
+                f"does not reach {want.strip()}")
+        if f"{L}.{n + 1} " in block:
+            fails.append(
+                f"appendix contents: lists {L}.{n + 1} but {L} has only {n}")
+
     if fails:
         print("INCONSISTENT:")
         for f in fails:
@@ -273,6 +296,7 @@ def main() -> int:
     print("  - the abstract's register range is that table's bias column")
     print("  - the confirmatory table's edges, tiers and ratios all cohere")
     print("  - every table and figure is cited from prose")
+    print("  - the appendix contents list matches the appendix")
     return 0
 
 
