@@ -66,6 +66,10 @@ def main() -> int:
     load_macros()
     apx = APX.read_text()
     main_tex = MAIN.read_text()
+    # every source the guards read; built once, before any of them run
+    tex = {"main": main_tex, "appendix": apx}
+    for f in sorted((ROOT / "sections").glob("*.tex")):
+        tex[f.stem] = f.read_text()
     fails = []
 
     # --- per-partial displacements must reproduce the uniform-weight table
@@ -230,10 +234,12 @@ def main() -> int:
                 f"table says {bunif}")
     if reg_bias:
         lo, hi = min(reg_bias), max(reg_bias)
-        m = re.search(r"([\d.]+)\s+to\s+([\d.]+)\s+across\s+four\s+octaves",
-                      " ".join((ROOT / "main.tex").read_text().split()))
+        allsrc = " ".join(" ".join(tex.values()).split())
+        m = (re.search(r"([\d.]+)\s+to\s+([\d.]+)\s+across\s+four\s+octaves", allsrc)
+             or re.search(r"octaves the bias runs ([\d.]+) to ([\d.]+)", allsrc))
         if not m:
-            fails.append("abstract: no register range found")
+            fails.append("no 'X to Y across four octaves' claim found to check "
+                         "against the register table")
         elif abs(float(m.group(1)) - lo) > 0.06 or abs(float(m.group(2)) - hi) > 0.06:
             fails.append(
                 f"abstract quotes {m.group(1)} to {m.group(2)} across registers, "
@@ -396,9 +402,6 @@ def main() -> int:
     WORDS = {"fig": {"Figure", "Figures"}, "tab": {"Table", "Tables"},
              "sec": {"Section", "Sections", "Appendix", "Appendices"},
              "eq": {"Equation", "Equations"}}
-    tex = {"main": main_tex, "appendix": apx}
-    for f in sorted((ROOT / "sections").glob("*.tex")):
-        tex[f.stem] = f.read_text()
     for name, src in tex.items():
         for m in re.finditer(r"(\w+)[\s~]+(?:and[\s~]+)?\\ref\{(fig|tab|sec|eq):", src):
             word, kind = m.group(1), m.group(2)
@@ -546,6 +549,64 @@ def main() -> int:
             fails.append(f"figures/{png.name} is older than its PDF; a preview "
                          f"read from it will not be what the paper shows")
 
+    # --- a ladder fraction quoted in the main text must be the one Figure
+    # \ref{fig:conditions} draws for that row. The prose quoted the flat-side
+    # column for WavTokenizer and BigVGAN while the figure plotted the mean
+    # over detuning signs, and quoted the mean for EnCodec, so the main text
+    # disagreed with the figure and with itself.
+    if figsrc.exists():
+        blk = re.search(r"ROWS = \[(.*?)\n\]", figsrc.read_text(), re.S)
+        drawnl = {m.group(1): m.group(2) for m in re.finditer(
+            r'\("([^"]+)",\s*(?:-?[\d.]+,\s*){3}(None|-?[\d.]+)',
+            blk.group(1) if blk else "")}
+        QUOTED = {"WavLadderMean": "WavTokenizer, 0.9 kbps",
+                  "VocLadderMean": "BigVGAN (vocoder)"}
+        for macro, row in QUOTED.items():
+            if macro not in MACROS or row not in drawnl:
+                fails.append(f"ladder quote: {macro} or {row!r} not found")
+                continue
+            want, got = drawnl[row], MACROS[macro].strip()
+            if want == "None" or abs(float(want) - float(got)) > 0.005:
+                fails.append(f"ladder quote: prose macro {macro} is {got} but "
+                             f"Figure 3 draws {want} for {row}")
+
+    # --- a straight double quote typesets as a closing quote at both ends,
+    # so `"the corpus's tuning"` printed as }the corpus's tuning}. LaTeX wants
+    # ``...''. Comments are exempt.
+    for name, src in tex.items():
+        for ln, line in enumerate(src.split("\n"), 1):
+            if line.lstrip().startswith("%"):
+                continue
+            body = line.split("%")[0]
+            if '"' in body:
+                fails.append(f"{name}:{ln}: straight double quote in body text; "
+                             f"use ``...'' so the opening quote is not reversed")
+
+    # --- a bare label like "eq:pullshare" printed as literal text means a
+    # \ref was stripped instead of resolved; the appendix contents list, which
+    # is generated, leaked one this way.
+    for name, src in tex.items():
+        for m in re.finditer(r"(?<![\\{a-zA-Z])((?:tab|fig|sec|eq|prop):[a-z0-9-]+)", src):
+            before = src[max(0, m.start() - 8):m.start()]
+            if "ref{" in before or "label{" in before or "}{" in before:
+                continue
+            fails.append(f"{name}: bare label {m.group(1)!r} in body text; it "
+                         f"will print literally")
+
+    # --- em-dashes had spread to twenty-six in nine pages of main text, which
+    # reads as punctuation by reflex rather than by choice. Most were doing the
+    # work of a colon, a semicolon or a full stop.
+    MAIN_FILES = ("main", "01_intro", "02_related", "03_method", "04_pitch",
+                  "07_discussion")
+    n_dash = 0
+    for name in MAIN_FILES:
+        src = tex.get(name, "")
+        n_dash += sum(l.split("%")[0].count("---")
+                      for l in src.split("\n") if not l.lstrip().startswith("%"))
+    if n_dash > 6:
+        fails.append(f"main text uses {n_dash} em-dashes; keep it under six so "
+                     f"they read as a choice")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -618,7 +679,7 @@ def main() -> int:
     print("  - the grid-attributable costs are the stated differences of paired differences")
     print("  - each retuning arm lands within 3 cents of its prediction")
     print("  - the per-register table satisfies Equation 16 row by row")
-    print("  - the abstract's register range is that table's bias column")
+    print("  - the register range in prose is that table's bias column")
     print("  - the confirmatory table's edges, tiers and ratios all cohere")
     print("  - every table and figure is cited from prose")
     print("  - the appendix contents list matches the appendix")
@@ -629,6 +690,10 @@ def main() -> int:
     print("  - every named external resource is cited")
     print("  - the conditions figure matches the tables it is drawn from")
     print("  - one figures directory, and every included figure is in it")
+    print("  - ladder fractions quoted in prose match the figure")
+    print("  - no straight double quotes in body text")
+    print("  - no bare labels printed as text")
+    print("  - em-dashes in the main text stay rare")
     return 0
 
 
