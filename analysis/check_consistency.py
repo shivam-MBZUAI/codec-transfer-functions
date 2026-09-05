@@ -607,6 +607,19 @@ def main() -> int:
         fails.append(f"main text uses {n_dash} em-dashes; keep it under six so "
                      f"they read as a choice")
 
+    # --- a sec: label defined in the appendix must be introduced as an
+    # Appendix, not a Section. The generic reference-word guard cannot catch
+    # this, because sec: covers both; "Section H holds content fixed" printed
+    # for a label that had moved into the appendix.
+    apx_secs = set(re.findall(r"\\label\{(sec:[^}]+)\}", apx))
+    for name, src in tex.items():
+        if name == "09_appendix":
+            continue
+        for m in re.finditer(r"(\w+)[\s~]*\\ref\{(sec:[^}]+)\}", src):
+            if m.group(2) in apx_secs and m.group(1) in ("Section", "Sections"):
+                fails.append(f"{name}: {m.group(1)!r} introduces "
+                             f"{m.group(2)!r}, which is an appendix section")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -694,6 +707,7 @@ def main() -> int:
     print("  - no straight double quotes in body text")
     print("  - no bare labels printed as text")
     print("  - em-dashes in the main text stay rare")
+    print("  - appendix sections are called Appendix, not Section")
     return 0
 
 
