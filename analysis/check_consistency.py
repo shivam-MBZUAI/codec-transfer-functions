@@ -247,6 +247,18 @@ def main() -> int:
                     f"confirmatory {r[0]!r}: bias/b_unif = "
                     f"{bias / bunif:.2f}, outside the observed 0.15-0.75")
 
+    # --- every float must be cited from prose, not only from its own caption
+    all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
+    for extra in ("01_intro", "07_discussion", "05_phonology"):
+        fp = ROOT / "sections" / f"{extra}.tex"
+        if fp.exists():
+            all_tex += fp.read_text()
+    prose = re.sub(r"\\caption\{(?:[^{}]|\{[^{}]*\})*\}", " ", all_tex)
+    labels = set(re.findall(r"\\label\{((?:tab|fig):[^}]+)\}", all_tex))
+    cited = set(re.findall(r"\\ref\{((?:tab|fig):[^}]+)\}", prose))
+    for orphan in sorted(labels - cited):
+        fails.append(f"float {orphan!r} is never cited outside its own caption")
+
     if fails:
         print("INCONSISTENT:")
         for f in fails:
@@ -260,6 +272,7 @@ def main() -> int:
     print("  - the per-register table satisfies Equation 16 row by row")
     print("  - the abstract's register range is that table's bias column")
     print("  - the confirmatory table's edges, tiers and ratios all cohere")
+    print("  - every table and figure is cited from prose")
     return 0
 
 
