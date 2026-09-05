@@ -76,7 +76,7 @@ def panel_a(ax):
     base = y[-1] - h / 2 - 0.40
     for k in range(1, 9):
         ax.plot([k * F0, k * F0], [base, base + 0.17], color=MUTED, lw=0.7)
-    ax.text(8 * F0 + 0.12, base + 0.08, "the eight partials",
+    ax.text(8 * F0 + 0.12, base + 0.08, "the probe's eight partials",
             fontsize=5.6, color=MUTED, va="center")
 
     ax.text(EDGE[0] / 2, y[0], "kept", fontsize=6.0, color="0.30",
@@ -116,8 +116,12 @@ def panel_b(ax):
     ax.set_yticks(y)
     ax.set_yticklabels([b[0] for b in BARS], fontsize=6.0)
     for tick, (_, _, _, fam) in zip(ax.get_yticklabels(), BARS):
-        tick.set_color(COLOR[fam])
-    ax.set_xlim(-0.18, 1.20)
+        pass
+    for fam, name in FAMILY.items():
+        ax.plot([], [], "o", color=COLOR[fam], ms=3.8, ls="none", label=name)
+    ax.legend(fontsize=5.0, loc="lower right", frameon=False, handlelength=0.8,
+              borderpad=0.1, labelspacing=0.22, handletextpad=0.35)
+    ax.set_xlim(-0.18, 1.34)
     ax.set_ylim(y[-1] - 0.7, y[0] + 0.7)
     ax.set_xticks([0.0, 0.5, 1.0])
     ax.set_xticklabels(["0.0\ninput's own\nharmonic", "0.5",
@@ -153,7 +157,7 @@ def main() -> int:
                   fontsize=7, loc="left", color="0.12")
     axb.set_title("(c) where the partials land", fontsize=7, loc="left",
                   color="0.12")
-    fig.subplots_adjust(left=0.10, right=0.985, top=0.93, bottom=0.17)
+    fig.subplots_adjust(left=0.125, right=0.985, top=0.93, bottom=0.17)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out)
     fig.savefig(out.with_suffix(".png"), dpi=220)

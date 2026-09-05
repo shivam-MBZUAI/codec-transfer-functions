@@ -71,7 +71,7 @@ def draw(ax):
     ax.set_yticks([-40, -20, 0])
     ax.set_xticks([0, 1, 2, 3, 4, 5])
     ax.set_xlabel("partial frequency $k f_0$ (kHz)", fontsize=7, color="0.2")
-    ax.set_ylabel("displacement $s_k$ (cents)", fontsize=7, color="0.2")
+    ax.set_ylabel("displacement $s_k$ (c)", fontsize=7, color="0.2")
 
     ax.set_title("(a) where the decoder puts each partial", fontsize=7,
                  loc="left", color="0.12")
@@ -123,7 +123,7 @@ def main() -> int:
     ax.set_yticks([-40, -20, 0])
     ax.set_xticks([0, 1, 2, 3, 4, 5])
     ax.set_xlabel("partial frequency $k f_0$ (kHz)", fontsize=7, color="0.2")
-    ax.set_ylabel("displacement $s_k$ (cents)", fontsize=7, color="0.2")
+    ax.set_ylabel("displacement $s_k$ (c)", fontsize=7, color="0.2")
 
     fig.tight_layout()
     out.parent.mkdir(parents=True, exist_ok=True)
