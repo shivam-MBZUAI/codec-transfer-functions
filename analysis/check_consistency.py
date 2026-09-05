@@ -620,6 +620,20 @@ def main() -> int:
                 fails.append(f"{name}: {m.group(1)!r} introduces "
                              f"{m.group(2)!r}, which is an appendix section")
 
+    # --- every bracketed interval printed in the main text must also stand in
+    # the appendix. A comparator interval, 5.73 [5.36, 6.11], was added to the
+    # main text on a reviewer's request and never given a home in the appendix,
+    # so the paper quoted a number nothing backed.
+    main_body = " ".join(tex[n] for n in
+                         ("main", "01_intro", "02_related", "03_method",
+                          "04_pitch", "07_discussion") if n in tex)
+    for m in re.finditer(r"\[([\d.]+),\s*([\d.]+)\]", main_body):
+        lo, hi = m.group(1), m.group(2)
+        if lo in apx and hi in apx:
+            continue
+        fails.append(f"main text prints the interval [{lo}, {hi}], which the "
+                     f"appendix never states")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -708,6 +722,7 @@ def main() -> int:
     print("  - no bare labels printed as text")
     print("  - em-dashes in the main text stay rare")
     print("  - appendix sections are called Appendix, not Section")
+    print("  - every interval in the main text is backed by the appendix")
     return 0
 
 
