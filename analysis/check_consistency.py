@@ -848,6 +848,21 @@ def main() -> int:
                              f"limitations or discussion section; Section 4 is "
                              f"the conclusion")
 
+    # --- the exclusion table names each run by its result-file stem, so the
+    # archive should contain one. Two rows named runs with no file: one added
+    # when BigVGAN was given a guard row, one older.
+    res = ROOT / "code" / "results"
+    if res.is_dir():
+        named = re.findall(r"(detune\\?_[a-z0-9\\_]+)\s*&",
+                           apx[apx.index("\\label{tab:exclusion}"):
+                               apx.index("\\end{tabular}",
+                                         apx.index("\\label{tab:exclusion}"))])
+        for n in named:
+            stem = n.replace("\\_", "_")
+            if not (res / f"{stem}.csv").exists():
+                fails.append(f"the exclusion table names run {stem!r}, which "
+                             f"has no result file in the archive")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -945,6 +960,7 @@ def main() -> int:
     print("  - no caption runs past three lines")
     print("  - every bibliography entry is cited, and every citation is in the bib")
     print("  - nothing cites Section 4 as a limitations section")
+    print("  - every run named in the exclusion table has a result file")
     return 0
 
 
