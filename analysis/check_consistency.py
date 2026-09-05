@@ -211,6 +211,33 @@ def main() -> int:
                 f"abstract quotes {m.group(1)} to {m.group(2)} across registers, "
                 f"the table gives {lo:.2f} to {hi:.2f}")
 
+    # --- the confirmatory table: Eq 16 per row, edge implies the partial
+    # count at 440 Hz, and the frozen tier rule matches the assigned tier
+    for r in rows_of("tab:confirmatory", apx):
+        edge = num(r[2])
+        above = r[3].split()[0] if r[3] else ""
+        lbar, bias = num(r[4]), num(r[5])
+        assigned = r[7].lower() if len(r) > 7 else ""
+        if edge is None or not above.isdigit() or lbar is None:
+            continue
+        want_above = len([k for k in range(1, 9) if k * 440.0 >= edge * 1000])
+        if want_above != int(above):
+            fails.append(
+                f"confirmatory {r[0]!r}: edge {edge} kHz puts {want_above} "
+                f"partials above at 440 Hz, table says {above}")
+        tier = ("ladder" if lbar >= 0.70
+                else "part" if lbar >= 0.20 else "input")
+        if tier not in assigned.replace(" way", "").replace("'s", ""):
+            fails.append(
+                f"confirmatory {r[0]!r}: lbar {lbar} is tier {tier!r}, "
+                f"table assigns {assigned!r}")
+        if bias is not None and abs(bias) > 1.0:
+            bunif = 40.0 * lbar * int(above) / 8.0
+            if not (0.15 <= bias / bunif <= 0.75):
+                fails.append(
+                    f"confirmatory {r[0]!r}: bias/b_unif = "
+                    f"{bias / bunif:.2f}, outside the observed 0.15-0.75")
+
     if fails:
         print("INCONSISTENT:")
         for f in fails:
@@ -223,6 +250,7 @@ def main() -> int:
     print("  - each retuning arm lands within 3 cents of its prediction")
     print("  - the per-register table satisfies Equation 16 row by row")
     print("  - the abstract's register range is that table's bias column")
+    print("  - the confirmatory table's edges, tiers and ratios all cohere")
     return 0
 
 
