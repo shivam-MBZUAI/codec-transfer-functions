@@ -362,6 +362,42 @@ def main() -> int:
             fails.append(f"flip arithmetic: {gained} gained minus {lost} lost is "
                          f"{gained - lost}/60, but {net}/60 is reported")
 
+    # --- the word before a \ref must match what the label points at. A
+    # "Table \ref{fig:conditions}" printed "Table 3" for Figure 3 for several
+    # rounds, and a doubled word printed "Section Section 4"; both read as
+    # broken references. The label prefix says which word is right.
+    WORDS = {"fig": {"Figure", "Figures"}, "tab": {"Table", "Tables"},
+             "sec": {"Section", "Sections", "Appendix", "Appendices"},
+             "eq": {"Equation", "Equations"}}
+    tex = {"main": main_tex, "appendix": apx}
+    for f in sorted((ROOT / "sections").glob("*.tex")):
+        tex[f.stem] = f.read_text()
+    for name, src in tex.items():
+        for m in re.finditer(r"(\w+)[\s~]+(?:and[\s~]+)?\\ref\{(fig|tab|sec|eq):", src):
+            word, kind = m.group(1), m.group(2)
+            if word in WORDS[kind] or word[0].islower() or word.isdigit():
+                continue
+            if any(word in w for w in WORDS.values()):
+                fails.append(f"{name}: {word!r} precedes a {kind}: reference; "
+                             f"expected one of {sorted(WORDS[kind])}")
+        for m in re.finditer(r"\b(\w+)[\s~]+\1[\s~]*\\ref\{", src):
+            fails.append(f"{name}: doubled word {m.group(1)!r} before a reference")
+
+    # --- external resources named in the prose must carry a citation
+    # somewhere. LibriSpeech, MMS, Whisper and Saraga were each used and
+    # reported on for several rounds with no bibliography entry cited.
+    RESOURCES = {"LibriSpeech": "panayotov2015librispeech",
+                 "MMS": "pratap2024mms",
+                 "Whisper": "radford2023whisper",
+                 "Saraga": "srinivasamurthy2021saraga",
+                 "NSynth": "engel2017nsynth",
+                 "GTZAN": "tzanetakis2002gtzan",
+                 "FLEURS": "conneau2022fleurs"}
+    allsrc = "\n".join(tex.values())
+    for word, key in RESOURCES.items():
+        if re.search(r"\b" + word + r"\b", allsrc) and key not in allsrc:
+            fails.append(f"{word} is used in the prose but {key} is never cited")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -441,6 +477,8 @@ def main() -> int:
     print("  - every float label matches its environment")
     print("  - every count the prose draws from the confirmatory table")
     print("  - the non-Western flip counts add up")
+    print("  - the word before every reference matches its label")
+    print("  - every named external resource is cited")
     return 0
 
 
