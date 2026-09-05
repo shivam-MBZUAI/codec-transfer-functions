@@ -216,8 +216,9 @@ def main() -> int:
     for r in rows_of("tab:confirmatory", apx):
         edge = num(r[2])
         above = r[3].split()[0] if r[3] else ""
-        lbar, bias = num(r[4]), num(r[5])
-        assigned = r[7].lower() if len(r) > 7 else ""
+        lbar, bias = num(r[4]), num(r[6])
+        tab_bunif = num(r[5])
+        assigned = r[8].lower() if len(r) > 8 else ""
         if edge is None or not above.isdigit() or lbar is None:
             continue
         want_above = len([k for k in range(1, 9) if k * 440.0 >= edge * 1000])
@@ -231,8 +232,16 @@ def main() -> int:
             fails.append(
                 f"confirmatory {r[0]!r}: lbar {lbar} is tier {tier!r}, "
                 f"table assigns {assigned!r}")
+        bunif = 40.0 * lbar * int(above) / 8.0
+        if tab_bunif is not None and abs(tab_bunif - bunif) > 0.15:
+            fails.append(
+                f"confirmatory {r[0]!r}: Eq 16 gives {bunif:.1f}, "
+                f"table says {tab_bunif}")
+        if edge * 1000.0 % 440.0 > 1e-6:
+            fails.append(
+                f"confirmatory {r[0]!r}: edge {edge} kHz is not a partial "
+                f"frequency at the 440 Hz reference")
         if bias is not None and abs(bias) > 1.0:
-            bunif = 40.0 * lbar * int(above) / 8.0
             if not (0.15 <= bias / bunif <= 0.75):
                 fails.append(
                     f"confirmatory {r[0]!r}: bias/b_unif = "
