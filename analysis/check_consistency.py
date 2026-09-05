@@ -44,6 +44,24 @@ def load_macros():
         MACROS[m.group(1)] = m.group(2).replace("\\xspace", "")
 
 
+def uncomment(src):
+    """Drop LaTeX comments, keeping escaped percent signs.
+
+    Guards that scan prose must not read the working notes in the margins:
+    two macro comments in main.tex carry bracketed intervals that are never
+    printed, and the interval guard reported both as unbacked claims.
+    """
+    out = []
+    for line in src.split("\n"):
+        i, keep = 0, []
+        while i < len(line):
+            if line[i] == "%" and (i == 0 or line[i - 1] != "\\"):
+                break
+            keep.append(line[i]); i += 1
+        out.append("".join(keep))
+    return "\n".join(out)
+
+
 def subst(cell):
     """Expand the paper's \newcommand values inside a table cell."""
     for name in MACROS:
@@ -67,9 +85,13 @@ def main() -> int:
     apx = APX.read_text()
     main_tex = MAIN.read_text()
     # every source the guards read; built once, before any of them run
-    tex = {"main": main_tex, "appendix": apx}
+    # "main" here is main.tex itself, which for a long time it was not: the
+    # key held sections/04_pitch.tex, so every guard that walks `tex` skipped
+    # the abstract, the statements and the appendix contents list entirely.
+    tex = {"main": uncomment((ROOT / "main.tex").read_text()),
+           "results": uncomment(main_tex), "appendix": uncomment(apx)}
     for f in sorted((ROOT / "sections").glob("*.tex")):
-        tex[f.stem] = f.read_text()
+        tex[f.stem] = uncomment(f.read_text())
     fails = []
 
     # --- per-partial displacements must reproduce the uniform-weight table
@@ -642,6 +664,37 @@ def main() -> int:
         fails.append("something calls them the four statistics; the paper "
                      "reports three, with pull a verdict rather than a fourth")
 
+    # --- the reproducibility statement counts files in the released archive,
+    # so it can be checked against the archive. It claimed 123 result files and
+    # 102 sidecars where the repository holds 146 and 117; a reviewer with the
+    # supplement checks this before anything else.
+    res = ROOT / "code" / "results"
+    if res.is_dir():
+        top_csv = sorted(res.glob("*.csv"))
+        rep_csv = sorted(res.glob("replication/*.csv"))
+        top_meta = sorted(res.glob("*.meta.json"))
+        rep_meta = sorted(res.glob("replication/*.meta.json"))
+        counts = {
+            "raw result files": len(top_csv) + len(rep_csv),
+            "reported or retained runs": len(top_csv),
+            "files carrying a sidecar": len(top_meta) + len(rep_meta),
+            "sidecars outside replication": len(top_meta),
+        }
+        claims = [
+            (r"all (\d+) raw result\s+files", "raw result files"),
+            (r"files \((\d+) reported or retained runs", "reported or retained runs"),
+            (r"Each of (\d+) sweep, corpus", "files carrying a sidecar"),
+            (r"Of the (\d+) sidecars outside", "sidecars outside replication"),
+        ]
+        stmt = " ".join(tex["main"].split())
+        for pat, key in claims:
+            m = re.search(pat, stmt)
+            if m is None:
+                fails.append(f"reproducibility: no claim matching {pat!r}")
+            elif int(m.group(1)) != counts[key]:
+                fails.append(f"reproducibility claims {m.group(1)} {key}, the "
+                             f"repository has {counts[key]}")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -732,6 +785,7 @@ def main() -> int:
     print("  - appendix sections are called Appendix, not Section")
     print("  - every interval in the main text is backed by the appendix")
     print("  - the paper counts three statistics everywhere")
+    print("  - the reproducibility file counts match the repository")
     return 0
 
 
