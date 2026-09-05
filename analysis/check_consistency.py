@@ -251,6 +251,92 @@ def main() -> int:
                     f"confirmatory {r[0]!r}: bias/b_unif = "
                     f"{bias / bunif:.2f}, outside the observed 0.15-0.75")
 
+    # --- every count the prose draws from the confirmatory table, recomputed
+    # from the table. These sentences have gone stale twice: a boundary sweep
+    # kept a count from before a tabulated value was corrected, and the
+    # interval-crossing count disagreed with the paragraph twenty lines above
+    # it. Prose summarising a table is derived data and belongs under a guard.
+    WORD = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+            "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
+            "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
+            "sixteen": 16}
+
+    def count_word(tok):
+        return int(tok) if tok.isdigit() else WORD.get(tok.lower())
+
+    i = apx.index("\\label{tab:confirmatory}")
+    body = apx[i:apx.index("\\end{tabular}", i)]
+    conf, group = [], None
+    for line in body.split("\\\\"):
+        if "multicolumn" in line:
+            group = "new" if "never measured" in line else "seen"
+            continue
+        cells = [c.strip() for c in line.split("&")]
+        if len(cells) < 7 or "textbf" in line:
+            continue
+        got = re.findall(r"-?\d\.\d\d", cells[4].replace("$-$", "-"))
+        if len(got) != 3:
+            continue
+        lbar, lo, hi = (float(x) for x in got)
+        conf.append(dict(name=cells[0], group=group, lbar=lbar, lo=lo, hi=hi,
+                         pred=cells[5].split()[0], got=cells[6].split()[0]))
+    if len(conf) != 16:
+        fails.append(f"confirmatory prose: parsed {len(conf)} rows, expected 16")
+    else:
+        def tier(x, ladder=0.70):
+            return "ladder" if x >= ladder else ("part" if x >= 0.20 else "input's")
+
+        hits = [r for r in conf if r["pred"] == tier(r["lbar"])]
+        n_new = sum(1 for r in hits if r["group"] == "new")
+        for want, pat in (
+                (len(hits), r"(\w+) of sixteen predictions hold"),
+                (len(hits) - n_new,
+                 r"of codecs we had already measured, (\w+) of six hold"),
+                (n_new, r"\\emph\{families\}, (\w+) of ten hold")):
+            m = re.search(pat, apx)
+            if m is None:
+                fails.append(f"confirmatory prose: no sentence matching {pat!r}")
+            elif count_word(m.group(1)) != want:
+                fails.append(
+                    f"confirmatory prose: {m.group(0)!r} but the table gives {want}")
+
+        # the boundary sweep, clause by clause of the sentence that reports it
+        sweep = re.search(r"Sweeping them:(.*?)(?<=\.)\s", apx, re.S)
+        if sweep is None:
+            fails.append("confirmatory sweep: no 'Sweeping them:' sentence")
+        else:
+            seen = 0
+            for clause in sweep.group(1).split(";"):
+                m = re.search(r"(0\.\d\d)\D+?(\d+)(?:\s+of\s+16)?\s*(?:$|[;.])",
+                              clause.strip())
+                if m is None:
+                    fails.append(f"confirmatory sweep: unparsed clause {clause.strip()!r}")
+                    continue
+                seen += 1
+                b, claim = m.group(1), int(m.group(2))
+                want = sum(1 for r in conf if r["pred"] == tier(r["lbar"], float(b)))
+                if claim != want:
+                    fails.append(f"confirmatory sweep: prose says {claim} at boundary "
+                                 f"{b}, the table gives {want}")
+            if seen < 2:
+                fails.append(f"confirmatory sweep: only {seen} boundaries parsed")
+
+        # misses running one way, and intervals crossing a tier boundary
+        misses = [r for r in conf if r["pred"] != tier(r["lbar"])]
+        oneway = sum(1 for r in misses
+                     if r["pred"] == "ladder" and tier(r["lbar"]) == "part")
+        m = re.search(r"(\w+) of the (\w+) misses run one way", apx)
+        if m and (count_word(m.group(1)), count_word(m.group(2))) != (oneway, len(misses)):
+            fails.append(f"confirmatory prose: {m.group(0)!r} but the table gives "
+                         f"{oneway} of {len(misses)}")
+        crossing = sum(1 for r in conf
+                       if any(r["lo"] < t < r["hi"] for t in (0.20, 0.70)))
+        for m in re.finditer(r"(\w+) of (?:the )?sixteen (?:\$\\bar\\ell\$ )?"
+                             r"intervals\s+cross", apx):
+            if count_word(m.group(1)) != crossing:
+                fails.append(f"confirmatory prose: {m.group(0)!r} but {crossing} "
+                             f"of the tabulated intervals cross a boundary")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -328,6 +414,7 @@ def main() -> int:
     print("  - every table and figure is cited from prose")
     print("  - the appendix contents list matches the appendix")
     print("  - every float label matches its environment")
+    print("  - every count the prose draws from the confirmatory table")
     return 0
 
 
