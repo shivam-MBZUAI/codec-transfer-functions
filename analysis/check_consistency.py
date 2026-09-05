@@ -634,6 +634,14 @@ def main() -> int:
         fails.append(f"main text prints the interval [{lo}, {hi}], which the "
                      f"appendix never states")
 
+    # --- the paper says three statistics recur and that "pull" is a verdict
+    # rather than a fourth. An appendix heading said "the four statistics",
+    # contradicting its own table caption on the same page.
+    allsrc = " ".join(tex.values())
+    if re.search(r"four statistic", allsrc, re.I):
+        fails.append("something calls them the four statistics; the paper "
+                     "reports three, with pull a verdict rather than a fourth")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -723,6 +731,7 @@ def main() -> int:
     print("  - em-dashes in the main text stay rare")
     print("  - appendix sections are called Appendix, not Section")
     print("  - every interval in the main text is backed by the appendix")
+    print("  - the paper counts three statistics everywhere")
     return 0
 
 
