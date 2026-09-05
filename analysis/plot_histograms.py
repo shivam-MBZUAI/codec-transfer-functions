@@ -16,6 +16,8 @@ from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["ps.fonttype"] = 42
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -47,14 +49,23 @@ for ax, (fname, label, colour) in zip(axes[0], SETS):
     d = np.array([float(r["density"]) for r in rows])
     d = d / d.mean()
     ax.bar(lo + 1, d, width=(lo[1] - lo[0]) * 0.9, color=colour, align="edge")
-    ax.axhline(1.0, color="0.4", ls="--", lw=1.2, label="flat (no grid structure)")
-    ax.set_title(f"{label}\npeak/mean {d.max():.2f}", fontsize=7)
-    ax.tick_params(labelsize=6.5)
-    if ax is axes[0][-1]:
-        ax.legend(fontsize=6, loc="upper center")
-    ax.grid(alpha=0.2, axis="y")
+    ax.axhline(1.0, color="0.4", ls="--", lw=1.1, zorder=4)
+    ax.set_title(f"{label}\npeak/mean {d.max():.2f}", fontsize=7, color="0.15",
+                 linespacing=1.25)
+    ax.tick_params(labelsize=6.5, colors="0.25", length=2.4, width=0.7)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color("0.55"); ax.spines[side].set_linewidth(0.8)
+    ax.grid(alpha=0.14, axis="y", lw=0.6); ax.set_axisbelow(True)
 axes[0][0].set_ylim(0, max(a.get_ylim()[1] for a in axes[0]) * 1.12)   # headroom above the tallest bar
-axes[0][0].set_ylabel("relative density (mean = 1)", fontsize=7)
+axes[0][0].set_ylabel("relative density (mean = 1)", fontsize=7, color="0.2")
+# label the reference line once, in the flattest panel, rather than boxing a
+# legend over the tallest bars
+axes[0][1].text(50, 1.35, "flat: no grid structure", fontsize=5.8, color="0.35",
+                ha="center", va="bottom", zorder=5)
+axes[0][1].annotate("", xy=(50, 1.05), xytext=(50, 1.32),
+                    arrowprops=dict(arrowstyle="-", color="0.6", lw=0.6))
 fig.supxlabel("cents above the 12-TET pitch below", fontsize=7, y=0.04)
 fig.tight_layout(rect=(0, 0.05, 1, 1))
 out = ROOT / "figures" / "pitch_histograms.pdf"

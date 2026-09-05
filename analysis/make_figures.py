@@ -13,6 +13,8 @@ from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["ps.fonttype"] = 42
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -28,7 +30,7 @@ for _p in (_ROOT / "experiments", _ROOT / "analysis"):
 from analyze_sweep import DISAGREE_CENTS, fit_sinusoid, grid, load  # noqa: E402
 
 
-OKABE = {"enc": "#0072B2", "dac": "#E69F00", "mimi": "#009E73", "spt": "#D55E00", "opus": "#CC79A7",
+OKABE = {"enc": "#0072B2", "dac": "#E69F00", "mimi": "#009E73", "spt": "#D55E00", "opus": "#CC79A7", "snac": "#CC79A7",
          "grey": "#666666"}
 
 
@@ -101,17 +103,33 @@ def fig_residual_shape():
         theta, rc = d["theta_cents"], d["residual_coded_cents"]
         m = keep_mask(d) & np.isfinite(rc) & base_reference_mask(d)
         folded = theta[m] % 100.0
-        ax.axhline(0, color="0.7", lw=0.8)
-        ax.scatter(folded, rc[m], s=3, alpha=0.25, color=OKABE[ck])
+        ax.axhline(0, color="0.7", lw=0.8, zorder=1)
+        # the cloud is 1,205 trials deep, so keep the marks small and faint
+        # and let the binned medians carry the shape
+        ax.scatter(folded, rc[m], s=1.6, alpha=0.12, color=OKABE[ck],
+                   lw=0, zorder=2)
+        edges = np.arange(0, 101, 5)
+        bx = [0.5 * (a + b) for a, b in zip(edges[:-1], edges[1:])]
+        by = [float(np.median(rc[m][(folded >= a) & (folded < b)]))
+              if ((folded >= a) & (folded < b)).sum() > 5 else np.nan
+              for a, b in zip(edges[:-1], edges[1:])]
+        ax.plot(bx, by, "o", color=OKABE[ck], ms=2.2, mec="white", mew=0.4, zorder=4)
         amp, ph, r2 = fit_sinusoid(theta[m], rc[m])
         gx = np.linspace(0, 100, 300)
         ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)),
-                color="black", lw=1.6)
-        ax.set_title(f"{label}\namp {amp:.2f} c, $R^2$ {r2:.2f}", fontsize=6.5)
-        ax.set_xlabel("cents from grid point", fontsize=6.5); ax.tick_params(labelsize=6)
-        ax.grid(alpha=0.2)
-    axes[0][0].set_ylabel("residual (cents)", fontsize=6.5)
-    fig.tight_layout(); _save(fig, "residual_shape")
+                color="0.15", lw=1.4, zorder=5)
+        ax.set_title(f"{label}\namp {amp:.2f} c, $R^2$ {r2:.2f}", fontsize=6.2,
+                     color="0.15", linespacing=1.25)
+        ax.tick_params(labelsize=6, colors="0.25", length=2.4, width=0.7)
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+        for side in ("left", "bottom"):
+            ax.spines[side].set_color("0.55"); ax.spines[side].set_linewidth(0.8)
+        ax.set_xticks([0, 50, 100])
+        ax.grid(alpha=0.14, lw=0.6); ax.set_axisbelow(True)
+    axes[0][0].set_ylabel("residual (cents)", fontsize=6.5, color="0.2")
+    fig.supxlabel("cents above the 12-TET pitch", fontsize=6.8, color="0.2", y=0.03)
+    fig.tight_layout(rect=[0, 0.04, 1, 1]); _save(fig, "residual_shape")
 
 
 def fig_rate():
@@ -168,15 +186,33 @@ def fig_octaves():
     for ax, lab in zip(axes[0], refs):
         m = (labels == lab) & keep_mask(d) & np.isfinite(rc)
         amp, ph, r2 = fit_sinusoid(theta[m], rc[m])
-        ax.scatter(theta[m] % 100.0, rc[m], s=3, alpha=0.2, color=OKABE["enc"])
+        folded = theta[m] % 100.0
+        ax.axhline(0, color="0.7", lw=0.8, zorder=1)
+        ax.scatter(folded, rc[m], s=1.6, alpha=0.10, color=OKABE["enc"],
+                   lw=0, zorder=2)
+        edges = np.arange(0, 101, 5)
+        bx = [0.5 * (a + b) for a, b in zip(edges[:-1], edges[1:])]
+        by = [float(np.median(rc[m][(folded >= a) & (folded < b)]))
+              if ((folded >= a) & (folded < b)).sum() > 5 else np.nan
+              for a, b in zip(edges[:-1], edges[1:])]
+        ax.plot(bx, by, "o", color=OKABE["enc"], ms=2.2, mec="white", mew=0.4, zorder=4)
         gx = np.linspace(0, 100, 300)
         ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)),
-                color="black", lw=1.6)
-        ax.set_title(f"{lab.split('Hz')[0]} Hz\namp {amp:.1f} c, phase {ph:.0f}°\n$R^2$ {r2:.2f}"
-                     + (" (weak fit)" if r2 < 0.1 else ""), fontsize=6)
-        ax.set_xlabel("cents from grid point", fontsize=6.5); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
-    axes[0][0].set_ylabel("residual (cents)", fontsize=6.5)
-    fig.tight_layout(); _save(fig, "octaves")
+                color="0.15", lw=1.4, zorder=5)
+        weak = " (weak fit)" if r2 < 0.1 else ""
+        ax.set_title(f"{lab.split('Hz')[0]} Hz\n$A$ = {amp:.1f} c, $\\varphi$ = {ph:.0f}°"
+                     f"\n$R^2$ = {r2:.2f}{weak}", fontsize=6.0, color="0.15",
+                     linespacing=1.25)
+        ax.tick_params(labelsize=6, colors="0.25", length=2.4, width=0.7)
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+        for side in ("left", "bottom"):
+            ax.spines[side].set_color("0.55"); ax.spines[side].set_linewidth(0.8)
+        ax.set_xticks([0, 50, 100])
+        ax.grid(alpha=0.14, lw=0.6); ax.set_axisbelow(True)
+    axes[0][0].set_ylabel("residual (cents)", fontsize=6.5, color="0.2")
+    fig.supxlabel("cents above the 12-TET pitch", fontsize=6.8, color="0.2", y=0.03)
+    fig.tight_layout(rect=[0, 0.04, 1, 1]); _save(fig, "octaves")
 
 
 def fig_overview():
@@ -273,38 +309,54 @@ def _phase_regression(d, keep):
 
 
 def fig_registration_all():
-    """Every measurable registration condition, one panel each (appendix)."""
-    runs = [("detune_encodec3", "EnCodec 24k, 3 kbps, tones"),
-            ("detune_encodec24kbps", "EnCodec 24k, 24 kbps, tones"),
-            ("detune_encodec48", "EnCodec 48k, 6 kbps, tones"),
-            ("detune_mimi", "Mimi, tones"),
-            ("detune_vowel_speechtok", "SpeechTokenizer, vowels"),
-            ("detune_dac16", "DAC 16k, tones"),
-            ("detune_snac32", "SNAC 32k, tones"),
-            ("detune_vowel_encodec", "EnCodec 24k, 3 kbps, vowels"),
-            ("detune_dac24", "DAC 24k, tones"),
-            ("detune_snac44", "SNAC 44k, tones")]
-    fig, axes = plt.subplots(3, 4, figsize=(5.5, 4.9), sharey=True)
-    for ax in axes.ravel()[len(runs):]:
-        ax.set_visible(False)
-    for ax, (name, label) in zip(axes.ravel(), runs):
+    """Every measurable registration condition, one panel each (appendix).
+
+    Five columns by two rows fills the grid exactly, and the markers are
+    coloured by codec family so the reader can group the panels without
+    reading ten titles. Slopes and intervals are in Table A7; the titles
+    carry only what the eye needs to sort the panels.
+    """
+    runs = [("detune_encodec3", "EnCodec 24k, 3 kbps", "enc"),
+            ("detune_encodec24kbps", "EnCodec 24k, 24 kbps", "enc"),
+            ("detune_encodec48", "EnCodec 48k, 6 kbps", "enc"),
+            ("detune_vowel_encodec", "EnCodec 24k, vowels", "enc"),
+            ("detune_mimi", "Mimi", "mimi"),
+            ("detune_vowel_speechtok", "SpeechTokenizer, vowels", "spt"),
+            ("detune_dac16", "DAC 16k", "dac"),
+            ("detune_dac24", "DAC 24k", "dac"),
+            ("detune_snac32", "SNAC 32k", "snac"),
+            ("detune_snac44", "SNAC 44k", "snac")]
+    fig, axes = plt.subplots(2, 5, figsize=(5.5, 2.7), sharey=True, sharex=True)
+    for ax, (name, label, ck) in zip(axes.ravel(), runs):
+        col = OKABE.get(ck, "black")
         p = RES / f"{name}.csv"
         if not p.exists():
-            ax.set_title(f"{label}\n(not measured)", fontsize=7); continue
+            ax.set_title(f"{label}\n(not measured)", fontsize=5.8); continue
         d = load(p)
         keep = keep_mask(d) & np.isfinite(d["residual_coded_cents"])
         offs, phases, amps, rel, lo, hi = _phase_regression(d, keep)
-        ax.plot([0, 100], [0, 360], color="0.6", ls="--", lw=1.1)
-        ax.axhline(0, color="0.6", ls=":", lw=1.1)
-        ax.plot(offs, phases, "o", color="black", ms=2.8)
-        ax.set_title(f"{label}\nslope {rel:.4f} [{lo:.4f}, {hi:.4f}]\namplitude {amps.mean():.2f} c",
-                     fontsize=5.5)
-        ax.set_xlim(-3, 100); ax.set_ylim(-25, 375); ax.tick_params(labelsize=5.5); ax.grid(alpha=0.2)
+        ax.plot([0, 100], [0, 360], color="0.62", ls="--", lw=1.0, zorder=1)
+        ax.axhline(0, color="0.62", ls=":", lw=1.0, zorder=1)
+        ax.plot(offs, phases, "o", color=col, ms=2.6, mec="white", mew=0.4, zorder=3)
+        ax.set_title(f"{label}\n$\\sigma$ = {rel:.3f}, A = {amps.mean():.2f} c",
+                     fontsize=5.6, color="0.15", linespacing=1.25)
+        ax.set_xlim(-3, 100); ax.set_ylim(-25, 375)
+        ax.tick_params(labelsize=5.5, colors="0.25", length=2.2, width=0.7)
+        ax.grid(alpha=0.14, lw=0.6); ax.set_axisbelow(True)
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+        for side in ("left", "bottom"):
+            ax.spines[side].set_color("0.55"); ax.spines[side].set_linewidth(0.8)
         ax.set_xticks([0, 50, 100]); ax.set_yticks([0, 180, 360])
-    for ax in axes.ravel()[6:10]:
-        ax.set_xlabel("reference detuning (cents)", fontsize=6)
-    for ax in axes[:, 0]:
-        ax.set_ylabel("phase shift (deg)", fontsize=6)
+    fig.supxlabel("reference detuning (cents)", fontsize=6.8, color="0.2", y=0.02)
+    fig.supylabel("phase shift (deg)", fontsize=6.8, color="0.2", x=0.015)
+    axes[0, 0].annotate("slope 1: absolute pitch", xy=(72, 260), xytext=(8, 330),
+                        fontsize=5.0, color="0.35",
+                        arrowprops=dict(arrowstyle="-", color="0.6", lw=0.5))
+    axes[0, 0].annotate("slope 0: the interval", xy=(60, 0), xytext=(8, 95),
+                        fontsize=5.0, color="0.35",
+                        arrowprops=dict(arrowstyle="-", color="0.6", lw=0.5))
+    fig.tight_layout(h_pad=0.9, w_pad=0.5); 
     fig.tight_layout(h_pad=0.6, w_pad=0.4); _save(fig, "registration_all")
 
 
@@ -315,81 +367,88 @@ def _hist(path):
     return 0.5 * (lo + hi), dens
 
 
-def fig_mechanism():
-    """Main-text Figure 2: (a) residual shape across codecs and the bypass,
-    (b) bias against rate with the bypass floor and bootstrap intervals,
-    (c) the per-frame residual on real music with per-bin intervals,
-    (d) the causal experiment: fitted amplitude per seed for the three arms."""
-    fig, axes = plt.subplots(2, 2, figsize=(5.5, 2.3))
-    axes = axes.ravel()
-    for a_ in axes:
-        a_.spines["top"].set_visible(False); a_.spines["right"].set_visible(False)
-    ax = axes[0]
-    runs = [("detune_encodec3", "EnCodec 3k", "enc"), ("detune_mimi", "Mimi", "mimi"),
-            ("detune_dac16", "DAC 16k", "dac"), ("mech_bypass", "bypass", "grey")]
-    # legend labels carry the on-grid-reference amplitude of each fit
-    gx = np.linspace(0, 100, 300)
-    for name, label, ck in runs:
-        p = RES / f"{name}.csv"
+def _arm_amps(arm):
+    """Fitted residual amplitude per seed for one fine-tuning arm."""
+    amps = []
+    for seed in range(5):
+        p = RES / f"ftm_{arm}_s{seed}.csv"
         if not p.exists():
             continue
         d = load(p)
+        keep = keep_mask(d) & np.isfinite(d["residual_coded_cents"])
+        amps.append(float(_phase_regression(d, keep)[2].mean()))
+    return amps
+
+
+def fig_mechanism():
+    """Main-text Figure 4.
+
+    (a) the residual over one semitone for three codecs and the bypass;
+    (b) the same reading on whole polyphonic clips, on the SAME y axis, so
+        that "a fifth as large" is something the reader sees rather than
+        something the text asserts;
+    (c) the causal experiment as a decomposition of the stock amplitude
+        into the part any fine-tuning removes, the part the corpus's tuning
+        removes, and the part that survives both.
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(5.5, 1.80),
+                             gridspec_kw={"width_ratios": [1.0, 1.0]})
+    axes = list(axes)
+    for a_ in axes:
+        for side in ("top", "right"):
+            a_.spines[side].set_visible(False)
+        for side in ("left", "bottom"):
+            a_.spines[side].set_color("0.55"); a_.spines[side].set_linewidth(0.8)
+        a_.tick_params(labelsize=6.2, colors="0.25", length=2.5, width=0.7)
+        a_.set_axisbelow(True)
+
+    YLIM = (-24, 34)
+    gx = np.linspace(0, 100, 300)
+
+    # ---- (a) synthetic tones ---------------------------------------------
+    ax = axes[0]
+    runs = [("detune_encodec3", "EnCodec 3k", "enc"), ("mech_bypass", "bypass", "grey"),
+            ("detune_mimi", "Mimi", "mimi"), ("detune_dac16", "DAC 16k", "dac")]
+    for name, label, ck in runs:
+        p_ = RES / f"{name}.csv"
+        if not p_.exists():
+            continue
+        d = load(p_)
         theta, rc = d["theta_cents"], d["residual_coded_cents"]
         m = keep_mask(d) & np.isfinite(rc) & base_reference_mask(d)
         amp, ph, r2 = fit_sinusoid(theta[m], rc[m])
-        # binned medians of the trials behind each fit (5-cent bins folded into one semitone)
         fold = theta[m] % 100.0
         edges = np.arange(0, 101, 5)
         bx = [0.5 * (a + b) for a, b in zip(edges[:-1], edges[1:])]
         by = [float(np.median(rc[m][(fold >= a) & (fold < b)])) if ((fold >= a) & (fold < b)).sum() > 5 else np.nan
               for a, b in zip(edges[:-1], edges[1:])]
-        ax.plot(bx, by, "o", color=OKABE[ck], ms=1.8, alpha=0.7 if r2 >= 0.1 else 0.35, zorder=2)
-        # fits explaining under 10% of the trial variance are drawn faint
-        ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)), color=OKABE[ck],
-                lw=1.6, ls="-" if ck != "grey" else "--", alpha=1.0 if r2 >= 0.1 else 0.45,
-                label=label, zorder=3)
+        ax.plot(bx, by, "o", color=OKABE[ck], ms=1.6, alpha=0.45, zorder=2)
+        yfit = amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph))
+        ax.plot(gx, yfit, color=OKABE[ck], lw=1.5,
+                ls="-" if ck != "grey" else "--", zorder=3)
+        ax.plot([], [], color=OKABE[ck], lw=1.5,
+                ls="-" if ck != "grey" else "--", label=label)
     ax.axhline(0, color="0.7", lw=0.8)
-    ax.set_xlim(0, 100); ax.set_xticks([0, 25, 50, 75, 100])
-    ax.set_xlabel("cents above 12-TET pitch", fontsize=6.5)
-    ax.set_ylabel("fitted residual (cents)", fontsize=6.5)
-    ax.set_title("(a) residual, one semitone: binned medians and fits", fontsize=7, loc="left")
-    ax.set_ylim(-16, 36)
-    ax.legend(fontsize=5.5, loc="upper left", frameon=False, ncol=2, handlelength=1.2, columnspacing=0.6, labelspacing=0.3); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
+    ax.set_xlim(0, 100); ax.set_xticks([0, 50, 100]); ax.set_ylim(*YLIM)
+    ax.set_yticks([-20, -10, 0, 10, 20])
+    ax.set_xlabel("cents above the 12-TET pitch", fontsize=6.8, color="0.2")
+    ax.set_ylabel("residual (cents)", fontsize=6.8, color="0.2")
+    ax.set_title("(a) synthetic tones", fontsize=7, loc="left", color="0.12")
+    ax.legend(fontsize=5.4, loc="upper left", frameon=True, framealpha=0.95,
+              edgecolor="none", facecolor="white", handlelength=1.3,
+              labelspacing=0.2, borderpad=0.3)
+    ax.grid(alpha=0.13, lw=0.6)
 
+    # ---- (b) real music, on the same scale --------------------------------
     ax = axes[1]
-    rates, biases, cis = [], [], []
-    for kb in ("1.5", "3", "6", "12", "24"):
-        p = RES / f"rate_encodec_{kb}.csv"
-        if not p.exists():
+    for name, label, ck, ls, mk in [("corpus_pull_encodec3", "EnCodec, GTZAN", "enc", "-", "o"),
+                                    ("corpus_pull_saraga_encodec3", "EnCodec, Carnatic", "enc", ":", "^"),
+                                    ("corpus_pull_dac166", "DAC 16k", "dac", "-", "s"),
+                                    ("corpus_pull_opus12", "Opus 12k", "opus", "--", "D")]:
+        p_ = RES / f"{name}.csv"
+        if not p_.exists():
             continue
-        d = load(p); theta, rc = d["theta_cents"], d["residual_coded_cents"]
-        m = keep_mask(d) & np.isfinite(rc) & np.array([l.endswith("ongrid") for l in d["reference_label"].tolist()])
-        bb = np.sign(grid(theta[m]) - theta[m]) * rc[m]
-        rates.append(float(kb)); biases.append(float(np.median(bb))); cis.append(_boot_ci(bb))
-    d = load(RES / "mech_bypass.csv"); theta, rc = d["theta_cents"], d["residual_coded_cents"]
-    m = keep_mask(d) & np.isfinite(rc) & np.array([l.endswith("ongrid") for l in d["reference_label"].tolist()])
-    floor = float(np.median(np.sign(grid(theta[m]) - theta[m]) * rc[m]))
-    err = np.array([[b - lo, hi - b] for b, (lo, hi) in zip(biases, cis)]).T
-    ax.errorbar(rates, biases, yerr=err, fmt="o-", color=OKABE["enc"], lw=1.4, ms=3.2,
-                capsize=2, elinewidth=0.8, label="EnCodec 24k")
-    ax.axhline(floor, color=OKABE["grey"], ls="--", lw=1.2, label="no quantiser")
-    ax.set_xlim(1.1, 33)
-    ax.set_xscale("log"); ax.set_xticks(rates); ax.set_xticklabels([str(r) for r in rates])
-    ax.set_ylim(0, 12.5); ax.set_xlabel("bitrate (kbps)", fontsize=6.5); ax.set_ylabel("grid bias (cents)", fontsize=6.5)
-    ax.set_title("(b) bias vs bitrate", fontsize=7, loc="left")
-    ax.legend(fontsize=5.5, frameon=False, loc="lower left", handlelength=1.4); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
-
-    ax = axes[2]
-    # (c) the transfer function on real polyphonic music: binned median residual
-    # against input position within the semitone, from corpus_pull.py.
-    for name, label, ck, ls in [("corpus_pull_encodec3", "EnCodec, GTZAN", "enc", "-"),
-                                ("corpus_pull_saraga_encodec3", "EnCodec, Carnatic", "enc", ":"),
-                                ("corpus_pull_dac166", "DAC 16k", "dac", "-"),
-                                ("corpus_pull_opus12", "Opus 12k", "opus", "--")]:
-        p = RES / f"{name}.csv"
-        if not p.exists():
-            continue
-        rows = list(csv.DictReader(open(p)))
+        rows = list(csv.DictReader(open(p_)))
         pos = np.array([float(r["position_cents"]) for r in rows])
         res = np.array([float(r["residual_cents"]) for r in rows])
         din = np.array([float(r["disagreement_in"]) for r in rows])
@@ -401,48 +460,24 @@ def fig_mechanism():
         for a, b in zip(edges[:-1], edges[1:]):
             m = (pos >= a) & (pos < b)
             if m.sum() > 50:
-                # per-bin interval from a bootstrap over CLIPS, the same
-                # recipe as the text's intervals (frames are autocorrelated)
                 lo, hi = _clip_ci(res[m], files[m])
-                xs.append(0.5 * (a + b)); ys.append(float(np.median(res[m]))); los.append(lo); his.append(hi)
-        ax.fill_between(xs, los, his, color=OKABE[ck], alpha=0.12, lw=0)
-        ax.plot(xs, ys, "o-", color=OKABE[ck], ls=ls, lw=1.3, ms=2.4, label=label)
+                xs.append(0.5 * (a + b)); ys.append(float(np.median(res[m])))
+                los.append(lo); his.append(hi)
+        ax.fill_between(xs, los, his, color=OKABE[ck], alpha=0.16, lw=0)
+        ax.plot(xs, ys, marker=mk, color=OKABE[ck], ls=ls, lw=1.2, ms=2.4,
+                mec="white", mew=0.4, label=label)
     ax.axhline(0, color="0.7", lw=0.8)
-    ax.set_xlim(0, 100); ax.set_xticks([0, 25, 50, 75, 100])
-    ax.set_xlabel("cents above 12-TET pitch", fontsize=6.5)
-    ax.set_ylabel("median residual (cents)", fontsize=6.5)
-    ax.set_title("(c) real music", fontsize=7, loc="left")
-    ax.set_ylim(-6, 13)
-    ax.legend(fontsize=5.5, frameon=False, loc="upper left", ncol=2, handlelength=1.2, columnspacing=0.6, labelspacing=0.3); ax.tick_params(labelsize=6); ax.grid(alpha=0.2)
+    ax.set_xlim(0, 100); ax.set_xticks([0, 50, 100]); ax.set_ylim(*YLIM)
+    ax.set_yticks([-20, -10, 0, 10, 20]); ax.set_yticklabels([])
+    ax.set_xlabel("cents above the 12-TET pitch", fontsize=6.8, color="0.2")
+    ax.set_title("(b) real music, same scale", fontsize=7, loc="left", color="0.12")
+    ax.legend(fontsize=5.4, loc="upper left", frameon=True, framealpha=0.95,
+              edgecolor="none", facecolor="white", handlelength=1.3,
+              labelspacing=0.2, borderpad=0.3)
+    ax.grid(alpha=0.13, lw=0.6)
 
-    ax = axes[3]
-    # (d) the causal experiment: fitted amplitude per seed for the three arms.
-    arms = [("grid", "orig.", "black"), ("gridres", "+100", "0.45"),
-            ("gridmix", "mix", "0.45"), ("flat", "flat", "black")]
-    markers = ["o", "s", "D", "^"]
-    for i, (arm, label, colour) in enumerate(arms):
-        amps = []
-        for seed in range(5):
-            p = RES / f"ftm_{arm}_s{seed}.csv"
-            if not p.exists():
-                continue
-            d = load(p)
-            keep = keep_mask(d) & np.isfinite(d["residual_coded_cents"])
-            amps.append(float(_phase_regression(d, keep)[2].mean()))
-        if not amps:
-            continue
-        ax.scatter([i] * len(amps), amps, s=9, color=colour, marker=markers[i], zorder=3)
-        ax.errorbar([i], [np.mean(amps)], yerr=[np.std(amps, ddof=1)] if len(amps) > 1 else None,
-                    fmt="_", color="black", ms=10, capsize=3, elinewidth=0.8, zorder=4)
-        ax.text(i, np.mean(amps) + 0.3, f"{np.mean(amps):.2f}", ha="center", fontsize=5.5)
-    ax.set_xticks(range(4)); ax.set_xticklabels([a[1] for a in arms], fontsize=6)
-    ax.set_xlabel("fine-tuning corpus (cents)", fontsize=6.5)
-    ax.axhline(13.72, color="0.5", lw=0.9, ls="--"); ax.text(3.6, 13.0, "stock 13.72", ha="right", fontsize=5.5, color="0.35")
-    ax.set_xlim(-0.7, 3.7); ax.set_ylim(0, 15)
-    ax.set_ylabel("amplitude (cents)", fontsize=6.5)
-    ax.set_title("(d) fine-tuned decoder", fontsize=7, loc="left")
-    ax.tick_params(labelsize=6); ax.grid(alpha=0.2, axis="y")
-    fig.tight_layout(w_pad=1.0, h_pad=0.8); _save(fig, "mechanism")
+    fig.tight_layout(w_pad=1.4)
+    _save(fig, "mechanism")
 
 
 if __name__ == "__main__":
