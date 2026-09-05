@@ -778,6 +778,35 @@ def main() -> int:
             fails.append(f"{lab.group(1) if lab else 'a table'} uses {n} dash "
                          f"cells without saying in its caption what a dash means")
 
+    # --- captions are capped at three rendered lines. Notes added to explain
+    # a rounding rule or a dash pushed five captions past it in one round, so
+    # the cap is enforced rather than remembered.
+    CAP_CHARS = 3 * 104          # about 104 characters to a caption line
+    for name, src in tex.items():
+        if name in ("results", "09_appendix"):   # same file as "appendix"
+            continue
+        raw = (ROOT / "main.tex").read_text() if name == "main" else None
+        for m in re.finditer(r"\\caption\{", src):
+            depth, j = 0, m.end() - 1
+            for k in range(j, len(src)):
+                if src[k] == "{":
+                    depth += 1
+                elif src[k] == "}":
+                    depth -= 1
+                    if depth == 0:
+                        break
+            cap = src[j + 1:k]
+            flat = re.sub(r"\\(?:ref|label)\{[^}]*\}", "A00", cap)
+            flat = re.sub(r"\\[a-zA-Z]+\{([^{}]*)\}", r"\1", flat)
+            flat = re.sub(r"\\[a-zA-Z]+", "", flat)
+            flat = re.sub(r"\s+", " ", flat.replace("$", "")
+                          .replace("{", "").replace("}", "")).strip()
+            if len(flat) > CAP_CHARS:
+                lab = re.search(r"\\label\{((?:tab|fig):[^}]+)\}", src[k:k + 1400])
+                fails.append(
+                    f"caption for {lab.group(1) if lab else name} runs "
+                    f"{len(flat)/104:.1f} lines; the cap is three")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -872,6 +901,7 @@ def main() -> int:
     print("  - the guard grid follows from the exclusion table")
     print("  - the between-run table reproduces from its five runs")
     print("  - every table using a dash says what a dash means")
+    print("  - no caption runs past three lines")
     return 0
 
 
