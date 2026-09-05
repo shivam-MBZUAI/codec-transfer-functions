@@ -44,6 +44,14 @@ def load_macros():
         MACROS[m.group(1)] = m.group(2).replace("\\xspace", "")
 
 
+def subst(cell):
+    """Expand the paper's \newcommand values inside a table cell."""
+    for name in MACROS:
+        cell = (cell.replace("\\" + name + "{}", MACROS[name])
+                    .replace("\\" + name, MACROS[name]))
+    return cell
+
+
 def num(cell):
     # longest name first: \AttractorRetune is a prefix of \AttractorRetuneMimi
     for name in sorted(MACROS, key=len, reverse=True):
@@ -398,6 +406,106 @@ def main() -> int:
         if re.search(r"\b" + word + r"\b", allsrc) and key not in allsrc:
             fails.append(f"{word} is used in the prose but {key} is never cited")
 
+    # --- every value the conditions figure draws must equal the appendix cell
+    # it came from. The figure carries its numbers as a literal table in the
+    # plotting script, and six of its bias intervals had drifted from Table
+    # \ref{tab:c4} by up to 0.6 cents at an end. Internal consistency (the
+    # point lying inside its own interval) does not catch that. The mapping
+    # from figure row to appendix row is declared here rather than guessed
+    # from the label, because guessing matched 24 kbps to the 3 kbps row.
+    FIGROW = {
+        # figure label: (registration row, band-edge row)
+        "EnCodec 24k, 3 kbps":     ("EnCodec 24k|3 kbps, tones", "EnCodec 24k|3 kbps"),
+        "EnCodec 24k, 24 kbps":    ("EnCodec 24k|24 kbps, tones", "EnCodec 24k|24 kbps"),
+        "WavTokenizer, 0.9 kbps":  ("WavTokenizer|", "WavTokenizer|"),
+        "EnCodec 48k, 6 kbps":     ("EnCodec 48k, music|", "EnCodec 48k, music|"),
+        "SNAC 32k":                ("SNAC 32k|", "SNAC 32k|"),
+        "EnCodec 24k, vowels":     ("EnCodec 24k|3 kbps, vowels", None),
+        "Mimi":                    ("Mimi|", "Mimi|"),
+        "SpeechTokenizer, vowels": ("SpeechTokenizer|", None),
+        "DAC 16k":                 ("DAC 16k|", "DAC 16k|"),
+        "DAC 24k":                 ("DAC 24k|", None),
+        "SNAC 44k":                ("SNAC 44k|", None),
+        "BigVGAN (vocoder)":       ("BigVGAN (vocoder)|", "BigVGAN (vocoder)|"),
+        "Opus, 6 kbps":            ("@classical|Opus 6", None),
+        "MP3, 16 kbps":            ("@classical|MP3 16", None),
+    }
+    MARGIN = (0.85, 1.15)
+
+    def cells(text):
+        return [float(x) for x in re.findall(
+            r"-?\d+\.\d+", subst(text).replace("$-$", "-").replace("\\,", " "))]
+
+    def lookup(rows, key):
+        codec, point = key.split("|")
+        for r in rows:
+            if r[0].strip().startswith(codec) and (
+                    not point or (len(r) > 1 and r[1].strip().startswith(point))):
+                return r
+        return None
+
+    if figsrc.exists():
+        block = re.search(r"ROWS = \[(.*?)\n\]", figsrc.read_text(), re.S)
+        drawn = re.findall(
+            r'\("([^"]+)",\s*(-?[\d.]+),\s*(-?[\d.]+),\s*(-?[\d.]+),'
+            r'\s*(None|-?[\d.]+),\s*(None|-?[\d.]+),\s*(None|-?[\d.]+),'
+            r'\s*\w+,\s*(True|False|None)\)',
+            block.group(1) if block else "")
+        if len(drawn) != len(FIGROW):
+            fails.append(f"conditions figure: parsed {len(drawn)} rows against "
+                         f"{len(FIGROW)} declared")
+        c4, cls = rows_of("tab:c4", apx), rows_of("tab:classical", apx)
+        be = rows_of("tab:bandedge", apx)
+        for name, b, lo, hi, l, llo, lhi, reg in drawn:
+            b, lo, hi = float(b), float(lo), float(hi)
+            if name not in FIGROW:
+                fails.append(f"conditions figure: {name!r} has no declared source")
+                continue
+            regkey, edgekey = FIGROW[name]
+            # --- the bias and its interval
+            if regkey.startswith("@classical|"):
+                r = lookup(cls, "|" + regkey.split("|")[1])
+                r = lookup(cls, regkey.split("|")[1] + "|")
+                want = cells(r[4]) if r and len(r) > 4 else None
+            else:
+                r = lookup(c4, regkey)
+                want = cells(r[5]) if r and len(r) > 5 else None
+            if want is None or len(want) != 3:
+                fails.append(f"conditions figure: no bias cell found for {name}")
+            elif [round(x, 2) for x in (b, lo, hi)] != [round(x, 2) for x in want]:
+                fails.append(f"conditions figure: {name} draws bias {b} [{lo}, "
+                             f"{hi}] against the appendix's {want[0]} "
+                             f"[{want[1]}, {want[2]}]")
+            # --- the registration marker must follow from the slope interval
+            if reg != "None" and not regkey.startswith("@classical"):
+                ci = cells(r[2]) if r and len(r) > 2 else None
+                if ci and len(ci) == 3:
+                    inside = MARGIN[0] <= ci[1] and ci[2] <= MARGIN[1]
+                    if (reg == "True") != inside:
+                        fails.append(
+                            f"conditions figure: {name} is drawn as "
+                            f"{'registering' if reg == 'True' else 'not registering'}"
+                            f" but its slope interval [{ci[1]}, {ci[2]}] is "
+                            f"{'inside' if inside else 'outside'} the margin")
+            # --- the ladder: mean over signs, bar spanning the two estimates
+            if l == "None":
+                continue
+            l, llo, lhi = float(l), float(llo), float(lhi)
+            er = lookup(be, edgekey) if edgekey else None
+            if er is None or len(er) < 5:
+                fails.append(f"conditions figure: {name} draws a ladder fraction "
+                             f"with no row in Table tab:bandedge")
+                continue
+            flat, sharp = cells(er[3])[0], cells(er[4])[0]
+            if [round(llo, 2), round(lhi, 2)] != [round(min(flat, sharp), 2),
+                                                  round(max(flat, sharp), 2)]:
+                fails.append(f"conditions figure: {name} draws ladder bar [{llo}, "
+                             f"{lhi}], but its two sign estimates are "
+                             f"{flat} and {sharp}")
+            elif abs(l - (flat + sharp) / 2) > 0.006:
+                fails.append(f"conditions figure: {name} draws ladder {l} against "
+                             f"a sign mean of {(flat + sharp) / 2:.3f}")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -479,6 +587,7 @@ def main() -> int:
     print("  - the non-Western flip counts add up")
     print("  - the word before every reference matches its label")
     print("  - every named external resource is cited")
+    print("  - the conditions figure matches the tables it is drawn from")
     return 0
 
 

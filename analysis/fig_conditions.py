@@ -24,22 +24,37 @@ import matplotlib.pyplot as plt
 PULL, LADNP, OWN, VOC, CLS = "#0072B2", "#009E73", "#E69F00", "#CC79A7", "#8a8a8a"
 INK = "#222222"
 
-# (label, bias, lo, hi, ladder, lad_lo, lad_hi, colour, registers)
+# (label, bias, lo, hi, ladder, lad_lo, lad_hi, colour, registration)
+# registration is True (registers), False (does not), or None (not applicable).
+# MP3 16 kbps needs the third state: its slope of 1.001 [0.977, 1.025] sits
+# inside the 1 +- 0.15 margin and so passes the test mechanically, but it is
+# regressed on the phases of a 0.01-cent residual that carries nothing. The
+# main text says the figure marks it not applicable rather than a pass, and
+# with only two states the figure was contradicting it.
 ROWS = [
-    ("EnCodec 24k, 3 kbps",   12.6, 10.71, 13.67, 0.90, 0.85, 0.96, PULL,  True),
-    ("EnCodec 24k, 24 kbps",   8.0,  6.42,  9.31, 0.72, 0.58, 0.86, PULL,  True),
-    ("WavTokenizer, 0.9 kbps", 7.6,  5.90,  9.02, 0.88, 0.81, 0.95, PULL,  True),
-    ("EnCodec 48k, 6 kbps",    6.5,  4.88,  7.94, 0.79, 0.66, 0.91, PULL,  True),
-    ("SNAC 32k",               0.6,  0.12,  1.05, 0.30, 0.20, 0.46, PULL,  True),
-    ("EnCodec 24k, vowels",    0.4,  0.09,  0.72, None, None, None, PULL,  True),
-    ("Mimi",                   1.2, -0.18,  2.55, 0.31, 0.17, 0.45, LADNP, True),
+    # bias and its interval are Table \ref{tab:c4} verbatim (Table
+    # \ref{tab:classical} for the two classical rows). Six of these had
+    # drifted from the table by up to 0.6 cents at an interval end; the
+    # checker now compares them cell by cell.
+    #
+    # The ladder column is the mean over the two detuning signs, with the bar
+    # spanning the two sign estimates of Table \ref{tab:bandedge}. It used to
+    # be that for the EnCodec rows and the flat-side column alone for the
+    # others, which is two conventions in one axis.
+    ("EnCodec 24k, 3 kbps",   12.55, 10.71, 13.67, 0.90, 0.85, 0.96, PULL,  True),
+    ("EnCodec 24k, 24 kbps",   8.03,  6.45,  8.81, 0.72, 0.58, 0.86, PULL,  True),
+    ("WavTokenizer, 0.9 kbps", 7.61,  6.44,  8.52, 0.84, 0.79, 0.88, PULL,  True),
+    ("EnCodec 48k, 6 kbps",    6.54,  5.83,  7.80, 0.79, 0.66, 0.91, PULL,  True),
+    ("SNAC 32k",               0.61,  0.18,  1.02, 0.30, 0.26, 0.33, PULL,  True),
+    ("EnCodec 24k, vowels",    0.43,  0.19,  0.60, None, None, None, PULL,  True),
+    ("Mimi",                   1.19, -0.15,  2.86, 0.29, 0.27, 0.31, LADNP, True),
     ("SpeechTokenizer, vowels", -0.03, -0.21, 0.14, None, None, None, OWN,  False),
-    ("DAC 16k",               -0.13, -0.55, 0.07, 0.12, -0.01, 0.25, OWN,   True),
-    ("DAC 24k",                0.01, -0.30, 0.33, None, None, None, OWN,    True),
-    ("SNAC 44k",              -0.10, -0.48, 0.29, None, None, None, OWN,    True),
-    ("BigVGAN (vocoder)",      4.8,  3.91,  5.64, 0.71, 0.60, 0.82, VOC,    True),
-    ("Opus, 6 kbps",           0.0, -0.42,  0.41, None, None, None, CLS,    False),
-    ("MP3, 16 kbps",           0.0, -0.11,  0.11, None, None, None, CLS,    False),
+    ("DAC 16k",               -0.13, -0.55,  0.07, 0.11, 0.09, 0.12, OWN,   True),
+    ("DAC 24k",                0.01, -0.22,  0.13, None, None, None, OWN,   True),
+    ("SNAC 44k",              -0.14, -0.29,  0.07, None, None, None, OWN,   True),
+    ("BigVGAN (vocoder)",      4.82,  3.91,  5.64, 0.68, 0.64, 0.71, VOC,   True),
+    ("Opus, 6 kbps",           0.00,  0.00,  0.42, None, None, None, CLS,   False),
+    ("MP3, 16 kbps",           0.00,  0.00,  0.00, None, None, None, CLS,   None),
 ]
 # (first row, last row + 1, gutter label, colour). "input's own ladder" was
 # once "no ladder", which read as a synonym for the italic "not resolved"
@@ -71,8 +86,17 @@ def main() -> int:
         label, b, lo, hi, l, llo, lhi, c, reg = r
         axb.plot([lo, hi], [yi, yi], color=c, lw=1.3, alpha=0.45,
                  solid_capstyle="round", zorder=3)
-        axb.plot([b], [yi], "o", color=c, ms=4.0, mec="white", mew=0.7,
-                 zorder=4, fillstyle="full" if reg else "none")
+        # an open marker must take its edge from the row colour: drawing it
+        # with mec="white" as the filled markers do made a white ring on
+        # white, so every non-registering row rendered as nothing at all
+        if reg is None:
+            axb.plot([b], [yi], "x", color=c, ms=4.2, mew=1.2, zorder=4)
+        elif reg:
+            axb.plot([b], [yi], "o", ms=4.0, mfc=c, mec="white", mew=0.7,
+                     zorder=4)
+        else:
+            axb.plot([b], [yi], "o", ms=4.2, mfc="white", mec=c, mew=1.2,
+                     zorder=4)
         if l is not None:
             axl.plot([llo, lhi], [yi, yi], color=c, lw=1.3, alpha=0.45,
                      solid_capstyle="round", zorder=3)
@@ -128,11 +152,18 @@ def main() -> int:
                   loc="left", color="0.12")
     axl.grid(axis="x", alpha=0.13, lw=0.6)
 
-    axb.plot([], [], "o", color=INK, ms=4.0, ls="none", label="registers")
-    axb.plot([], [], "o", color=INK, ms=4.0, ls="none", fillstyle="none",
+    axb.plot([], [], "o", ms=4.0, ls="none", mfc=INK, mec="white", mew=0.7,
+             label="registers")
+    axb.plot([], [], "o", ms=4.2, ls="none", mfc="white", mec=INK, mew=1.2,
              label="does not register")
-    axb.legend(fontsize=6.2, loc="lower right", frameon=True, framealpha=0.95,
-               edgecolor="none", facecolor="white", handlelength=1.0, borderpad=0.3)
+    axb.plot([], [], "x", ms=4.2, ls="none", color=INK, mew=1.2,
+             label="no residual to register")
+    # the empty block right of the four near-zero rows; at lower right the
+    # box crowded BigVGAN's interval
+    axb.legend(fontsize=6.0, loc="center right", bbox_to_anchor=(1.0, 0.34),
+               frameon=True, framealpha=0.95, edgecolor="none",
+               facecolor="white", handlelength=1.0, borderpad=0.3,
+               labelspacing=0.35)
 
     axl.set_xlim(-0.22, 1.22)
     out.parent.mkdir(parents=True, exist_ok=True)
