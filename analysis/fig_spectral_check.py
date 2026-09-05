@@ -26,11 +26,19 @@ import matplotlib.pyplot as plt
 
 DELTA = 40.0          # detuning of the reference, cents
 GRID = -DELTA         # the nearest 12-TET harmonic, in cents from the input
-# Table \ref{tab:spectral}, 3 kbps, delta_0 = +40
-H1, H3 = -0.2, -24.0
+# Table \ref{tab:spectral}, 3 kbps, delta_0 = +40. At 440 Hz the partials are
+# 440, 880, 1320, 1760 ... and the band edge is 1320 Hz, so H3 *is* the edge:
+# H1 and H2 are transmitted, H4 upward are regenerated, and H3 is the one the
+# appendix describes as carrying "two lines of comparable level".
 FLOOR_IN, FLOOR_OUT = -78.0, -44.0    # analysis floor; decoded broadband floor
-RESIDUAL_DB = -21.0                   # the input-frequency line above the edge
 SEED = 20260902
+
+# (harmonic, its measured displacement, where its band puts it, the caption)
+PANELS = [
+    (1, -0.2,  "below", "below the edge", "transmitted; line stays put"),
+    (3, -24.0, "edge",  "at the edge",    "two lines, read as $-24$"),
+    (4, -37.9, "above", "above the edge", "regenerated onto the grid"),
+]
 
 
 def window_response(cents, centre, width=2.6, floor=-90.0):
@@ -66,50 +74,45 @@ def main() -> int:
     rng = np.random.default_rng(SEED)
     cents = np.linspace(-100, 100, 1600)
 
-    fig, axes = plt.subplots(1, 2, figsize=(5.5, 1.72), sharey=True)
-    for ax, (k, moved) in zip(axes, ((1, H1), (3, H3))):
+    fig, axes = plt.subplots(1, 3, figsize=(5.5, 1.92), sharey=True)
+    for i, (ax, (k, moved, band, where, note)) in enumerate(zip(axes, PANELS)):
         style(ax)
         s_in = window_response(cents, 0.0, floor=FLOOR_IN)
         noise = FLOOR_OUT + 4.2 * rng.standard_normal(cents.size)
-        if k == 1:
-            # below the edge: transmitted, one line where the input put it
+        if band == "below":
             s_out = db_sum(window_response(cents, moved), noise - 8.0)
+        elif band == "edge":
+            # two lines of comparable level, at the input frequency and at the
+            # grid harmonic. -24 is what the estimator reads off the pair; no
+            # single line sits there, which an earlier draft of this figure
+            # drew and the appendix does not claim.
+            s_out = db_sum(window_response(cents, 0.0) - 1.5,
+                           window_response(cents, GRID) - 3.0, noise)
         else:
-            # above the edge: the input line is 21 dB down and a new line sits
-            # most of the way toward the grid harmonic
-            s_out = db_sum(window_response(cents, 0.0) + RESIDUAL_DB,
-                           window_response(cents, moved),
-                           noise)
+            # above the edge: the input line is well down and the regenerated
+            # line carries the partial, essentially on the grid harmonic
+            s_out = db_sum(window_response(cents, 0.0) - 21.0,
+                           window_response(cents, moved), noise)
         ax.plot(cents, s_in, color="0.62", lw=0.9, label="input")
         ax.plot(cents, s_out, color="#C0392B", lw=0.9, label="EnCodec 3 kbps")
         ax.axvline(0.0, color="0.35", lw=0.7, ls=":")
         ax.axvline(GRID, color="#0072B2", lw=0.9, ls="--",
                    label="harmonic of nearest 12-TET $f_0$")
-        ax.set_xlim(-100, 100); ax.set_ylim(-80, 8)
-        ax.set_xticks([-100, -50, 0, 50] if k == 1 else [-50, 0, 50])
-        ax.set_title(f"({'ab'[k == 3]}) partial {k}, 440 Hz, "
-                     f"$\\delta_0 = +40$ c", fontsize=8.0, loc="left",
-                     color="0.12")
-        ax.set_xlabel("cents from input partial", fontsize=7.8, color="0.2")
+        ax.set_xlim(-72, 72); ax.set_ylim(-80, 6)
+        ax.set_xticks([-40, 0, 40])
+        # both lines of text sit above the axes, where nothing can collide
+        # with the traces -- annotations inside the panel kept landing on them
+        ax.set_title(f"({'abc'[i]}) H{k}, {440 * k} Hz \u2014 {where}\n{note}",
+                     fontsize=6.4, loc="left", color="0.15", linespacing=1.45)
+        ax.set_xlabel("cents from input partial", fontsize=7.4, color="0.2")
 
-    axes[0].set_ylabel("dB re input peak", fontsize=7.8, color="0.2")
-    # annotations go in the empty upper-left of each panel, clear of both
-    # traces and of the 12-TET marker
-    axes[0].annotate("transmitted: stays where\nthe input put it",
-                     xy=(H1 - 3, -7), xytext=(-96, -9), fontsize=6.3,
-                     ha="left", va="top", color="0.3",
-                     arrowprops=dict(arrowstyle="->", lw=0.7, color="0.45",
-                                     shrinkB=2))
-    axes[1].annotate("regenerated: moves 24 of\nthe 40 cents to the grid",
-                     xy=(H3, -6), xytext=(-96, -9), fontsize=6.3,
-                     ha="left", va="top", color="0.3",
-                     arrowprops=dict(arrowstyle="->", lw=0.7, color="0.45",
-                                     shrinkB=2))
+    axes[0].set_ylabel("dB re input peak", fontsize=7.6, color="0.2")
     # the legend sits under the panels; inside the axes it printed over the
     # decoded trace and across the 12-TET marker
-    axes[0].legend(fontsize=6.8, loc="upper center", bbox_to_anchor=(1.03, -0.36),
+    axes[1].legend(fontsize=6.6, loc="upper center", bbox_to_anchor=(0.5, -0.34),
                    ncol=3, frameon=False, handlelength=1.6, columnspacing=1.4)
-    fig.subplots_adjust(left=0.093, right=0.995, top=0.87, bottom=0.35, wspace=0.10)
+    fig.subplots_adjust(left=0.088, right=0.995, top=0.795, bottom=0.325,
+                        wspace=0.10)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out); fig.savefig(out.with_suffix(".png"), dpi=220)
     print(f"wrote {out}")
