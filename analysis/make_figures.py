@@ -230,7 +230,7 @@ def fig_overview():
     f1 = d["f1_nominal"]
     offsets_all = (1200.0 * np.log2(f1 / 440.0)) % 100.0
 
-    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(5.5, 1.62),
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(5.5, 1.45),
                                   gridspec_kw={"width_ratios": [1.15, 1]})
     # (a) folded residual, on-grid reference
     m = keep & (np.round(offsets_all, 3) == 0.0)
