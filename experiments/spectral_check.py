@@ -318,7 +318,7 @@ def main() -> int:
             ax.axvline(0.0, color="k", lw=0.6, ls=":")
             ax.axvline(-delta, color="C0", lw=0.8, ls="--", label="harmonic of nearest 12-TET $f_0$")
             ax.set_xlim(-100, 100); ax.set_ylim(-70, 5)
-            ax.set_title(f"({'ab'[k == 3]}) partial {k}, 440 Hz, δ = +40 c", fontsize=7, loc="left")
+            ax.set_title(f"({'ab'[k == 3]}) partial {k}, 440 Hz, δ₀ = +40 c", fontsize=7, loc="left")
             ax.set_xlabel("cents from input partial", fontsize=6.5)
             ax.tick_params(labelsize=6); ax.grid(alpha=0.25)
             ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
