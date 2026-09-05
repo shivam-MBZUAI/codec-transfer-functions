@@ -53,10 +53,10 @@ def permutation_p(pred, got, rng):
 
 def main():
     tab = rows()
-    if len(tab) != 16:
-        sys.exit(f"parsed {len(tab)} rows, expected 16")
+    if len(tab) != 26:
+        sys.exit(f"parsed {len(tab)} rows, expected 26")
     rng = np.random.default_rng(SEED)
-    for name, sel in (("all sixteen", lambda r: True),
+    for name, sel in (("all twenty-six", lambda r: True),
                       ("new families", lambda r: r[0] == "new"),
                       ("new operating points", lambda r: r[0] == "seen")):
         sub = [r for r in tab if sel(r)]

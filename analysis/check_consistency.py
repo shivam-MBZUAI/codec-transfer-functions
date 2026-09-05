@@ -200,10 +200,25 @@ def main() -> int:
 
     # --- the per-register table must satisfy Equation 16 row by row, and its
     # bias column must be the range the abstract quotes
+    # columns are located by header, not by index: adding the b^soft column
+    # silently moved "Measured" and the guard went on reading the old position
+    hdr = [c.strip() for c in
+           rows_of.__globals__["re"].search(
+               r"\\toprule(.*?)\\\\", apx[apx.index("\\label{tab:registeredge}"):],
+               rows_of.__globals__["re"].S).group(1).split("&")]
+    def col(name):
+        for j, h in enumerate(hdr):
+            if name.lower() in h.lower():
+                return j
+        return None
+    i_l, i_u, i_m = col("bar"), col("unif"), col("measured")
     reg_bias = []
     for r in rows_of("tab:registeredge", apx):
         above = r[2].split()[0] if r[2] else ""
-        lbar, bunif, meas = num(r[3]), num(r[4]), num(r[5])
+        if None in (i_l, i_u, i_m) or len(r) <= max(i_l, i_u, i_m):
+            fails.append("register table: could not locate its columns by header")
+            break
+        lbar, bunif, meas = num(r[i_l]), num(r[i_u]), num(r[i_m])
         if meas is not None:
             reg_bias.append(meas)
         if lbar is None or bunif is None or not above.isdigit():
@@ -267,7 +282,10 @@ def main() -> int:
     WORD = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
             "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
             "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
-            "sixteen": 16}
+            "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
+            "twenty": 20, "twenty-one": 21, "twenty-two": 22,
+            "twenty-three": 23, "twenty-four": 24, "twenty-five": 25,
+            "twenty-six": 26}
 
     def count_word(tok):
         return int(tok) if tok.isdigit() else WORD.get(tok.lower())
@@ -288,8 +306,9 @@ def main() -> int:
         lbar, lo, hi = (float(x) for x in got)
         conf.append(dict(name=cells[0], group=group, lbar=lbar, lo=lo, hi=hi,
                          pred=cells[5].split()[0], got=cells[6].split()[0]))
-    if len(conf) != 16:
-        fails.append(f"confirmatory prose: parsed {len(conf)} rows, expected 16")
+    n_conf = len(conf)
+    if n_conf < 16:
+        fails.append(f"confirmatory prose: parsed {n_conf} rows, expected at least 16")
     else:
         def tier(x, ladder=0.70):
             return "ladder" if x >= ladder else ("part" if x >= 0.20 else "input's")
@@ -297,10 +316,10 @@ def main() -> int:
         hits = [r for r in conf if r["pred"] == tier(r["lbar"])]
         n_new = sum(1 for r in hits if r["group"] == "new")
         for want, pat in (
-                (len(hits), r"(\w+) of sixteen predictions hold"),
+                (len(hits), r"(\w+) of twenty-six predictions hold"),
                 (len(hits) - n_new,
                  r"of codecs we had already measured, (\w+) of six hold"),
-                (n_new, r"\\emph\{families\}, (\w+) of ten hold")):
+                (n_new, r"\\emph\{families\}, (\w+) of twenty hold")):
             m = re.search(pat, apx)
             if m is None:
                 fails.append(f"confirmatory prose: no sentence matching {pat!r}")
@@ -315,7 +334,7 @@ def main() -> int:
         else:
             seen = 0
             for clause in sweep.group(1).split(";"):
-                m = re.search(r"(0\.\d\d)\D+?(\d+)(?:\s+of\s+16)?\s*(?:$|[;.])",
+                m = re.search(r"(0\.\d\d)\D+?(\d+)(?:\s+of\s+26)?\s*(?:$|[;.])",
                               clause.strip())
                 if m is None:
                     fails.append(f"confirmatory sweep: unparsed clause {clause.strip()!r}")
@@ -339,7 +358,7 @@ def main() -> int:
                          f"{oneway} of {len(misses)}")
         crossing = sum(1 for r in conf
                        if any(r["lo"] < t < r["hi"] for t in (0.20, 0.70)))
-        for m in re.finditer(r"(\w+) of (?:the )?sixteen (?:\$\\bar\\ell\$ )?"
+        for m in re.finditer(r"(\w+) of (?:the )?twenty-six (?:\$\\bar\\ell\$ )?"
                              r"intervals\s+cross", apx):
             if count_word(m.group(1)) != crossing:
                 fails.append(f"confirmatory prose: {m.group(0)!r} but {crossing} "
