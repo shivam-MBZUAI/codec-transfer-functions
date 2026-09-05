@@ -822,6 +822,21 @@ def main() -> int:
         for k in sorted(cited - entries):
             fails.append(f"{k!r} is cited but absent from refs.bib")
 
+    # --- a sentence that names a section by its old role. Section 4 was
+    # "Discussion, limitations and conclusion" and became "Conclusion"; two
+    # sentences went on citing it for a limitations discussion it no longer
+    # holds, one of them also asserting a gap the soft-edge model had closed.
+    ROLE = {"sec:conclusion": ("conclu",), "sec:discussion": ("conclu",)}
+    for name, src in tex.items():
+        if name in ("results", "09_appendix"):
+            continue
+        for m in re.finditer(r"([^.]{0,90})\\ref\{(sec:(?:discussion|conclusion))\}", src):
+            ctx = re.sub(r"\s+", " ", m.group(1)).lower()
+            if re.search(r"\blimitations? of\b|\bdiscussion of\b", ctx):
+                fails.append(f"{name}: a sentence cites {m.group(2)} for a "
+                             f"limitations or discussion section; Section 4 is "
+                             f"the conclusion")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -918,6 +933,7 @@ def main() -> int:
     print("  - every table using a dash says what a dash means")
     print("  - no caption runs past three lines")
     print("  - every bibliography entry is cited, and every citation is in the bib")
+    print("  - nothing cites Section 4 as a limitations section")
     return 0
 
 
