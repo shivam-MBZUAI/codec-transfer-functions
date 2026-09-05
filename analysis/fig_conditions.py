@@ -56,20 +56,20 @@ def main() -> int:
            else Path(__file__).resolve().parents[2] / "figures" / "conditions.pdf")
     y = np.arange(len(ROWS))[::-1]
     fig, (axb, axl) = plt.subplots(
-        1, 2, figsize=(5.5, 3.3), sharey=True,
+        1, 2, figsize=(5.5, 2.75), sharey=True,
         gridspec_kw={"width_ratios": [1.55, 1.0], "wspace": 0.06})
     style(axb); style(axl)
 
     for yi, r in zip(y, ROWS):
         label, b, lo, hi, l, llo, lhi, c, reg = r
-        axb.plot([lo, hi], [yi, yi], color=c, lw=1.5, alpha=0.45,
+        axb.plot([lo, hi], [yi, yi], color=c, lw=1.3, alpha=0.45,
                  solid_capstyle="round", zorder=3)
-        axb.plot([b], [yi], "o", color=c, ms=4.6, mec="white", mew=0.7,
+        axb.plot([b], [yi], "o", color=c, ms=4.0, mec="white", mew=0.7,
                  zorder=4, fillstyle="full" if reg else "none")
         if l is not None:
-            axl.plot([llo, lhi], [yi, yi], color=c, lw=1.5, alpha=0.45,
+            axl.plot([llo, lhi], [yi, yi], color=c, lw=1.3, alpha=0.45,
                      solid_capstyle="round", zorder=3)
-            axl.plot([l], [yi], "o", color=c, ms=4.6, mec="white", mew=0.7, zorder=4)
+            axl.plot([l], [yi], "o", color=c, ms=4.0, mec="white", mew=0.7, zorder=4)
         else:
             axl.text(0.5, yi, "not resolved", fontsize=6.2, color="0.55",
                      ha="center", va="center", style="italic")
@@ -105,13 +105,13 @@ def main() -> int:
                   loc="left", color="0.12")
     axl.grid(axis="x", alpha=0.13, lw=0.6)
 
-    axb.plot([], [], "o", color=INK, ms=4.6, ls="none", label="registers")
-    axb.plot([], [], "o", color=INK, ms=4.6, ls="none", fillstyle="none",
+    axb.plot([], [], "o", color=INK, ms=4.0, ls="none", label="registers")
+    axb.plot([], [], "o", color=INK, ms=4.0, ls="none", fillstyle="none",
              label="does not register")
     axb.legend(fontsize=6.2, loc="lower right", frameon=True, framealpha=0.95,
                edgecolor="none", facecolor="white", handlelength=1.0, borderpad=0.3)
 
-    fig.subplots_adjust(left=0.245, right=0.998, top=0.935, bottom=0.185)
+    fig.subplots_adjust(left=0.245, right=0.998, top=0.925, bottom=0.215)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out); fig.savefig(out.with_suffix(".png"), dpi=220)
     print(f"wrote {out}")
