@@ -863,6 +863,54 @@ def main() -> int:
                 fails.append(f"the exclusion table names run {stem!r}, which "
                              f"has no result file in the archive")
 
+    # --- a macro defined and never used is a number with no reader. Eighteen
+    # had accumulated, holding values for results that were cut, and a later
+    # edit reaching for one would have got a stale figure: \VocBias held 4.8
+    # where the paper prints 4.82.
+    defs = re.findall(r"\\newcommand\{\\(\w+)\}\{([^}]*)\}", tex["main"])
+    stripped = re.sub(r"\\newcommand\{\\\w+\}\{[^}]*\}", "", tex["main"])
+    body = stripped + " " + " ".join(
+        v for k, v in tex.items() if k not in ("main",))
+    inside = " ".join(v for _, v in defs)
+    for name, _ in defs:
+        pat = r"\\" + name + r"(?![a-zA-Z])"
+        if not re.search(pat, body) and not re.search(pat, inside):
+            fails.append(f"macro \\{name} is defined and never used")
+
+    # --- the soft-edge model is recomputed here rather than trusted: the
+    # b^soft column of the register table must be what the script produces
+    # from the derived form and the measured roll-off.
+    try:
+        import numpy as _np
+        EDGE_ = {110: 1320.0, 220: 1320.0, 440: 1320.0, 880: 1760.0}
+        D0_, LB_, N_ = 40.0, 0.90, 8
+        ROLL_ = 4.5 / _np.log2(1760.0 / 1320.0)
+
+        def _pred(f0, w):
+            k = _np.arange(1, N_ + 1)
+            o = _np.log2(k * f0 / EDGE_[f0])
+            rho = LB_ / (1.0 + _np.exp(-o / w))
+            wt = 10 ** (-ROLL_ * _np.maximum(o, 0.0) / 10.0)
+            return float(D0_ * (wt * rho).sum() / wt.sum())
+
+        meas = {}
+        for r in rows_of("tab:registeredge", apx):
+            hz = re.match(r"(\d+)\s*Hz", r[0].strip())
+            if hz and len(r) > 6:
+                meas[int(hz.group(1))] = (num(subst(r[5])), num(subst(r[6])))
+        if len(meas) == 4:
+            grid = _np.arange(0.05, 1.50, 0.002)
+            err = [sum(_np.log(_pred(f, w) / m[1]) ** 2 for f, m in meas.items())
+                   for w in grid]
+            w_ = float(grid[int(_np.argmin(err))])
+            for f, (soft, _m) in meas.items():
+                want = _pred(f, w_)
+                if abs(want - soft) > 0.02:
+                    fails.append(f"register table prints b^soft {soft} at {f} Hz; "
+                                 f"the model gives {want:.2f}")
+    except ImportError:
+        pass
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -961,6 +1009,8 @@ def main() -> int:
     print("  - every bibliography entry is cited, and every citation is in the bib")
     print("  - nothing cites Section 4 as a limitations section")
     print("  - every run named in the exclusion table has a result file")
+    print("  - every macro defined is used")
+    print("  - the soft-edge column recomputes from the model")
     return 0
 
 
