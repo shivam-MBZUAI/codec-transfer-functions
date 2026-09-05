@@ -695,6 +695,53 @@ def main() -> int:
                 fails.append(f"reproducibility claims {m.group(1)} {key}, the "
                              f"repository has {counts[key]}")
 
+    # --- the guard-sensitivity grid is a summary of the exclusion table, so it
+    # can be recomputed from it. Adding BigVGAN to the exclusion table left the
+    # grid reporting 13 admitted of 17 when the answer had become 14 of 18.
+    runs = []
+    for r in rows_of("tab:exclusion", apx):
+        if len(r) < 5:
+            continue
+        cv, ret = num(subst(r[3])), num(subst(r[4]))
+        if cv is None or ret is None:
+            continue
+        # the two octave repeats are the same condition at another reference
+        if "220 Hz" in r[1] or "880 Hz" in r[1]:
+            continue
+        runs.append((r[1].strip(), cv, ret))
+    if runs:
+        m = re.search(r"admitted conditions of the (\w+) measured", apx)
+        if m and count_word(m.group(1)) != len(runs):
+            fails.append(f"guard grid says {m.group(1)} conditions measured, "
+                         f"the exclusion table lists {len(runs)}")
+        # parse this one directly: rows_of drops any row containing \textbf,
+        # and the reported operating point is exactly the bolded row
+        gi = apx.index("\\label{tab:guardgrid}")
+        gbody = apx[gi:apx.index("\\end{tabular}", gi)]
+        grid = []
+        for line in gbody.split("\\\\"):
+            line = re.sub(r"\\(?:top|mid|bottom)rule|\\cmidrule\(?[^)]*\)?\{[^}]*\}",
+                          " ", line)
+            cells = [c.replace("\\textbf{", "").replace("}", "").strip()
+                     for c in line.split("&")]
+            if len(cells) >= 6 and re.match(r"^0\.\d+$", cells[0]):
+                grid.append(cells)
+        if len(grid) < 3:
+            fails.append(f"guard grid: parsed {len(grid)} rows")
+        for row in grid:
+            cvlim = num(row[0])
+            if cvlim is None:
+                continue
+            for j, retlim in enumerate((0.15, 0.20, 0.25, 0.30, 0.34), start=1):
+                if j >= len(row):
+                    break
+                want = sum(1 for _, cv, ret in runs if cv <= cvlim and ret >= retlim)
+                got = num(row[j])
+                if got is not None and int(got) != want:
+                    fails.append(
+                        f"guard grid at cv<={cvlim}, retention>={retlim} says "
+                        f"{int(got)}; the exclusion table gives {want}")
+
     # --- every float must be cited from prose, not only from its own caption
     all_tex = main_tex + apx + (ROOT / "main.tex").read_text()
     for extra in ("01_intro", "07_discussion", "05_phonology"):
@@ -786,6 +833,7 @@ def main() -> int:
     print("  - every interval in the main text is backed by the appendix")
     print("  - the paper counts three statistics everywhere")
     print("  - the reproducibility file counts match the repository")
+    print("  - the guard grid follows from the exclusion table")
     return 0
 
 
