@@ -84,15 +84,26 @@ def main() -> int:
     load_macros()
     apx = APX.read_text()
     main_tex = MAIN.read_text()
+    fails = []
     # every source the guards read; built once, before any of them run
     # "main" here is main.tex itself, which for a long time it was not: the
     # key held sections/04_pitch.tex, so every guard that walks `tex` skipped
     # the abstract, the statements and the appendix contents list entirely.
     tex = {"main": uncomment((ROOT / "main.tex").read_text()),
            "results": uncomment(main_tex), "appendix": uncomment(apx)}
+    # only the files main.tex actually \input. sections/02_related.tex sat
+    # uncompiled for many rounds, and because the guards globbed the whole
+    # directory it counted as live: its citations made eleven bibliography
+    # entries look used when nothing in the paper cited them.
+    included = re.findall(r"\\input\{sections/([^}]+)\}", tex["main"])
+    for stem in included:
+        f = (ROOT / "sections" / stem).with_suffix(".tex")
+        if f.exists():
+            tex[f.stem] = uncomment(f.read_text())
     for f in sorted((ROOT / "sections").glob("*.tex")):
-        tex[f.stem] = uncomment(f.read_text())
-    fails = []
+        if f.stem not in tex:
+            fails.append(f"sections/{f.name} is not \\input by main.tex; "
+                         f"either include it or delete it")
 
     # --- per-partial displacements must reproduce the uniform-weight table
     partials = {}
