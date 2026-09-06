@@ -48,6 +48,11 @@ DISAGREE_CENTS = 5.0
 
 
 def grid(theta: np.ndarray) -> np.ndarray:
+    # Half-to-even at the midpoint, so theta = 50 and 150 round to 0 and 200.
+    # At |delta| = 50 the tone is equidistant from two grid points and the
+    # direction "toward the grid" is a convention, not a fact; Section 2.2
+    # says so, and those trials are 5% of a sweep. Every reported number uses
+    # this rounding, so do not change it without regenerating the results.
     return PERIOD * np.round(theta / PERIOD)
 
 

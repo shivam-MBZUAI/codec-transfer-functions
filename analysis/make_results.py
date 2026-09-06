@@ -184,7 +184,7 @@ def main() -> int:
             "rate.\n\n"
         )
 
-    figs = sorted(p for p in (ROOT / "figures").glob("*.png"))
+    figs = sorted(p for p in (ROOT.parent / "figures").glob("*.png"))
     out.append("## Figures\n\n")
     if figs:
         for f in figs:

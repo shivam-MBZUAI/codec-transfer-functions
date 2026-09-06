@@ -7,6 +7,7 @@ on the LaTeX source, so a drift fails here before a reader finds it.
     python analysis/check_consistency.py
 """
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -78,6 +79,26 @@ def num(cell):
     cell = cell.replace("+", "").replace("$-$", "-").replace("−", "-")
     m = re.search(r"-?\d+\.?\d*", cell)
     return float(m.group(0)) if m else None
+
+
+
+def _check_lowladder(name, l, llo, lhi, edgekey, apx, fails):
+    """A figure row with no bias: check its ladder against the table it came
+    from. These rows exist because panel (b) plotted only the seven rows
+    between 0.71 and 0.90, so a figures-only reader saw a universal effect."""
+    if l == "None":
+        fails.append(f"conditions figure: {name} carries neither bias nor ladder")
+        return
+    tbl, key = edgekey.split("|", 1)
+    src = "tab:confirmatory" if tbl == "@confirm" else "tab:sbr"
+    for row in rows_of(src, apx):
+        if key.lower() in row[0].lower():
+            nums = [float(x) for x in re.findall(r"-?\d+\.\d+", subst(" ".join(row)))]
+            if round(float(l), 2) not in [round(n, 2) for n in nums]:
+                fails.append(f"conditions figure: {name} draws {l}, absent from "
+                             f"its row of {src}")
+            return
+    fails.append(f"conditions figure: no {src} row matches {name}")
 
 
 def main() -> int:
@@ -186,6 +207,145 @@ def main() -> int:
                     f"conditions figure, {label!r}: bias {bias} outside its "
                     f"own interval [{lo}, {hi}]")
 
+    # --- the figure's ladder column is the mean of the two detuning-sign
+    # estimates in the band-edge table, rounded half-up, with the bar spanning
+    # them. Both were hand-copied once and drifted; a value that reads 0.10 in
+    # the text and 0.11 in the figure is the same tie resolved two ways.
+    LADMAP = {
+        "EnCodec 24k, 3 kbps": ("EnCodec 24k", "3 kbps"),
+        "EnCodec 24k, 24 kbps": ("EnCodec 24k", "24 kbps"),
+        "WavTokenizer, 0.9 kbps": ("WavTokenizer", "0.9 kbps"),
+        "EnCodec 48k, 6 kbps": ("EnCodec 48k, music", "6 kbps"),
+        "SNAC 32k": ("SNAC 32k", "default"),
+        "Mimi": ("Mimi", "Q8"),
+        "DAC 16k": ("DAC 16k", "Q6"),
+        "BigVGAN (vocoder)": ("BigVGAN (vocoder)", "mel input"),
+    }
+    from decimal import Decimal as _D, ROUND_HALF_UP as _HU
+    signs = {}
+    for r in rows_of("tab:bandedge", apx):
+        if len(r) < 5:
+            continue
+        neg, pos = num(r[3]), num(r[4])
+        if neg is not None and pos is not None:
+            signs[(r[0].strip(), r[1].strip())] = (neg, pos)
+    if figsrc.exists() and signs:
+        blk = re.search(r"ROWS = \[(.*?)\n\]", figsrc.read_text(), re.S)
+        for line in (blk.group(1).splitlines() if blk else []):
+            m = re.match(r'\s*\("([^"]+)",\s*(?:-?[\d.]+,\s*){3}'
+                         r'([\d.]+),\s*([\d.]+),\s*([\d.]+)', line)
+            if not m or m.group(1) not in LADMAP:
+                continue
+            label = m.group(1)
+            lad, blo, bhi = (float(x) for x in m.groups()[1:])
+            key = LADMAP[label]
+            if key not in signs:
+                fails.append(f"conditions figure, {label!r}: no {key} row in "
+                             "the band-edge table to check the ladder against")
+                continue
+            neg, pos = signs[key]
+            want = float(((_D(repr(neg)) + _D(repr(pos))) / 2).quantize(
+                _D("0.01"), rounding=_HU))
+            if abs(want - lad) > 1e-9:
+                fails.append(
+                    f"conditions figure, {label!r}: ladder {lad}, but the "
+                    f"band-edge table's {neg} and {pos} mean {want}")
+            # the bar itself is already checked further down; here we only
+            # need the point value the main text quotes.
+
+
+    # The prose states the range of lbar across stock conditions; it must be the
+    # min and max of the same round-half-up means the figure and tables use. It
+    # read "0.85 and 0.96" once, which is a per-sign pair, not a range of means.
+    if signs:
+        stock = {k: v for k, v in signs.items()
+                 if "fine-tuned" not in k[0] and "bypass" not in k[0]
+                 and "NSynth" not in k[1] and "vocoder" not in k[0].lower()}
+        if stock:
+            means = [float(((_D(repr(a)) + _D(repr(b))) / 2).quantize(
+                _D("0.01"), rounding=_HU)) for a, b in stock.values()]
+            lo_w, hi_w = min(means), max(means)
+            prose = " ".join(" ".join(tex.values()).split())
+            m = re.search(r"\\bar\\ell\$ between ([\d.]+) and ([\d.]+)", prose)
+            if m:
+                lo_g, hi_g = float(m.group(1)), float(m.group(2))
+                if abs(lo_g - lo_w) > 1e-9 or abs(hi_g - hi_w) > 1e-9:
+                    fails.append(
+                        f"prose says lbar runs {lo_g} to {hi_g} across conditions, "
+                        f"but the band-edge table's means run {lo_w} to {hi_w}")
+
+    # Wherever the prose quotes DAC's ladder fraction as a point value it must
+    # be that same mean: it read 0.10 in two places while the figure drew 0.11.
+    if ("DAC 16k", "Q6") in signs:
+        neg, pos = signs[("DAC 16k", "Q6")]
+        want = float(((_D(repr(neg)) + _D(repr(pos))) / 2).quantize(
+            _D("0.01"), rounding=_HU))
+        prose = " ".join(" ".join(tex.values()).split())
+        for phr in (r"DAC's own ladder fraction, ([\d.]+)",
+                    r"DAC's own measured fraction,\s*([\d.]+)"):
+            for got in dict.fromkeys(re.findall(phr, prose)):
+                if abs(float(got) - want) > 1e-9:
+                    fails.append(
+                        f"prose quotes DAC's ladder fraction as {got}, but the "
+                        f"band-edge table's {neg} and {pos} mean {want}")
+
+    # Every place a single lbar is printed for an arm whose two detuning signs
+    # are in the band-edge table, it must be their round-half-up mean. Five of
+    # these are exact ties, and the Saraga row resolved its tie downward while
+    # every other row resolved upward.
+    A24MAP = {  # band-edge row -> (relocation row, which column)
+        ("EnCodec, fine-tuned on GTZAN", "3 kbps"): ("Original clips (grid)", 4),
+        ("EnCodec, fine-tuned on $+33$-cent GTZAN", "3 kbps"):
+            ("Shifted by $+33$ cents", 4),
+        ("EnCodec, fine-tuned on 24-TET GTZAN", "3 kbps"):
+            ("Quantised to 24-TET", 4),
+        ("EnCodec, fine-tuned on flattened GTZAN", "3 kbps"):
+            ("Random offsets (flat)", 5),   # no own grid; the 12-TET column
+        ("EnCodec, fine-tuned on Saraga", "3 kbps"):
+            ("EnCodec, fine-tuned on Saraga", 4),
+    }
+    reloc = {}
+    for r in rows_of("tab:relocate", apx):
+        if r:
+            reloc[r[0].strip()] = r
+    for key, (rowname, col) in A24MAP.items():
+        if key not in signs or rowname not in reloc:
+            continue
+        neg, pos = signs[key]
+        want = float(((_D(repr(neg)) + _D(repr(pos))) / 2).quantize(
+            _D("0.01"), rounding=_HU))
+        row = reloc[rowname]
+        got = num(row[col]) if len(row) > col else None
+        if got is not None and abs(got - want) > 1e-9:
+            fails.append(
+                f"relocation table, {rowname!r}: lbar {got}, but the band-edge "
+                f"table's {neg} and {pos} mean {want}")
+
+    # the two reference rows that repeat EnCodec's sign pair as a bracket
+    if ("EnCodec 24k", "3 kbps") in signs:
+        neg, pos = signs[("EnCodec 24k", "3 kbps")]
+        lo, hi = min(neg, pos), max(neg, pos)
+        flat = " ".join(" ".join(tex.values()).split())
+        for m in re.finditer(r"for reference\$\^\\ddagger\$[^\\]*?"
+                             r"([\d.]+)\s*(?:\[|\()\s*([\d.]+)\s*(?:,|to)\s*"
+                             r"([\d.]+)", flat):
+            mid, blo, bhi = (float(x) for x in m.groups())
+            if (round(blo, 4), round(bhi, 4)) != (round(lo, 4), round(hi, 4)):
+                fails.append(
+                    f"a reference row prints the sign range as {blo} to {bhi}, "
+                    f"but the band-edge table gives {lo} and {hi}")
+
+    # The extender and the vocoder both read 0.68; Contribution 3 once quoted the
+    # vocoder's macro for the extender, which no rendering would have revealed.
+    ext = None
+    for r in rows_of("tab:bwe", apx):
+        if r and "as recorded" in r[0]:
+            ext = num(r[1])
+    if ext is not None and "ExtLadder" in MACROS:
+        got = float(MACROS["ExtLadder"].replace("\\xspace", "").strip())
+        if abs(got - ext) > 1e-9:
+            fails.append(f"ExtLadder is {got} but the extender table's "
+                         f"grid-peaked arm reads {ext}")
 
     # --- downstream: the grid-attributable figure must be a difference of paired differences
     dn = {}
@@ -205,7 +365,7 @@ def main() -> int:
     for corpus, quoted_dac, quoted_opus in [("Saraga", 0.9, 0.4), ("Turkish", 1.5, 0.7)]:
         enc = paired(corpus, "EnCodec 3 kbps")
         dac = paired(corpus, "DAC 16k")
-        opus = paired(corpus, "Opus, damage-matched")
+        opus = paired(corpus, "Opus, distortion-matched")
         if None in (enc, dac, opus):
             fails.append(f"{corpus}: could not read all three paired differences")
             continue
@@ -268,6 +428,11 @@ def main() -> int:
     if reg_bias:
         lo, hi = min(reg_bias), max(reg_bias)
         allsrc = " ".join(" ".join(tex.values()).split())
+        # Prose may quote these values through their macros, so expand first;
+        # longest name first, since one macro name can prefix another.
+        for _nm in sorted(MACROS, key=len, reverse=True):
+            allsrc = allsrc.replace("\\" + _nm + "{}", MACROS[_nm]).replace(
+                "\\" + _nm, MACROS[_nm])
         m = (re.search(r"([\d.]+)\s+to\s+([\d.]+)\s+across\s+four\s+octaves", allsrc)
              or re.search(r"octaves the bias runs ([\d.]+) to ([\d.]+)", allsrc))
         if not m:
@@ -357,8 +522,8 @@ def main() -> int:
         for want, pat in (
                 (len(hits), r"(\w+) of twenty-six predictions hold"),
                 (len(hits) - n_new,
-                 r"of codecs we had already measured, (\w+) of six hold"),
-                (n_new, r"\\emph\{families\}, (\w+) of twenty hold")):
+                 r"SNAC 24k --- (\w+) of six hold"),
+                (n_new, r"exploratory phase never touched, (\w+) hold")):
             m = re.search(pat, apx)
             if m is None:
                 fails.append(f"confirmatory prose: no sentence matching {pat!r}")
@@ -408,7 +573,7 @@ def main() -> int:
     # change must be the tabulated gain and loss over sixty recordings.
     m = re.search(r"(\d+)\s*\nrecordings change which fits better.*?(\d+)\s*\n?of 200 "
                   r"Saraga.*?flips (\d+) of 60.*?the (\w+) control\s*\n?flips[^.]*?"
-                  r"split (\w+) toward and (\w+) away", apx, re.S)
+                  r"split (\w+)\s*\n?toward(?: 12-TET)? and (\w+)\s*\n?away", apx, re.S)
     if m is None:
         fails.append("flip arithmetic: the Saraga/makam sentence did not parse")
     else:
@@ -484,6 +649,11 @@ def main() -> int:
         "BigVGAN (vocoder)":       ("BigVGAN (vocoder)|", "BigVGAN (vocoder)|"),
         "Opus, 6 kbps":            ("@classical|Opus 6", None),
         "MP3, 16 kbps":            ("@classical|MP3 16", None),
+        # no bias: the fitting guards refuse these on the two-tone probe, so
+        # only the spectral read exists. @none skips the bias comparison.
+        "SNAC 24k (held out)":      ("@none|", "@confirm|SNAC 24k"),
+        "DAC 44k, Q8 (held out)":   ("@none|", "@confirm|DAC 44k"),
+        "HE-AAC SBR, 32 kbps":      ("@none|", "@sbr|HE-AAC"),
     }
     MARGIN = (0.85, 1.15)
 
@@ -502,7 +672,7 @@ def main() -> int:
     if figsrc.exists():
         block = re.search(r"ROWS = \[(.*?)\n\]", figsrc.read_text(), re.S)
         drawn = re.findall(
-            r'\("([^"]+)",\s*(-?[\d.]+),\s*(-?[\d.]+),\s*(-?[\d.]+),'
+            r'\("([^"]+)",\s*(None|-?[\d.]+),\s*(None|-?[\d.]+),\s*(None|-?[\d.]+),'
             r'\s*(None|-?[\d.]+),\s*(None|-?[\d.]+),\s*(None|-?[\d.]+),'
             r'\s*\w+,\s*(True|False|None)\)',
             block.group(1) if block else "")
@@ -512,11 +682,14 @@ def main() -> int:
         c4, cls = rows_of("tab:c4", apx), rows_of("tab:classical", apx)
         be = rows_of("tab:bandedge", apx)
         for name, b, lo, hi, l, llo, lhi, reg in drawn:
-            b, lo, hi = float(b), float(lo), float(hi)
             if name not in FIGROW:
                 fails.append(f"conditions figure: {name!r} has no declared source")
                 continue
             regkey, edgekey = FIGROW[name]
+            if regkey.startswith("@none"):
+                _check_lowladder(name, l, llo, lhi, edgekey, apx, fails)
+                continue
+            b, lo, hi = float(b), float(lo), float(hi)
             # --- the bias and its interval
             if regkey.startswith("@classical|"):
                 r = lookup(cls, "|" + regkey.split("|")[1])
@@ -592,8 +765,7 @@ def main() -> int:
         drawnl = {m.group(1): m.group(2) for m in re.finditer(
             r'\("([^"]+)",\s*(?:-?[\d.]+,\s*){3}(None|-?[\d.]+)',
             blk.group(1) if blk else "")}
-        QUOTED = {"WavLadderMean": "WavTokenizer, 0.9 kbps",
-                  "VocLadderMean": "BigVGAN (vocoder)"}
+        QUOTED = {"VocLadderMean": "BigVGAN (vocoder)"}
         for macro, row in QUOTED.items():
             if macro not in MACROS or row not in drawnl:
                 fails.append(f"ladder quote: {macro} or {row!r} not found")
@@ -687,13 +859,15 @@ def main() -> int:
         rep_meta = sorted(res.glob("replication/*.meta.json"))
         counts = {
             "raw result files": len(top_csv) + len(rep_csv),
-            "reported or retained runs": len(top_csv),
+            "runs": len(top_meta) + len(rep_meta),
+            "derived tables": len(top_csv) - len(top_meta),
             "files carrying a sidecar": len(top_meta) + len(rep_meta),
             "sidecars outside replication": len(top_meta),
         }
         claims = [
             (r"all (\d+) raw result\s+files", "raw result files"),
-            (r"files \((\d+) reported or retained runs", "reported or retained runs"),
+            (r"files \((\d+) runs, of which nine", "runs"),
+            (r"plus (\d+) derived tables\)", "derived tables"),
             (r"Each of (\d+) sweep, corpus", "files carrying a sidecar"),
             (r"Of the (\d+) sidecars outside", "sidecars outside replication"),
         ]
@@ -705,6 +879,108 @@ def main() -> int:
             elif int(m.group(1)) != counts[key]:
                 fails.append(f"reproducibility claims {m.group(1)} {key}, the "
                              f"repository has {counts[key]}")
+
+
+    # --- main text and appendix must not restate each other verbatim. The main
+    # text is at the ICLR page limit, so a long shared run is wasted budget, and
+    # a restatement that later drifts is how the two came to disagree before.
+    # The inline glossary of 2.1 and Table B.1 share short definition rows by
+    # design, which is why the threshold sits above their longest row (13).
+    def _dedupe_words(src):
+        s = re.sub(r"\\(cite[a-z]*|ref|eqref|label)\{[^}]*\}", " ", uncomment(src))
+        s = re.sub(r"\\[a-zA-Z]+\*?", "", s)
+        return re.sub(r"[{}$~\\&]", " ", s).lower().split()
+
+    RUN = 14
+    MAIN_STEMS = [s for s in tex
+                  if re.match(r"0[1-8]_", s) and "appendix" not in s]
+    body = "".join(tex[s] for s in MAIN_STEMS)
+    apx_src = tex.get("09_appendix", "")
+    if not body or not apx_src:
+        fails.append("duplication guard read no main-text or appendix source")
+    if body and apx_src:
+        mw, aw = _dedupe_words(body), _dedupe_words(apx_src)
+        seen = {}
+        for i in range(len(aw) - RUN):
+            seen.setdefault(tuple(aw[i:i + RUN]), i)
+        i = 0
+        while i < len(mw) - RUN:
+            g = tuple(mw[i:i + RUN])
+            if g in seen:
+                j, n = seen[g], RUN
+                while (i + n < len(mw) and j + n < len(aw)
+                       and mw[i + n] == aw[j + n]):
+                    n += 1
+                fails.append(f"main text and appendix share {n} words verbatim: "
+                             f"{' '.join(mw[i:i + n])[:70]}...")
+                i += n
+            else:
+                i += 1
+
+
+    # --- the headline interval's resampling unit is described in four places
+    # (2.5, B.6, Table B-unitmap, G.3). They disagreed once, in a way that made
+    # the paper claim coverage it did not have, so the wording is pinned here.
+    unit_claims = []
+    for name in ("03_method", "09_appendix"):
+        src = tex.get(name, "")
+        for bad in ("BCa bootstrap over units", "randomisation test over unit",
+                    "eleven units", "eleven detunings of the same",
+                    "cluster bootstrap over eleven"):
+            if bad in " ".join(src.split()):
+                unit_claims.append(f"{name}: '{bad}'")
+    if unit_claims:
+        fails.append("headline interval described as a cluster/randomisation "
+                     "interval, which it is not: " + "; ".join(unit_claims))
+
+
+    # --- a registration row's slope interval is determined by its slope and
+    # R^2 alone (OLS on ten detunings, t(8)); two rows once carried intervals
+    # their R^2 could not produce, which no rounding absorbs.
+    try:
+        from scipy import stats as _st
+        _t8 = float(_st.t.ppf(0.975, 8))
+    except Exception:
+        _t8 = 2.306
+    _mac = dict(re.findall(r"\\newcommand\{\\(\w+)\}\{([^}]*)\}", main_tex))
+
+    def _expand(s):
+        for _k, _v in _mac.items():
+            s = s.replace("\\" + _k + "{}", _v).replace("\\" + _k, _v)
+        return s.replace("\\xspace", "")
+
+    for _line in tex["appendix"].splitlines():
+        if _line.count("&") < 4:
+            continue
+        _m = re.search(r"&\s*([\d.]+)\s*\[([\d.]+),\\?,?\s*([\d.]+)\]\s*&\s*(0\.99\d+)\s*&",
+                       _expand(_line))
+        if not _m:
+            continue
+        _sl, _lo, _hi, _r2 = (float(x) for x in _m.groups())
+        _hw = (_hi - _lo) / 2
+        _imp = _t8 * abs(_sl) * ((1 - _r2) / (8 * _r2)) ** 0.5
+        if _hw > 0 and abs(_imp - _hw) / _hw > 0.06:
+            _who = _line.split("&")[0].strip()[:40]
+            fails.append(f"registration row '{_who}': half-width {_hw:.5f} is not "
+                         f"attainable from R^2 {_r2} (implies {_imp:.5f})")
+
+
+    # --- Table A14's b^unif column is an identity in the two cells beside it,
+    # so it must equal 40 * lbar * above/8 rounded half-up. Two exact ties in
+    # that column were once rounded in opposite directions.
+    from decimal import Decimal as _D, ROUND_HALF_UP as _HU
+    for _m in re.finditer(
+            r"^(\d+) Hz &[^&]*&\s*(\d) of 8 &\s*([\d.]+|--)\s*&\s*([\d.]+)\s*&",
+            tex["appendix"], re.M):
+        _reg, _above, _lbar, _printed = _m.groups()
+        if _lbar == "--":
+            continue
+        _exact = 40.0 * float(_lbar) * int(_above) / 8.0
+        _want = float(_D(repr(_exact)).quantize(_D("0.1"), rounding=_HU))
+        if abs(_want - float(_printed)) > 1e-9:
+            fails.append(f"register table {_reg} Hz: b^unif should be {_want:.1f} "
+                         f"(40 x {_lbar} x {_above}/8 = {_exact:.3f}, half-up), "
+                         f"table prints {_printed}")
 
     # --- the guard-sensitivity grid is a summary of the exclusion table, so it
     # can be recomputed from it. Adding BigVGAN to the exclusion table left the
@@ -792,7 +1068,10 @@ def main() -> int:
     # --- captions are capped at three rendered lines. Notes added to explain
     # a rounding rule or a dash pushed five captions past it in one round, so
     # the cap is enforced rather than remembered.
-    CAP_CHARS = 3 * 104          # about 104 characters to a caption line
+    # 104 was guessed and is too generous: captions of 305-312 characters pass
+    # it and render as four lines. Measured against the built PDF the wrap is
+    # about 95 characters, so the cap is 3 * 95.
+    CAP_CHARS = 3 * 95
     for name, src in tex.items():
         if name in ("results", "09_appendix"):   # same file as "appendix"
             continue
@@ -816,7 +1095,7 @@ def main() -> int:
                 lab = re.search(r"\\label\{((?:tab|fig):[^}]+)\}", src[k:k + 1400])
                 fails.append(
                     f"caption for {lab.group(1) if lab else name} runs "
-                    f"{len(flat)/104:.1f} lines; the cap is three")
+                    f"{len(flat)/95:.1f} lines; the cap is three")
 
     # --- the bibliography ships with the supplement, so an entry nothing
     # cites is either a dropped citation or padding. Five had accumulated;
@@ -924,16 +1203,22 @@ def main() -> int:
         fails.append(f"float {orphan!r} is never cited outside its own caption")
 
     # --- the appendix contents list must match the appendix's own sectioning
-    letter, seen = None, {}
+    letter, seen, titles = None, {}, {}
     for mm in re.finditer(r"\\(section|subsection)\{([^}]*)\}", apx):
         if mm.group(1) == "section":
             letter = chr(ord("A") + len(seen)); seen[letter] = 0
+            titles[letter] = mm.group(2)
         elif letter:
             seen[letter] += 1
     listing = (ROOT / "main.tex").read_text()
     a = listing.find("\\section*{Appendix contents}")
     b = listing.find("Where to find each claim")
     block = listing[a:b] if a >= 0 and b > a else ""
+    for L, title in titles.items():
+        if f"\\textbf{{{L}. " not in block:
+            fails.append(
+                f"appendix contents: the list has no entry for {L}, "
+                f"{title!r}")
     for L, n in seen.items():
         if n == 0:
             continue
@@ -951,7 +1236,8 @@ def main() -> int:
         rows = re.search(r"ROWS = \[(.*?)\n\]", figsrc.read_text(), re.S)
         drawn = re.findall(r'\("([^"]+)"', rows.group(1)) if rows else []
         names = " ".join(
-            r[0] for tbl in ("tab:c4", "tab:classical", "tab:controls")
+            r[0] for tbl in ("tab:c4", "tab:classical", "tab:controls",
+                             "tab:sbr", "tab:confirmatory")
             for r in rows_of(tbl, apx)).lower()
         for label in drawn:
             stem = label.split(",")[0].strip().lower()
@@ -972,8 +1258,281 @@ def main() -> int:
                         f"{name}: {lbl!r} labels a {env}; prose citing it will "
                         f"print the wrong float word")
 
+    # --- claims the round-1 panel found contradicting each other. Each of
+    # these was a real defect: a section heading that generalised past what
+    # the section measured, an abstract clause that explained a null the body
+    # calls unexplained, and a post-hoc table whose caption counted its own
+    # rows wrong. They are cheap to reintroduce while editing prose.
+    WORDS = {"six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+             "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
+             "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
+             "nineteen": 19, "twenty": 20}
+
+    # a heading may not assert that regridding is universal; seven of the nine
+    # resolving conditions regrid, and SNAC 24k reads 0.28 at EnCodec's own edge
+    for m in re.finditer(r"\\subsection\{([^}]*regrid[^}]*)\}", tex["results"]):
+        h = m.group(1)
+        if re.search(r"\b(Every|All)\b", h) and "primary set" not in h:
+            fails.append(
+                f"the regridding heading reads {h!r}; it asserts a universal "
+                "the paper's own tables refute, and does not scope it")
+
+    absn = re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}", tex["main"], re.S)
+    if absn:
+        a = " ".join(absn.group(1).split())
+        if "read as null" in a and "all but one" not in a:
+            fails.append(
+                "the abstract explains the null conditions without the "
+                "exception; Section 3.1 reports SpeechTokenizer's null as "
+                "unexplained")
+
+    # the post-hoc table's caption states its own length; count the rows
+    cap = re.search(r"\\caption\{Analytic choices made after results were seen\.(.*?)\}\s*\n\\label\{tab:posthoc\}",
+                    apx, re.S)
+    if cap:
+        claimed = next((WORDS[w] for w in WORDS if w in cap.group(1)), None)
+        actual = len(rows_of("tab:posthoc", apx))
+        if claimed is not None and actual and claimed != actual:
+            fails.append(
+                f"the post-hoc table's caption claims {claimed} decisions and "
+                f"the table lists {actual}; the table's whole point is that the "
+                "count is complete")
+
+    # the soft-edge section says both how far the 110 Hz partials sit from the
+    # edge and where its prediction comes from; those two must agree
+    if "partials inside\nthe transition" in apx or "partials inside the transition" in apx:
+        if "within one width of the edge" in apx:
+            fails.append(
+                "the soft-edge appendix says the 110 Hz partials are inside the "
+                "transition and also that none lies within one width of the "
+                "edge; at 1.3 and 1.7 widths only the second is true")
+
+    # --- The summary layer must recompute from the held-out table.
+    # Nine review cycles put almost every substantive error in the same place:
+    # the abstract, the contributions and the conclusion drift from the tables
+    # they summarise, and adding a table row silently falsifies a count three
+    # sections away. Reviewers have caught 16-vs-12-vs-9 for one quantity, a
+    # ladder span quoted over five arms after the table grew to seven, and a
+    # correlation printed against the wrong variable. So derive the counts
+    # here rather than trusting the prose.
+    try:
+        conf = rows_of("tab:confirmatory", apx)
+    except ValueError:
+        conf = []
+    lbars, conds = [], []
+    for r in conf:
+        if len(r) < 9:
+            continue
+        lb, lr = num(r[4]), num(r[8])
+        if lb is None or lr is None:
+            continue
+        lbars.append(lb)
+        conds.append(lr)
+    if len(lbars) >= 20:
+        total = len(lbars)
+        not_ladder = sum(1 for v in lbars if v < 0.70)
+        macros = MACROS
+        claimed_total = num(macros.get("HeldTotal", ""))
+        claimed_miss = num(macros.get("HeldNotLadder", ""))
+        if claimed_total is not None and int(claimed_total) != total:
+            fails.append(
+                f"HeldTotal says {int(claimed_total)} but tab:confirmatory has "
+                f"{total} rows")
+        if claimed_miss is not None and int(claimed_miss) != not_ladder:
+            fails.append(
+                f"HeldNotLadder says {int(claimed_miss)} but {not_ladder} of "
+                f"{total} rows read an inclusive ladder fraction below 0.70")
+        # the abstract's boundary sensitivity must be the not-in-ladder count,
+        # not the hit count printed beside it in G.5
+        lo = sum(1 for v in lbars if v < 0.60)
+        hi = sum(1 for v in lbars if v < 0.75)
+        abstract = tex["main"]
+        m = re.search(r"(\d+) or (\d+) had\s*\n?\s*we frozen", abstract)
+        if m and (int(m.group(1)), int(m.group(2))) != (lo, hi):
+            fails.append(
+                f"the abstract sweeps the tier boundary to {m.group(1)} and "
+                f"{m.group(2)}; recomputing from tab:confirmatory gives "
+                f"{lo} and {hi}")
+        # "seven of those N" regrid high on the conditional metric
+        thr = num(MACROS.get("MissRegrid", "")) or 0.71
+        seven = sum(1 for lb, lr in zip(lbars, conds) if lb < 0.70 and lr >= thr)
+        m = re.search(r"But (\w+) of those", abstract)
+        words = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+                 "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+        if m and words.get(m.group(1)) not in (None, seven):
+            fails.append(
+                f"the abstract says {m.group(1)} of the missing checkpoints "
+                f"regrid at {thr} or higher; the table gives {seven}")
+
+    # --- A count in the main text that names a table must match that table.
+    # Adding the two grid-preserving arms to tab:relocate on 2026-09-06 left
+    # three sentences saying "five fine-tunes" of a seven-row table.
+    body = "\n".join(tex[k] for k in ("main", "01_intro", "04_pitch")
+                      if k in tex)
+    words = {"two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+             "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11}
+    for m in re.finditer(
+            r"(\w+)\s+fine-tunes of (?:the |one )?\s*(?:the )?[^.]*?"
+            r"\\ref\{(tab:[A-Za-z-]+)\}", body):
+        want, label = words.get(m.group(1).lower()), m.group(2)
+        if want is None:
+            continue
+        try:
+            rows = rows_of(label, apx)
+        except ValueError:
+            continue
+        # tab:relocate stacks several decoders; a sentence about "the one
+        # EnCodec decoder" ranges over the arms before the next codec's block
+        n = 0
+        for r in rows:
+            first = subst(r[0])
+            if re.match(r"(Mimi|WavTokenizer|SNAC|DAC|Vocos)\b", first):
+                continue
+            n += 1
+        if n != want:
+            fails.append(
+                f"the main text says {m.group(1)} fine-tunes of "
+                f"\\ref{{{label}}}, which has {n} rows")
+
+    # --- No page carries two main-text figures.
+    # Two figures stacked on one page reads badly and squeezes the text
+    # between them; on 2026-09-06 Figures 2 and 3 both landed on page 7.
+    # Placement is decided by where the float is declared, so the fix is to
+    # move the declaration later, not to add a placement specifier.
+    pdf = ROOT / "main.pdf"
+    if pdf.exists():
+        try:
+            txt = subprocess.run(
+                ["pdftotext", str(pdf), "-"],
+                capture_output=True, text=True, check=True).stdout
+        except (OSError, subprocess.CalledProcessError):
+            txt = ""
+        for n, page in enumerate(txt.split("\f")[:12], 1):
+            caps = re.findall(r"Figure (\d+):", page)
+            if len(set(caps)) > 1:
+                fails.append(
+                    f"page {n} carries Figures {', '.join(sorted(set(caps)))}; "
+                    "keep one figure to a page in the main text")
+
+    # --- The main text must end by page 9.
+    # ICLR 2026/27 caps the main text at nine pages at submission and enforces
+    # it with desk rejection; references, appendices and the ethics and
+    # reproducibility statements do not count. The Ethics Statement is the
+    # first thing after the main text, so the page it starts on is the check.
+    # This is guarded because it has crept back twice: a summary-layer edit
+    # adds two lines, the conclusion spills onto page 10, and nothing in the
+    # build fails. Page breaking here is float-pinned, so a cut made before a
+    # float is absorbed by it -- only a cut on page 9 itself moves the break.
+    if txt:
+        pages = txt.split("\f")
+        start = None
+        for n, page in enumerate(pages, 1):
+            if "ETHICSSTATEMENT" in re.sub(r"\s+", "", page).upper():
+                start = n
+                break
+        if start is None:
+            fails.append("no Ethics Statement found in main.pdf, so the "
+                         "main text length cannot be checked")
+        elif start > 10:
+            fails.append(
+                f"the main text runs to page {start - 1}; ICLR caps it at "
+                f"nine, so the Ethics Statement must start by page 10")
+
+    # --- The paper's statement about its own bibliography must recompute.
+    # On 2026-09-07 two entries were added and the AI-use statement kept
+    # saying "93 entries, 72 verified"; a reviewer checked the one number the
+    # paper invites them to check and it did not hold. The counts are cheap to
+    # derive, so derive them.
+    bib_src = (ROOT / "refs.bib").read_text()
+    n_entries = len(re.findall(r"^@", bib_src, re.M))
+    n_unver = len(re.findall(r"\[UNVERIFIED\]", bib_src)) - bib_src.count(
+        "[UNVERIFIED] marker instead")
+    n_ver = n_entries - n_unver
+    stated = re.search(
+        r"Of (\d+) bibliography entries, (\d+) carry a provenance comment[^.]*?"
+        r"the remaining (\d+) are marked", tex["main"], re.S)
+    if stated:
+        got = tuple(int(g) for g in stated.groups())
+        if got != (n_entries, n_ver, n_unver):
+            fails.append(
+                f"the statement says {got[0]} entries / {got[1]} verified / "
+                f"{got[2]} unverified; refs.bib has {n_entries} / {n_ver} / "
+                f"{n_unver}")
+    hdr = re.search(r"As of this revision: (\d+) entries, (\d+) verified, "
+                    r"(\d+) unverified", bib_src)
+    if hdr:
+        got = tuple(int(g) for g in hdr.groups())
+        if got != (n_entries, n_ver, n_unver):
+            fails.append(
+                f"the refs.bib header says {got[0]}/{got[1]}/{got[2]}; the file "
+                f"has {n_entries}/{n_ver}/{n_unver}")
+    # the load-bearing-unverified list must name works that really are unverified
+    named = re.search(r"and (\w+) of the 21 are load-bearing", tex["main"])
+    words = {"three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
+             "eight": 8, "nine": 9}
+    if named:
+        keys = ["terhardt1982pitch", "dietz2002sbr", "nagel2009harmonic",
+                "pons2021upsampling", "schuirmann1987tost",
+                "berendes2026finetuning", "lee2023bigvgan"]
+        unver_keys = set()
+        for m in re.finditer(r"\[UNVERIFIED\][^@]*@\w+\{([^,]+),", bib_src):
+            unver_keys.add(m.group(1))
+        listed = [k for k in keys if k in unver_keys]
+        want = words.get(named.group(1))
+        if want is not None and want != len(listed):
+            fails.append(
+                f"the statement calls {named.group(1)} entries load-bearing "
+                f"and unverified; {len(listed)} of the named keys are actually "
+                "unverified")
+
+    # a bibliography entry marked verified against a peer-reviewed venue must
+    # not still print as an arXiv preprint
+    bib = (ROOT / "refs.bib").read_text()
+    for entry in re.finditer(r"(%[^\n]*\n)*@\w+\{([^,]+),(.*?)\n\}", bib, re.S):
+        head, key, body = entry.group(0), entry.group(2), entry.group(3)
+        cited_venue = re.search(r"%.*(Interspeech|ACL|TASLP|ISMIR|NeurIPS|ICASSP)", head)
+        if cited_venue and "arXiv preprint" in body:
+            fails.append(
+                f"refs.bib entry {key!r} is annotated with a "
+                f"{cited_venue.group(1)} venue but still prints as an arXiv "
+                "preprint")
+
+    # --- a negative \vspace just after \end{figure} does not shrink the float.
+    # The figure floats away and the space stays in the text stream, deleting
+    # line separation wherever the source happened to sit: on 2026-09-06 a
+    # -7mm added to claw back a page overprinted two paragraphs on page 6.
+    # Float separation belongs in \textfloatsep, set once in the preamble.
+    for stem, src in tex.items():
+        for m in re.finditer(r"\\end\{(figure|table)\}\s*\n\s*\\vspace\{\s*-", src):
+            fails.append(
+                f"{stem}: a negative \\vspace follows \\end{{{m.group(1)}}}; "
+                "the float moves and the space does not, so it deletes line "
+                "spacing in whatever paragraph lands there. Use "
+                "\\textfloatsep instead")
+
+    # --- every measured value in the abstract must come from a macro.
+    # Seven drafts running, the abstract carried literals that duplicated an
+    # appendix number, and every one of them drifted when the other copy was
+    # edited: the cross-family pair came to collide with the extender's, a
+    # multiplicity adjustment appeared that Appendix G.1 disclaims, and a
+    # held-out count replaced the frozen tier rule's with an undefined cut.
+    raw_abs = re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}",
+                        (ROOT / "main.tex").read_text(), re.S)
+    if raw_abs:
+        body = raw_abs.group(1)
+        # strip macro calls, maths, and citations before looking for digits
+        stripped = re.sub(r"\\[A-Za-z]+\{[^}]*\}", " ", body)
+        stripped = re.sub(r"\\[A-Za-z]+", " ", stripped)
+        stripped = re.sub(r"\$[^$]*\$", " ", stripped)
+        stripped = re.sub(r"\[[^\]]*\]", " ", stripped)   # printed intervals
+        for lit in re.findall(r"(?<![\w.])\d+\.\d+(?![\w])", stripped):
+            fails.append(
+                f"the abstract hard-codes {lit!r}; every measured value there "
+                "must come from a macro so it cannot drift from the appendix")
+
     if fails:
         print("INCONSISTENT:")
+        fails = list(dict.fromkeys(fails))
         for f in fails:
             print("  -", f)
         return 1
@@ -1011,6 +1570,18 @@ def main() -> int:
     print("  - every run named in the exclusion table has a result file")
     print("  - every macro defined is used")
     print("  - the soft-edge column recomputes from the model")
+    print("  - no section heading asserts that every decoder regrids")
+    print("  - the abstract's null clause carries its exception")
+    print("  - the post-hoc table's caption counts its own rows")
+    print("  - the soft-edge appendix agrees with itself on the 110 Hz partials")
+    print("  - no bibliography entry is a preprint at a peer-reviewed venue")
+    print("  - no negative vspace is attached to a float")
+    print("  - the abstract quotes no unmacroed measured value")
+    print("  - the abstract's held-out counts recompute from the table")
+    print("  - a count naming a table matches that table's rows")
+    print("  - no main-text page carries two figures")
+    print("  - the main text ends by page 9")
+    print("  - the bibliography self-count recomputes from refs.bib")
     return 0
 
 

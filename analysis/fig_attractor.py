@@ -28,9 +28,9 @@ ARMS = [
 ]
 # (label, colour, amplitude, sd) for the decomposition
 BARS = [
-    ("stock",             "0.80", 13.72, 0.00),
-    ("grid kept",         ENC,     4.69, 0.05),
-    ("flattened",         FT,      3.75, 0.11),
+    ("stock",   "0.80", 13.72, 0.00),
+    ("grid",    ENC,     4.69, 0.05),
+    ("flat",    FT,      3.78, 0.11),
 ]
 
 
@@ -73,7 +73,7 @@ def panel_move(ax):
     ax.set_xticks([0, 10, 20, 30, 40])
     ax.set_xlabel("residual's zero crossing: where the decoder's grid sits (cents)",
                   fontsize=6.8, color="0.2")
-    ax.set_title("retuning the corpus moves the grid with it",
+    ax.set_title("(a) retuning the corpus moves the grid",
                  fontsize=7.2, loc="left", color="0.12")
     ax.grid(axis="x", alpha=0.14, lw=0.6)
 
@@ -87,10 +87,15 @@ def panel_decompose(ax):
             ax.plot([xi, xi], [amp - sd, amp + sd], color="0.25", lw=1.0)
         ax.text(xi, amp + 0.55, f"{amp:.2f}", ha="center", fontsize=6.2,
                 color="0.2")
-    ax.annotate("", xy=(2.42, 4.69), xytext=(2.42, 3.75),
-                arrowprops=dict(arrowstyle="<->", color=INK, lw=0.9))
-    ax.text(2.60, 4.22, "corpus\ntuning:\n0.91 c", fontsize=5.8,
-            color=INK, va="center", linespacing=1.3)
+    # the gap is under a cent on a 16-cent axis, so the arrow is tiny; keep it
+    # clear of the 3.75 bar label rather than beside it
+    # a 0.94-cent gap on a 16-cent axis is too short to read as an arrow;
+    # draw it as a capped span instead, with leaders back to the two bars
+    for yv in (4.69, 3.75):
+        ax.plot([2.30, 2.70], [yv, yv], color=INK, lw=0.7, alpha=0.55)
+    ax.plot([2.62, 2.62], [3.75, 4.69], color=INK, lw=0.9)
+    ax.text(2.80, 4.22, "corpus\ntuning\n0.91 c", fontsize=5.8,
+            color=INK, va="center", linespacing=1.35)
 
     ax.set_xticks(x)
     ax.set_xticklabels([b[0] for b in BARS], fontsize=6.0)
@@ -105,12 +110,19 @@ def panel_decompose(ax):
 def main() -> int:
     out = (Path(sys.argv[1]) if len(sys.argv) > 1
            else Path(__file__).resolve().parents[2] / "figures" / "attractor.pdf")
-    fig, ax1 = plt.subplots(1, 1, figsize=(5.5, 1.72))
-    style(ax1)
+    fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(5.5, 1.72),
+        gridspec_kw={"width_ratios": [1.85, 1.0], "wspace": 0.30})
+    style(ax1); style(ax2)
     panel_move(ax1)
-    fig.tight_layout()
+    panel_decompose(ax2)
+    # tight_layout() refuses on this pair and silently leaves panel (a)'s x
+    # label below the canvas, so the figure's headline quantity went
+    # unlabelled; measure the bounding box from the artists instead.
     out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out); fig.savefig(out.with_suffix(".png"), dpi=220)
+    fig.savefig(out, bbox_inches="tight", pad_inches=0.02)
+    fig.savefig(out.with_suffix(".png"), dpi=220,
+                bbox_inches="tight", pad_inches=0.02)
     print(f"wrote {out}")
     return 0
 

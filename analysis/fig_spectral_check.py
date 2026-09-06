@@ -31,12 +31,13 @@ GRID = -DELTA         # the nearest 12-TET harmonic, in cents from the input
 # H1 and H2 are transmitted, H4 upward are regenerated, and H3 is the one the
 # appendix describes as carrying "two lines of comparable level".
 FLOOR_IN, FLOOR_OUT = -78.0, -44.0    # analysis floor; decoded broadband floor
+REGEN_DROP = 5.5                      # dB, mid of Appendix C.6's 4.5 to 7
 SEED = 20260902
 
 # (harmonic, its measured displacement, where its band puts it, the caption)
 PANELS = [
     (1, -0.2,  "below", "below the edge", "transmitted; line stays put"),
-    (3, -24.0, "edge",  "at the edge",    "two lines, read as $-24$"),
+    (3, -24.0, "edge",  "at the edge",    "two lines, read as $-24$ c"),
     (4, -37.9, "above", "above the edge", "regenerated onto the grid"),
 ]
 
@@ -74,7 +75,7 @@ def main() -> int:
     rng = np.random.default_rng(SEED)
     cents = np.linspace(-100, 100, 1600)
 
-    fig, axes = plt.subplots(1, 3, figsize=(5.5, 1.92), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(5.5, 1.50), sharey=True)
     for i, (ax, (k, moved, band, where, note)) in enumerate(zip(axes, PANELS)):
         style(ax)
         s_in = window_response(cents, 0.0, floor=FLOOR_IN)
@@ -89,15 +90,26 @@ def main() -> int:
             s_out = db_sum(window_response(cents, 0.0) - 1.5,
                            window_response(cents, GRID) - 3.0, noise)
         else:
-            # above the edge: the input line is well down and the regenerated
-            # line carries the partial, essentially on the grid harmonic
+            # Above the edge: the input line is well down and the regenerated
+            # line carries the partial, essentially on the grid harmonic --
+            # but attenuated. Appendix C.6 puts a regenerated partial 4.5 to
+            # 7 dB below the input, and that drop is load-bearing: it sets the
+            # 0.42-0.69 ratio column of Table A15 and anchors the soft-edge
+            # roll-off. An earlier version of this panel drew the regenerated
+            # line at full input level, which contradicted all three.
             s_out = db_sum(window_response(cents, 0.0) - 21.0,
-                           window_response(cents, moved), noise)
-        ax.plot(cents, s_in, color="0.62", lw=0.9, label="input")
-        ax.plot(cents, s_out, color="#C0392B", lw=0.9, label="EnCodec 3 kbps")
-        ax.axvline(0.0, color="0.35", lw=0.7, ls=":")
-        ax.axvline(GRID, color="#0072B2", lw=0.9, ls="--",
-                   label="harmonic of nearest 12-TET $f_0$")
+                           window_response(cents, moved) - REGEN_DROP, noise)
+        # the input is drawn wide and under the decoded trace, so that where
+        # the two coincide -- panel (a), the whole point of that panel -- the
+        # grey shows as a halo instead of vanishing beneath the red
+        ax.plot(cents, s_in, color="0.70", lw=2.0, label="input",
+                solid_capstyle="round", zorder=2)
+        ax.plot(cents, s_out, color="#C0392B", lw=0.9, label="EnCodec 3 kbps",
+                zorder=3)
+        ax.axvline(0.0, color="0.35", lw=0.7, ls=":", label="input partial",
+                   zorder=1)
+        ax.axvline(GRID, color="#0072B2", lw=0.9, ls="--", zorder=1,
+                   label="harmonic of nearest 12-TET pitch $f^{\\star}$")
         ax.set_xlim(-72, 72); ax.set_ylim(-80, 6)
         ax.set_xticks([-40, 0, 40])
         # both lines of text sit above the axes, where nothing can collide
@@ -110,7 +122,7 @@ def main() -> int:
     # the legend sits under the panels; inside the axes it printed over the
     # decoded trace and across the 12-TET marker
     axes[1].legend(fontsize=6.6, loc="upper center", bbox_to_anchor=(0.5, -0.34),
-                   ncol=3, frameon=False, handlelength=1.6, columnspacing=1.4)
+                   ncol=4, frameon=False, handlelength=1.5, columnspacing=1.0)
     fig.subplots_adjust(left=0.088, right=0.995, top=0.795, bottom=0.325,
                         wspace=0.10)
     out.parent.mkdir(parents=True, exist_ok=True)

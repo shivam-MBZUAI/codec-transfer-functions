@@ -37,23 +37,6 @@ RATES = [1.5, 3, 6, 12, 24]
 EDGE = [0.9, 1.3, 1.6, 2.0, 2.2]
 
 # (label, ladder fraction, 95% half-width, family)
-BARS = [
-    ("EnCodec 3 kbps",        0.91, 0.05, "enc"),
-    ("WavTokenizer 0.9k",     0.84, 0.07, "wav"),
-    ("EnCodec 24 kbps",       0.72, 0.10, "enc"),
-    ("quantiser bypassed",    0.78, 0.08, "enc"),
-    ("fine-tuned on GTZAN",   0.89, 0.06, "ft"),
-    ("fine-tuned, flattened", 0.59, 0.09, "ft"),
-    ("SNAC 32k",              0.30, 0.09, "other"),
-    ("Mimi",                  0.29, 0.10, "other"),
-    ("DAC 16k",               0.11, 0.07, "other"),
-]
-WAV = "#009E73"
-COLOR = {"enc": ENC, "ft": FT, "other": OTHER, "wav": WAV}
-FAMILY = {"enc": "EnCodec", "ft": "fine-tuned", "other": "other codecs",
-          "wav": "WavTokenizer"}
-
-
 def style(ax):
     for side in ("top", "right"):
         ax.spines[side].set_visible(False)
@@ -79,7 +62,7 @@ def panel_a(ax):
     ax.text(8 * F0 + 0.12, base + 0.08, "the probe's eight partials",
             fontsize=5.6, color=MUTED, va="center")
 
-    ax.text(EDGE[0] / 2, y[0], "kept", fontsize=6.0, color="0.30",
+    ax.text(EDGE[0] / 2, y[0], "transmitted", fontsize=6.0, color="0.30",
             ha="center", va="center", zorder=5)
     ax.text((EDGE[0] + NYQ) / 2, y[0], "invented by the decoder", fontsize=6.0,
             color="#0b3d5c", ha="center", va="center", zorder=5)
@@ -101,39 +84,6 @@ def panel_a(ax):
     ax.grid(axis="x", alpha=0.13, lw=0.6)
 
 
-def panel_b(ax):
-    """Ladder fraction per condition, as a dot and a 95% interval."""
-    y = np.arange(len(BARS))[::-1]
-    ax.axvline(0.0, color="0.45", lw=1.0, ls="--", zorder=1)
-    ax.axvline(1.0, color="0.45", lw=1.0, ls=":", zorder=1)
-
-    for yi, (label, v, e, fam) in zip(y, BARS):
-        c = COLOR[fam]
-        ax.plot([v - e, v + e], [yi, yi], color=c, lw=1.6,
-                solid_capstyle="round", alpha=0.5, zorder=3)
-        ax.plot([v], [yi], "o", color=c, ms=4.4, mec="white", mew=0.7, zorder=4)
-
-    ax.set_yticks(y)
-    ax.set_yticklabels([b[0] for b in BARS], fontsize=6.0)
-    for tick, (_, _, _, fam) in zip(ax.get_yticklabels(), BARS):
-        pass
-    for fam, name in FAMILY.items():
-        ax.plot([], [], "o", color=COLOR[fam], ms=3.8, ls="none", label=name)
-    ax.legend(fontsize=5.0, loc="lower right", frameon=False, handlelength=0.8,
-              borderpad=0.1, labelspacing=0.22, handletextpad=0.35)
-    ax.set_xlim(-0.18, 1.34)
-    ax.set_ylim(y[-1] - 0.7, y[0] + 0.7)
-    ax.set_xticks([0.0, 0.5, 1.0])
-    ax.set_xticklabels(["0.0\ninput's own\nharmonic", "0.5",
-                        "1.0\nthe grid\nharmonic"], fontsize=6.0,
-                       linespacing=1.25)
-    ax.set_xlabel("ladder fraction $\\bar\\ell$", fontsize=7, color="0.2",
-                  labelpad=1.0)
-    ax.set_title("(b) where the partials land", fontsize=7, loc="left",
-                 color="0.12")
-    ax.grid(axis="x", alpha=0.13, lw=0.6)
-
-
 def panel_partials(ax):
     """Per-partial displacement, the same model drawn by expected_partials.py."""
     import expected_partials as ep
@@ -142,7 +92,7 @@ def panel_partials(ax):
 
 def main() -> int:
     out = (Path(sys.argv[1]) if len(sys.argv) > 1
-           else Path(__file__).resolve().parent.parent / "figures" / "band_edge_expected.pdf")
+           else Path(__file__).resolve().parents[2] / "figures" / "band_edge_expected.pdf")
     fig = plt.figure(figsize=(5.5, 2.45))
     gs = fig.add_gridspec(2, 1, height_ratios=[1.15, 1.0], hspace=0.85)
     axp = fig.add_subplot(gs[0, 0])

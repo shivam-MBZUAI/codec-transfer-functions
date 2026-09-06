@@ -62,13 +62,18 @@ axes[0][0].set_ylim(0, max(a.get_ylim()[1] for a in axes[0]) * 1.12)   # headroo
 axes[0][0].set_ylabel("relative density (mean = 1)", fontsize=7, color="0.2")
 # label the reference line once, in the flattest panel, rather than boxing a
 # legend over the tallest bars
-axes[0][1].text(50, 1.35, "flat: no grid structure", fontsize=5.8, color="0.35",
+axes[0][1].text(50, 1.35, "near-flat: 1.07 vs a 1.04 floor", fontsize=5.8, color="0.35",
                 ha="center", va="bottom", zorder=5)
-axes[0][1].annotate("", xy=(50, 1.05), xytext=(50, 1.32),
-                    arrowprops=dict(arrowstyle="-", color="0.6", lw=0.6))
+# the leader has to touch the dashed line: ending it at 1.05, with the default
+# shrink on top of that, left a stub hanging in mid-air under the text
+axes[0][1].annotate("", xy=(50, 1.005), xytext=(50, 1.30),
+                    arrowprops=dict(arrowstyle="-", color="0.6", lw=0.6,
+                                    shrinkA=0, shrinkB=0))
 fig.supxlabel("cents above the 12-TET pitch below", fontsize=7, y=0.04)
 fig.tight_layout(rect=(0, 0.05, 1, 1))
-out = ROOT / "figures" / "pitch_histograms.pdf"
+# figures/ sits beside code/, not inside it: this wrote to code/figures/,
+# where the paper never looks, so edits to this script had no effect
+out = ROOT.parent / "figures" / "pitch_histograms.pdf"
 out.parent.mkdir(exist_ok=True)
 fig.savefig(out)
 fig.savefig(out.with_suffix(".png"), dpi=200)

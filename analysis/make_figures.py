@@ -133,7 +133,7 @@ def fig_residual_shape():
         ax.set_xticks([0, 50, 100])
         ax.grid(alpha=0.14, lw=0.6); ax.set_axisbelow(True)
     axes[0][0].set_ylabel("residual (cents)", fontsize=6.5, color="0.2")
-    fig.supxlabel("cents above the 12-TET pitch", fontsize=6.8, color="0.2", y=0.03)
+    fig.supxlabel("cents above the 12-TET pitch below", fontsize=6.8, color="0.2", y=0.03)
     fig.tight_layout(rect=[0, 0.04, 1, 1]); _save(fig, "residual_shape")
 
 
@@ -166,11 +166,17 @@ def fig_rate():
     ax.errorbar(rates, biases, yerr=err, fmt="o-", color=OKABE["enc"], lw=1.8, ms=6,
                 capsize=3, label="EnCodec 24k (95% bootstrap interval)")
     if floor is not None:
-        ax.axhline(floor, color=OKABE["grey"], ls="--", lw=1.5,
-                   label=f"quantiser removed ({floor:.2f} cents)")
+        # Plotted at 24 kbps only, not as a horizontal line. Section 3.2
+        # licenses this comparison at the matched 2.2 kHz edge, which is
+        # EnCodec's 24 kbps point; an axhline invited the reader to make it
+        # at 1.5, 3, 6 and 12 kbps, where the paper says it is not valid.
+        ax.plot([24.0], [floor], marker="s", ms=7, mfc="none", mew=1.8,
+                color=OKABE["grey"], ls="none",
+                label=f"quantiser removed, matched edge ({floor:.2f} cents)")
     ax.set_xscale("log"); ax.set_xticks(rates)
     ax.set_xticklabels([str(r) for r in rates])
-    ax.set_xlabel("bitrate (kbps)"); ax.set_ylabel("grid bias (cents)")
+    ax.set_xlabel("bitrate (kbps)")
+    ax.set_ylabel("all-trial median grid bias (cents)")
     ax.set_ylim(0, max(biases) * 1.15)
     ax.set_title("Grid bias against bitrate, EnCodec 24 kHz", fontsize=7.5)
     ax.tick_params(labelsize=7); ax.xaxis.label.set_size(7.5); ax.yaxis.label.set_size(7.5)
@@ -216,7 +222,7 @@ def fig_octaves():
         ax.set_xticks([0, 50, 100])
         ax.grid(alpha=0.14, lw=0.6); ax.set_axisbelow(True)
     axes[0][0].set_ylabel("residual (cents)", fontsize=6.5, color="0.2")
-    fig.supxlabel("cents above the 12-TET pitch", fontsize=6.8, color="0.2", y=0.03)
+    fig.supxlabel("cents above the 12-TET pitch below", fontsize=6.8, color="0.2", y=0.03)
     fig.tight_layout(rect=[0, 0.04, 1, 1]); _save(fig, "octaves")
 
 
@@ -247,7 +253,7 @@ def fig_overview():
     ax.plot(gx, amp * np.sin(2 * np.pi * gx / 100 + np.radians(ph)), color="black", lw=1.7)
     # the corners the scatter does not reach; at x = 50 these annotations
     # printed straight over the densest part of the cloud and the fitted curve
-    ax.annotate("pulled up", xy=(82, 14), xytext=(93, 41),
+    ax.annotate("pulled up", xy=(84, 14), xytext=(88, 41),
                 fontsize=6.4, ha="center", color="0.25",
                 arrowprops=dict(arrowstyle="->", lw=0.7, color="0.45",
                                 shrinkB=2))
@@ -257,7 +263,7 @@ def fig_overview():
                                 shrinkB=2))
     ax.set_xlim(0, 100); ax.set_ylim(-58, 58)
     ax.set_xticks([0, 25, 50, 75, 100])
-    ax.set_xlabel("cents above nearest 12-TET pitch", fontsize=8)
+    ax.set_xlabel("cents above the 12-TET pitch below", fontsize=8)
     ax.set_ylabel("residual (cents)", fontsize=8)
     ax.set_title("(a) folded residual, EnCodec 3 kbps", fontsize=7.5)
     ax.tick_params(labelsize=7); ax.grid(alpha=0.2)
@@ -289,8 +295,9 @@ def fig_overview():
     ax2.set_ylabel("phase shift (deg)", fontsize=8)
     ax2.set_title("(b) phase against detuning",
                   fontsize=8)
-    ax2.legend(fontsize=6.4, loc="upper left", frameon=True, framealpha=0.92,
-               edgecolor="none", facecolor="white", borderpad=0.25,
+    # "upper left" at 0.92 opacity painted over the 60-cent marker and part of
+    # the slope-1 line; "lower right" is empty in this panel.
+    ax2.legend(fontsize=6.4, loc="upper left", frameon=False, borderpad=0.25,
                labelspacing=0.3, handlelength=1.5)
     ax2.tick_params(labelsize=7); ax2.grid(alpha=0.2)
     fig.tight_layout(w_pad=0.4); _save(fig, "overview")
@@ -443,7 +450,7 @@ def fig_mechanism():
     ax.axhline(0, color="0.7", lw=0.8)
     ax.set_xlim(0, 100); ax.set_xticks([0, 50, 100]); ax.set_ylim(*YLIM)
     ax.set_yticks([-20, -10, 0, 10, 20])
-    ax.set_xlabel("cents above the 12-TET pitch", fontsize=6.8, color="0.2")
+    ax.set_xlabel("cents above the 12-TET pitch below", fontsize=6.8, color="0.2")
     ax.set_ylabel("residual (cents)", fontsize=6.8, color="0.2")
     ax.set_title("(a) synthetic tones", fontsize=7, loc="left", color="0.12")
     ax.legend(fontsize=5.4, loc="upper left", frameon=True, framealpha=0.95,
@@ -481,7 +488,7 @@ def fig_mechanism():
     ax.axhline(0, color="0.7", lw=0.8)
     ax.set_xlim(0, 100); ax.set_xticks([0, 50, 100]); ax.set_ylim(*YLIM)
     ax.set_yticks([-20, -10, 0, 10, 20]); ax.set_yticklabels([])
-    ax.set_xlabel("cents above the 12-TET pitch", fontsize=6.8, color="0.2")
+    ax.set_xlabel("cents above the 12-TET pitch below", fontsize=6.8, color="0.2")
     ax.set_title("(b) real music, same scale", fontsize=7, loc="left", color="0.12")
     ax.legend(fontsize=5.4, loc="upper left", frameon=True, framealpha=0.95,
               edgecolor="none", facecolor="white", handlelength=1.3,

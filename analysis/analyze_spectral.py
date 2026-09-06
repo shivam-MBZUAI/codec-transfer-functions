@@ -285,7 +285,7 @@ def main() -> int:
     ap.add_argument("--min-n", type=int, default=1, help="partials a bin needs to count")
     ap.add_argument("--summary", type=Path, default=None,
                     help="summary CSV (default: <csv stem>_summary.csv next to the input)")
-    ap.add_argument("--figdir", type=Path, default=ROOT / "figures")
+    ap.add_argument("--figdir", type=Path, default=ROOT.parent / "figures")
     ap.add_argument("--show-bins", action="store_true")
     ap.add_argument("--min-level-db", type=float, default=None,
                     help="keep only partials whose input level is within this many dB of the fundamental (needs the in_level_db column)")
