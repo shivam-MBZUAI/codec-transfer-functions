@@ -1437,6 +1437,22 @@ def main() -> int:
             fails.append(
                 f"the main text runs to page {start - 1}; ICLR caps it at "
                 f"nine, so the Ethics Statement must start by page 10")
+        else:
+            # Landing on page 10 is not enough: the heading can sit part-way
+            # down it with the conclusion above. The first version of this
+            # guard checked only the page number and passed a build whose
+            # conclusion spilled three lines onto page 10. What matters is
+            # that NO main-text prose precedes the heading on that page.
+            flat = re.sub(r"\s+", " ", pages[start - 1])
+            cut = flat.upper().find("E THICS")      # rendered in small caps
+            before = flat[:cut] if cut > 0 else ""
+            before = before.replace(
+                "Under review as a conference paper at ICLR 2027", "")
+            before = re.sub(r"\b\d{3}\b", "", before).strip()
+            if before:
+                fails.append(
+                    f"the main text spills onto page {start} before the "
+                    f"Ethics Statement: {before[:70]!r}")
 
     # --- The paper's statement about its own bibliography must recompute.
     # On 2026-09-07 two entries were added and the AI-use statement kept

@@ -216,8 +216,14 @@ def main() -> int:
         axb.plot([xv, xv], [y[-1] - 0.45, y[0] + 0.45], color=INK, lw=0.7,
                  alpha=0.30, zorder=0)
     axb.axvspan(0.50, 0.60, color=INK, alpha=0.16, lw=0, zorder=0)
-    axb.text(0.75, y[-1] - 0.62, "80% detectable", fontsize=5.6, color="0.45",
-             ha="left", va="center", style="italic")
+    # Inside the panel, not on its edge. At y[-1] - 0.62 against a lower
+    # limit of y[-1] - 0.7 this label sat centred on the bottom spine, and the
+    # rule ran through the text so it read as struck out.
+    # At the top of the caliper, which spans the full panel height. Beside
+    # the bottom rows it read as an annotation on the MP3 row; on the spine it
+    # read as struck out.
+    axb.text(0.85, y[0] + 0.42, "80% detectable", fontsize=5.6, color="0.45",
+             ha="left", va="bottom", style="italic")
     axb.set_xticks([0, 5, 10, 15])
     axb.set_xlim(-2.2, 15.2)
     axb.set_ylim(y[-1] - 0.7, y[0] + 0.7)
@@ -248,9 +254,29 @@ def main() -> int:
     # Below the axes, not inside them: at center right the legend text
     # collided with the "no bias: guards refuse" annotation and sat on the
     # gridlines of the four near-zero rows, reading as row content.
-    axb.legend(fontsize=6.0, loc="upper center", bbox_to_anchor=(0.62, -0.255),
-               ncol=3, frameon=False, handlelength=1.0, borderpad=0.3,
-               columnspacing=1.4, labelspacing=0.35)
+    # ncol=2 and centred on its own panel: at ncol=3 anchored to 0.62 this
+    # legend ran past panel (a) and collided with panel (b)'s.
+    axb.legend(fontsize=6.0, loc="upper left", bbox_to_anchor=(0.0, -0.255),
+               ncol=1, frameon=False, handlelength=1.0, borderpad=0.3,
+               labelspacing=0.35)
+
+    # Panel (b) draws three things and the main-text caption is capped at
+    # three lines, so the encodings are named here instead. An earlier caption
+    # tried to carry them and produced "a plain span the two sign estimates",
+    # which a reviewer could not parse. Figure A6 is the model: a figure that
+    # needs no caption to be read.
+    axl.plot([], [], "o", color=INK, ms=4.0, mec="white", mew=0.7, ls="none",
+             label="mean over the two detuning signs")
+    axl.plot([], [], color=INK, lw=1.2, marker="|", ms=5, mew=1.2,
+             label="95% interval")
+    axl.plot([], [], color=INK, lw=2.6, alpha=0.30, solid_capstyle="round",
+             label="range spanned by the two signs")
+    # Each legend is anchored to its OWN panel's left edge. Centred anchors
+    # let panel (a)'s widest entry run past its panel and overprint panel
+    # (b)'s first entry; axes do not overlap, so left-anchoring cannot.
+    axl.legend(fontsize=6.0, loc="upper left", bbox_to_anchor=(0.0, -0.255),
+               ncol=1, frameon=False, handlelength=1.3, borderpad=0.3,
+               labelspacing=0.35)
 
     # 1.30 not 1.22: at 1.22 the "the grid harmonic" tick label ran to the
     # last pixel column of the bounding box

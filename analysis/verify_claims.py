@@ -47,7 +47,18 @@ def pdf_text(pdf: Path | None = None) -> str:
     return normalise(out)
 
 
+# TeX renders ' and " as curly glyphs and -- as an en dash, so a claim typed
+# with ASCII punctuation fails against a correct PDF. This cost a false
+# failure on "a decoder's corpus" once already, the same way the hyphen
+# joining did. Fold both sides onto ASCII before comparing.
+_PUNCT = str.maketrans({
+    "\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"',
+    "\u2013": "-", "\u2014": "-", "\u2212": "-", "\u00a0": " ",
+})
+
+
 def normalise(s: str) -> str:
+    s = s.translate(_PUNCT)
     return re.sub(r"\s+", " ", s.replace("-\n", "").replace("-", ""))
 
 
