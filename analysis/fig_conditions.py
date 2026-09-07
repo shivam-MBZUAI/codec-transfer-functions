@@ -254,7 +254,7 @@ def main() -> int:
     axb.plot([], [], "o", ms=4.2, ls="none", mfc="white", mec=INK, mew=1.2,
              label="does not register")
     axb.plot([], [], "x", ms=4.2, ls="none", color=INK, mew=1.2,
-             label="amplitude carries no phase")
+             label="no amplitude to carry a phase")
     # the empty block right of the four near-zero rows; at lower right the
     # box crowded BigVGAN's interval
     # frameon=False: the white patch was opaque enough to erase the group rule
