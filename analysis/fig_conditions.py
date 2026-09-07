@@ -93,7 +93,7 @@ TIERS = [(0, 5, "pulls", PULL),
          (6, 7, "covers zero", LADNP),
          (7, 8, "edge 4.4 kHz", OWN),
          (8, 11, "edge censored", UNRES),
-         (11, 13, "resolves,\ndoes not regrid", LOWL),
+         (11, 13, "resolves,\nladder low", LOWL),
          (13, 14, "vocoder", VOC), (14, 17, "classical", CLS)]
 
 
@@ -284,7 +284,7 @@ def main() -> int:
     # so anything past the right margin is simply lost.
     axl.text(-0.28, -0.30, "(b)  dot: mean over the two\n"
              "detuning signs; pale span: range\n"
-             "ticked bar: 95% interval\n"
+             "ticked bar: spread, not coverage\n"
              "(held-out and classical rows)",
              transform=axl.transAxes, fontsize=5.8, color="0.25",
              ha="left", va="top", linespacing=1.4)

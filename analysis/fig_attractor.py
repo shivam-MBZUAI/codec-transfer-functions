@@ -168,7 +168,7 @@ def panel_decompose(ax):
     for yv in (4.69, 3.78):
         ax.plot([2.18, 2.58], [yv, yv], color=INK, lw=0.7, alpha=0.55)
     ax.plot([2.50, 2.50], [3.78, 4.69], color=INK, lw=0.9)
-    ax.text(1.35, 7.3, "corpus tuning 0.91 c", fontsize=6.8,
+    ax.text(1.35, 9.4, "corpus tuning 0.91 c", fontsize=6.8,
             color=INK, ha="center", va="center")
 
     # "stock" / "grid" / "flat" appeared nowhere else in the paper and a
