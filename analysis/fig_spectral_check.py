@@ -114,7 +114,11 @@ def main() -> int:
         ax.set_xticks([-40, 0, 40])
         # both lines of text sit above the axes, where nothing can collide
         # with the traces -- annotations inside the panel kept landing on them
-        ax.set_title(f"({'abc'[i]}) H{k}, {440 * k} Hz \u2014 {where}\n{note}",
+        # "H1, 440 Hz" named the 12-TET harmonic while the visible peak at
+        # 0 cents is the *input* partial, 40 cents above it. Saying which the
+        # number refers to stops the panel inviting the misreading the figure
+        # exists to prevent.
+        ax.set_title(f"({'abc'[i]}) H{k}, {where}\n{note}",
                      fontsize=6.4, loc="left", color="0.15", linespacing=1.45)
         ax.set_xlabel("cents from input partial", fontsize=7.4, color="0.2")
 

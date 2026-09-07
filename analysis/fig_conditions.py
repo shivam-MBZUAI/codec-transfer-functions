@@ -84,7 +84,7 @@ ROWS = [
 # about the edge and not about the ladder: panel (b) shows the "no pull" rows
 # landing as high as the pullers, which is the paper's point
 TIERS = [(0, 6, "pulls", PULL), (6, 7, "bias covers zero", LADNP),
-         (7, 8, "edge high", OWN),
+         (7, 8, "edge 4.4 kHz", OWN),
          (8, 11, "edge censored", UNRES),
          (11, 13, "resolves,\ndoes not regrid", LOWL),
          (13, 14, "vocoder", VOC), (14, 17, "classical", CLS)]
@@ -138,7 +138,7 @@ def main() -> int:
     for yi, r in zip(y, ROWS):
         label, b, lo, hi, l, llo, lhi, c, reg = r
         if b is None:
-            axb.text(3.2, yi, "no bias: guards refuse", fontsize=6.2,
+            axb.text(3.2, yi, "no bias: fit rejected", fontsize=6.2,
                      color="0.55", ha="center", va="center", style="italic",
                      bbox=dict(fc="white", ec="none", pad=0.8), zorder=6)
             # these rows carry a 95% interval, so they must be drawn through
@@ -164,7 +164,7 @@ def main() -> int:
             axl.text(0.5, yi, "not resolved", fontsize=6.2, color="0.55",
                      ha="center", va="center", style="italic")
 
-    axb.axvline(0.0, color="0.45", lw=0.9, ls="--", zorder=1)
+    axb.axvline(0.0, color="0.45", lw=0.9, ls="--", zorder=2)
     axl.axvline(0.0, color="0.45", lw=0.9, ls=":", zorder=1)
     axl.axvline(1.0, color="0.45", lw=0.9, ls=":", zorder=1)
 
@@ -212,10 +212,12 @@ def main() -> int:
     # meant to look small; the shaded band says why they cannot be resolved.
     # 0.50 to 0.60 is 0.1 cents on a 17-cent axis: under a point at print
     # width, so a tint alone is invisible. Draw it as a caliper instead.
-    for xv in (0.50, 0.60):
-        axb.plot([xv, xv], [y[-1] - 0.45, y[0] + 0.45], color=INK, lw=0.7,
-                 alpha=0.30, zorder=0)
-    axb.axvspan(0.50, 0.60, color=INK, alpha=0.16, lw=0, zorder=0)
+    # Symmetric about zero, because what the nulls bound is the magnitude of
+    # a bias in either direction. Drawn one-sided from 0.50 to 0.60 with two
+    # stroked calipers it was a 2 pt stripe three points from the dashed zero
+    # rule, and the two read as one composite axis artifact rather than as a
+    # region a reading has to clear.
+    axb.axvspan(-0.60, 0.60, color=INK, alpha=0.09, lw=0, zorder=0)
     # Inside the panel, not on its edge. At y[-1] - 0.62 against a lower
     # limit of y[-1] - 0.7 this label sat centred on the bottom spine, and the
     # rule ran through the text so it read as struck out.
@@ -258,25 +260,22 @@ def main() -> int:
     # legend ran past panel (a) and collided with panel (b)'s.
     axb.legend(fontsize=6.0, loc="upper left", bbox_to_anchor=(0.0, -0.255),
                ncol=1, frameon=False, handlelength=1.0, borderpad=0.3,
-               labelspacing=0.35)
+               labelspacing=0.35, title="(a)  span: bootstrap interval",
+               title_fontsize=6.0, alignment="left")
 
     # Panel (b) draws three things and the main-text caption is capped at
     # three lines, so the encodings are named here instead. An earlier caption
     # tried to carry them and produced "a plain span the two sign estimates",
     # which a reviewer could not parse. Figure A6 is the model: a figure that
     # needs no caption to be read.
-    axl.plot([], [], "o", color=INK, ms=4.0, mec="white", mew=0.7, ls="none",
-             label="mean over the two detuning signs")
-    axl.plot([], [], color=INK, lw=1.2, marker="|", ms=5, mew=1.2,
-             label="95% interval")
-    axl.plot([], [], color=INK, lw=2.6, alpha=0.30, solid_capstyle="round",
-             label="range spanned by the two signs")
-    # Each legend is anchored to its OWN panel's left edge. Centred anchors
-    # let panel (a)'s widest entry run past its panel and overprint panel
-    # (b)'s first entry; axes do not overlap, so left-anchoring cannot.
-    axl.legend(fontsize=6.0, loc="upper left", bbox_to_anchor=(0.0, -0.255),
-               ncol=1, frameon=False, handlelength=1.3, borderpad=0.3,
-               labelspacing=0.35)
+    # One text line, not a three-row legend. The legend version made the
+    # figure about two rows taller, which consumed the page-8 slack the
+    # conclusion was living on and pushed the main text onto page 10.
+    axl.text(0.0, -0.30, "(b)  dot: mean over the two detuning signs; "
+             "pale span: their range\n"
+             "ticked bar: 95% interval (held-out and classical rows)",
+             transform=axl.transAxes, fontsize=5.8, color="0.25",
+             ha="left", va="top", linespacing=1.4)
 
     # 1.30 not 1.22: at 1.22 the "the grid harmonic" tick label ran to the
     # last pixel column of the bounding box

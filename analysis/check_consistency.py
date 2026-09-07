@@ -16,6 +16,24 @@ APX = ROOT / "sections" / "09_appendix.tex"
 MAIN = ROOT / "sections" / "04_pitch.tex"
 
 
+def _fig_relocate_rows():
+    """(label, colour, own-grid lbar, 12-TET lbar) as fig_relocate.py plots
+    them. Parsed rather than imported: the guard suite must not need
+    matplotlib, and a figure that fails to render should still be checkable.
+    `None` for an arm with no corpus grid of its own."""
+    src = ROOT / "code" / "analysis" / "fig_relocate.py"
+    if not src.exists():
+        return []
+    out = []
+    for line in src.read_text().split("\n"):
+        m = re.match(r'\s*\("([^"]+)",\s*(\w+),\s*(None|[\d.]+),'
+                     r'\s*(None|[\d.]+)\)', line)
+        if m:
+            f = lambda s: None if s == "None" else float(s)
+            out.append((m.group(1), m.group(2), f(m.group(3)), f(m.group(4))))
+    return out
+
+
 def rows_of(table_label, src):
     """Body rows of the tabular carrying this label."""
     i = src.index("\\label{" + table_label + "}")
@@ -293,32 +311,40 @@ def main() -> int:
     # are in the band-edge table, it must be their round-half-up mean. Five of
     # these are exact ties, and the Saraga row resolved its tie downward while
     # every other row resolved upward.
-    A24MAP = {  # band-edge row -> (relocation row, which column)
-        ("EnCodec, fine-tuned on GTZAN", "3 kbps"): ("Original clips (grid)", 4),
+    # These lbar readings used to be two columns of tab:relocate and are now
+    # Figure A9, so the check reads the figure's own data rather than the
+    # table. Moving a number out of a table must not quietly retire the
+    # guard that held it; "own" is the arm's own corpus grid, "tet" 12-TET,
+    # and a flattened arm has no own grid so its 12-TET value is the one to
+    # compare.
+    A24MAP = {  # band-edge row -> (figure row label, which reading)
+        ("EnCodec, fine-tuned on GTZAN", "3 kbps"):
+            ("EnCodec, original clips", "own"),
         ("EnCodec, fine-tuned on $+33$-cent GTZAN", "3 kbps"):
-            ("Shifted by $+33$ cents", 4),
+            ("EnCodec, $+33$ cents", "own"),
         ("EnCodec, fine-tuned on 24-TET GTZAN", "3 kbps"):
-            ("Quantised to 24-TET", 4),
+            ("EnCodec, 24-TET", "own"),
         ("EnCodec, fine-tuned on flattened GTZAN", "3 kbps"):
-            ("Random offsets (flat)", 5),   # no own grid; the 12-TET column
+            ("EnCodec, random offsets", "tet"),   # no own grid
         ("EnCodec, fine-tuned on Saraga", "3 kbps"):
-            ("EnCodec, fine-tuned on Saraga", 4),
+            ("EnCodec, Saraga", "own"),
     }
-    reloc = {}
-    for r in rows_of("tab:relocate", apx):
-        if r:
-            reloc[r[0].strip()] = r
-    for key, (rowname, col) in A24MAP.items():
-        if key not in signs or rowname not in reloc:
+    reloc = {lab: {"own": own, "tet": tet}
+             for lab, _c, own, tet in _fig_relocate_rows()}
+    for key, (rowname, which) in A24MAP.items():
+        if key not in signs:
+            continue
+        if rowname not in reloc:
+            fails.append(f"fig:relocate has no row {rowname!r}, which the "
+                         f"band-edge cross-check needs")
             continue
         neg, pos = signs[key]
         want = float(((_D(repr(neg)) + _D(repr(pos))) / 2).quantize(
             _D("0.01"), rounding=_HU))
-        row = reloc[rowname]
-        got = num(row[col]) if len(row) > col else None
-        if got is not None and abs(got - want) > 1e-9:
+        got = reloc[rowname][which]
+        if got is None or abs(got - want) > 1e-9:
             fails.append(
-                f"relocation table, {rowname!r}: lbar {got}, but the band-edge "
+                f"fig:relocate, {rowname!r}: lbar {got}, but the band-edge "
                 f"table's {neg} and {pos} mean {want}")
 
     # the two reference rows that repeat EnCodec's sign pair as a bracket
@@ -985,14 +1011,17 @@ def main() -> int:
     # --- the guard-sensitivity grid is a summary of the exclusion table, so it
     # can be recomputed from it. Adding BigVGAN to the exclusion table left the
     # grid reporting 13 admitted of 17 when the answer had become 14 of 18.
-    runs = []
+    runs, all_runs = [], []
     for r in rows_of("tab:exclusion", apx):
         if len(r) < 5:
             continue
         cv, ret = num(subst(r[3])), num(subst(r[4]))
         if cv is None or ret is None:
             continue
-        # the two octave repeats are the same condition at another reference
+        all_runs.append((r[1].strip(), cv, ret))
+        # the two octave repeats are the same condition at another reference,
+        # so the condition-level counts exclude them; the figure plots runs
+        # and is checked against all_runs instead.
         if "220 Hz" in r[1] or "880 Hz" in r[1]:
             continue
         runs.append((r[1].strip(), cv, ret))
@@ -1001,33 +1030,34 @@ def main() -> int:
         if m and count_word(m.group(1)) != len(runs):
             fails.append(f"guard grid says {m.group(1)} conditions measured, "
                          f"the exclusion table lists {len(runs)}")
-        # parse this one directly: rows_of drops any row containing \textbf,
-        # and the reported operating point is exactly the bolded row
-        gi = apx.index("\\label{tab:guardgrid}")
-        gbody = apx[gi:apx.index("\\end{tabular}", gi)]
-        grid = []
-        for line in gbody.split("\\\\"):
-            line = re.sub(r"\\(?:top|mid|bottom)rule|\\cmidrule\(?[^)]*\)?\{[^}]*\}",
-                          " ", line)
-            cells = [c.replace("\\textbf{", "").replace("}", "").strip()
-                     for c in line.split("&")]
-            if len(cells) >= 6 and re.match(r"^0\.\d+$", cells[0]):
-                grid.append(cells)
-        if len(grid) < 3:
-            fails.append(f"guard grid: parsed {len(grid)} rows")
-        for row in grid:
-            cvlim = num(row[0])
-            if cvlim is None:
-                continue
-            for j, retlim in enumerate((0.15, 0.20, 0.25, 0.30, 0.34), start=1):
-                if j >= len(row):
-                    break
-                want = sum(1 for _, cv, ret in runs if cv <= cvlim and ret >= retlim)
-                got = num(row[j])
-                if got is not None and int(got) != want:
-                    fails.append(
-                        f"guard grid at cv<={cvlim}, retention>={retlim} says "
-                        f"{int(got)}; the exclusion table gives {want}")
+        # The 5x5 guard grid was replaced by figures/guards.pdf, which plots
+        # the same two quantities per run. The stronger check is that the
+        # figure's own data match the exclusion table it is drawn from, so
+        # they cannot drift apart the way a hand-copied table would.
+        gsrc = (ROOT / "code" / "analysis" / "fig_guards.py")
+        if gsrc.exists():
+            blk = gsrc.read_text()
+            blk = blk[blk.index("RUNS = ["):]
+            blk = blk[:blk.index("\n]")]
+            plotted = {}
+            for line in blk.split("\n"):
+                m = re.match(r'\s*\("([^"]+)",\s*([\d.]+),\s*([\d.]+),\s*(True|False)',
+                             line)
+                if m:
+                    plotted[m.group(1)] = (float(m.group(2)), float(m.group(3)),
+                                           m.group(4) == "True")
+            if len(plotted) != len(all_runs):
+                fails.append(f"guards figure plots {len(plotted)} runs, the "
+                             f"exclusion table lists {len(all_runs)}")
+            # match on the (cv, retention) pair, not the label: the figure
+            # shortens some names ("BigVGAN" for "BigVGAN (vocoder)") and a
+            # prefix match put "EnCodec 24k, vowels" onto "EnCodec 24k, 3 kbps".
+            tbl = {(round(cv, 6), round(ret, 6)) for _, cv, ret in all_runs}
+            for name, (cv, ret, ok) in plotted.items():
+                if (round(cv, 6), round(ret, 6)) not in tbl:
+                    fails.append(f"guards figure plots {name} at cv {cv}, "
+                                 f"retention {ret}, which is no row of the "
+                                 f"exclusion table")
 
     # --- the between-run table's last column is derivable from the three
     # before it: Combined = sqrt(Within^2 + (2 Sd)^2). All three rows follow
@@ -1095,7 +1125,8 @@ def main() -> int:
                 lab = re.search(r"\\label\{((?:tab|fig):[^}]+)\}", src[k:k + 1400])
                 fails.append(
                     f"caption for {lab.group(1) if lab else name} runs "
-                    f"{len(flat)/95:.1f} lines; the cap is three")
+                    f"{len(flat)} chars ({len(flat)/95:.1f} lines); "
+                    f"the cap is {CAP_CHARS}")
 
     # --- the bibliography ships with the supplement, so an entry nothing
     # cites is either a dropped citation or padding. Five had accumulated;

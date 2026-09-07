@@ -58,7 +58,11 @@ _PUNCT = str.maketrans({
 
 
 def normalise(s: str) -> str:
-    s = s.translate(_PUNCT)
+    # Case-folded: a claim quoted from mid-sentence differs from the same
+    # words at the start of one only in capitalisation, and that produced two
+    # false failures ("the identity is not violated" against "The identity
+    # ..."). Case never distinguishes two different claims here.
+    s = s.translate(_PUNCT).lower()
     return re.sub(r"\s+", " ", s.replace("-\n", "").replace("-", ""))
 
 
