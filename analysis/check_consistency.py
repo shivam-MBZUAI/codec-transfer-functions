@@ -678,7 +678,7 @@ def main() -> int:
         # no bias: the fitting guards refuse these on the two-tone probe, so
         # only the spectral read exists. @none skips the bias comparison.
         "SNAC 24k (held out)":      ("@none|", "@confirm|SNAC 24k"),
-        "DAC 44k, Q8 (held out)":   ("@none|", "@confirm|DAC 44k"),
+        "DAC 44k, Q4; ladder Q8":   ("@none|", "@confirm|DAC 44k"),
         "HE-AAC SBR, 32 kbps":      ("@none|", "@sbr|HE-AAC"),
     }
     MARGIN = (0.85, 1.15)

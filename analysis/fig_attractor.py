@@ -103,7 +103,7 @@ def panel_move(ax):
     ax.plot([], [], "o", color=MUTED, ms=4.2, mec="white", mew=0.7, ls="none",
             label="unshifted")
     ax.plot([], [], "D", color=MUTED, ms=4.0, mec="white", mew=0.7, ls="none",
-            label="retuned (95% CI below)")
+            label="retuned (seed spread below)")
     ax.plot([], [], marker="v", color=INK, ms=4.0, mew=0.8, ls="none",
             label="predicted")
     # In a blank band below the last row, not over it. At lower left inside

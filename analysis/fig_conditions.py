@@ -34,7 +34,7 @@ UNRES = "#B07A2A"
 # 3.1 no longer leads with.
 PULLW = "#5BA3D0"
 # rows whose panel-(b) bar is a 95% interval, not a two-point sign range
-LADDER_IS_CI = {"SNAC 24k (held out)", "DAC 44k, Q8 (held out)",
+LADDER_IS_CI = {"SNAC 24k (held out)", "DAC 44k, Q4; ladder Q8",
                 "HE-AAC SBR, 32 kbps"}
 # resolves a ladder fraction and does not regrid
 LOWL = "#56B4E9"
@@ -75,7 +75,7 @@ ROWS = [
     # fitting guards refuse them on the two-tone probe, and only the
     # spectral read survives.
     ("SNAC 24k (held out)",     None, None, None, 0.28, 0.14, 0.42, LOWL, None),
-    ("DAC 44k, Q8 (held out)",  None, None, None, 0.14, 0.01, 0.27, LOWL, None),
+    ("DAC 44k, Q4; ladder Q8",  None, None, None, 0.14, 0.01, 0.27, LOWL, None),
     ("BigVGAN (vocoder)",      4.82,  3.91,  5.64, 0.68, 0.64, 0.71, VOC,   True),
     ("HE-AAC SBR, 32 kbps",     0.05, -0.31,  0.42, 0.04, -0.07, 0.15, CLS,  True),
     ("Opus, 6 kbps",           0.00,  0.00,  0.42, None, None, None, CLS,   False),
