@@ -109,12 +109,13 @@ def panel_move(ax):
     # In a blank band below the last row, not over it. At lower left inside
     # the data the box covered WavTokenizer's original-clips dot entirely --
     # the starting point that is the panel's whole argument.
-    ax.legend(fontsize=5.6, loc="lower left", frameon=False, ncol=3,
+    ax.legend(fontsize=6.8, loc="upper left", bbox_to_anchor=(0.0, -0.42),
+              frameon=False, ncol=3,
               handlelength=1.0, borderpad=0.2, columnspacing=1.1,
               handletextpad=0.4)
 
     ax.set_yticks(y)
-    ax.set_yticklabels([a[0] for a in ARMS], fontsize=6.6)
+    ax.set_yticklabels([a[0] for a in ARMS], fontsize=8.1)
     for tick, arm in zip(ax.get_yticklabels(), ARMS):
         tick.set_color(arm[1])
     ax.set_xlim(0, 47)
@@ -128,18 +129,16 @@ def panel_move(ax):
     # manipulation is +33 cents -- both were only recoverable from Section 3.3.
     # Boxed in: the control rows' marks end near 9 cents and
     # WavTokenizer's interval starts at 34.6, so the note lives between them.
-    ax.text(0.235, 0.31, "unshifted / retuned corpus,\n"
-            "decoder-only; both points are\n"
-            "fine-tuned arms. predicted $=$\n"
-            "unshifted $+$ 33 c, $+$0 on the\n"
-            "controls. EnCodec 24k at 3 kbps,\nothers at their primary points",
-            transform=ax.transAxes, fontsize=5.2, color=MUTED,
-            va="center", linespacing=1.4)
+    # Both in-panel notes moved to the caption: at a legible type size
+    # neither fits beside the data, and the panel-(a) note sat on the two
+    # control rows' markers.
     ax.set_xticks([0, 10, 20, 30, 40])
-    ax.set_xlabel("residual's zero crossing: where the decoder's grid sits (cents)",
-                  fontsize=6.8, color="0.2")
-    ax.set_title("(a) retuning the corpus moves the grid",
-                 fontsize=7.2, loc="left", color="0.12")
+    ax.set_xlabel("residual's zero crossing (cents)",
+                  fontsize=8.3, color="0.2")
+    # shortened: at this panel width the full sentence ran into panel (b)'s
+    # axis label, and the caption carries the longer statement anyway
+    ax.set_title("(a) retuning moves the grid",
+                 fontsize=8.3, loc="left", color="0.12")
     ax.grid(axis="x", alpha=0.14, lw=0.6)
 
 
@@ -150,7 +149,7 @@ def panel_decompose(ax):
         ax.bar(xi, amp, width=0.58, color=c, lw=0)
         if sd:
             ax.plot([xi, xi], [amp - sd, amp + sd], color="0.25", lw=1.0)
-        ax.text(xi, amp + 0.55, f"{amp:.2f}", ha="center", fontsize=6.2,
+        ax.text(xi, amp + 0.55, f"{amp:.2f}", ha="center", fontsize=7.6,
                 color="0.2")
     # the gap is under a cent on a 16-cent axis, so the arrow is tiny; keep it
     # clear of the 3.78 bar label rather than beside it
@@ -162,11 +161,15 @@ def panel_decompose(ax):
     # difference. In a paper whose point is that the resampling unit is what
     # readers get wrong, the figure carrying the corpus claim must be one unit
     # throughout, with the reported figure named beside it.
+    # The label sits above the bars rather than to the right of them: set
+    # beside the bracket at a legible size it needed more width than the
+    # panel has, and pushed the x limit out until the category ticks
+    # collided.
     for yv in (4.69, 3.78):
-        ax.plot([2.44, 2.84], [yv, yv], color=INK, lw=0.7, alpha=0.55)
-    ax.plot([2.76, 2.76], [3.78, 4.69], color=INK, lw=0.9)
-    ax.text(2.94, 4.22, "corpus\ntuning\n0.91 c", fontsize=5.8,
-            color=INK, va="center", linespacing=1.35)
+        ax.plot([2.18, 2.58], [yv, yv], color=INK, lw=0.7, alpha=0.55)
+    ax.plot([2.50, 2.50], [3.78, 4.69], color=INK, lw=0.9)
+    ax.text(1.35, 7.3, "corpus tuning 0.91 c", fontsize=6.8,
+            color=INK, ha="center", va="center")
 
     # "stock" / "grid" / "flat" appeared nowhere else in the paper and a
     # reader had to reconstruct them from Section 3.3. Say what each arm is.
@@ -175,23 +178,24 @@ def panel_decompose(ax):
     # removed"). Stacked, but with "stock" on one line, so the second row
     # reads "kept  removed" under its own two ticks rather than as a
     # phantom third label spanning the axis.
-    ax.set_xticklabels(["stock", "grid\nkept", "grid\nremoved"],
-                       fontsize=5.8, linespacing=1.25)
-    ax.set_xlabel("corpus fine-tuned on", fontsize=6.4, color="0.2",
+    # one word each: at a legible size "grid kept" and "grid removed"
+    # overprint, and the axis label already says these are corpus grids
+    ax.set_xticklabels(["stock", "kept", "removed"], fontsize=6.4)
+    ax.set_xlabel("corpus grid", fontsize=7.8, color="0.2",
                   labelpad=1.5)
     # the panel never said which codec it was, nor what the whiskers were.
     # Inside the axes at top right, which is empty: above them it overprinted
     # the panel title.
     # Over the two short bars, where the panel is empty. Right-aligned at the
     # top it ran into the tall bar's value label and printed "13.72whiskers".
-    ax.text(0.40, 0.88, "EnCodec 24k, 3 kbps\nfine-tuned bars: ten corpus draws, $\\pm$1 sd",
-            transform=ax.transAxes, fontsize=5.2, color=MUTED,
-            ha="left", va="top", linespacing=1.3)
-    ax.set_xlim(-0.62, 3.45)
+    ax.set_xlim(-0.62, 2.95)
     ax.set_ylim(0, 16.4)
-    ax.set_ylabel("fitted amplitude (cents)", fontsize=6.8, color="0.2")
+    ax.set_ylabel("fitted amplitude (cents)", fontsize=8.3, color="0.2")
+    # wrapped: at this panel width one line ran past the canvas edge, and
+    # there is no tight bounding box to grow now that the figure is saved
+    # at the text width
     ax.set_title("(b) what fine-tuning removes",
-                 fontsize=7.2, loc="left", color="0.12")
+                 fontsize=6.6, loc="left", color="0.12")
     ax.grid(axis="y", alpha=0.14, lw=0.6)
 
 
@@ -199,8 +203,11 @@ def main() -> int:
     out = (Path(sys.argv[1]) if len(sys.argv) > 1
            else Path(__file__).resolve().parents[2] / "figures" / "attractor.pdf")
     fig, (ax1, ax2) = plt.subplots(
-        1, 2, figsize=(5.5, 1.72),
-        gridspec_kw={"width_ratios": [1.85, 1.0], "wspace": 0.30})
+        # Taller, and saved at the text width rather than to a tight box:
+        # at 1.72 in with bbox_inches="tight" the canvas came out 448 pt wide,
+        # LaTeX scaled it to 396, and the in-panel note printed at 4.6 pt.
+        1, 2, figsize=(5.5, 1.78),
+        gridspec_kw={"width_ratios": [1.25, 1.0], "wspace": 0.58})
     style(ax1); style(ax2)
     panel_move(ax1)
     panel_decompose(ax2)
@@ -208,7 +215,8 @@ def main() -> int:
     # label below the canvas, so the figure's headline quantity went
     # unlabelled; measure the bounding box from the artists instead.
     out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, bbox_inches="tight", pad_inches=0.02)
+    fig.subplots_adjust(left=0.305, right=0.985, top=0.82, bottom=0.345)
+    fig.savefig(out)
     fig.savefig(out.with_suffix(".png"), dpi=220,
                 bbox_inches="tight", pad_inches=0.02)
     print(f"wrote {out}")

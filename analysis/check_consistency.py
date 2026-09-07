@@ -1085,6 +1085,7 @@ def main() -> int:
         "SNAC 32k":                 ("SNAC 32k", "default"),
         "EnCodec, GTZAN fine-tune": ("EnCodec, fine-tuned on GTZAN", "3 kbps"),
     }
+    blind_rows = []
     for r in rows_of("tab:blindscore", apx):
         if len(r) < 6:
             continue
@@ -1116,6 +1117,7 @@ def main() -> int:
         if ap < a:
             fails.append(f"blind-score row {name!r}: dropping the placement clause "
                          f"cannot reduce the count above the edge")
+        blind_rows.append((name, before, after))
         if after > before + 1e-9:
             fails.append(f"blind-score row {name!r}: placement-blind reading rose, "
                          f"but Section 2.4 says the clause's removal lowers it")
@@ -1129,6 +1131,35 @@ def main() -> int:
         elif abs(bandedge[key] - before) > 1e-9:
             fails.append(f"blind-score row {name!r}: 'before' is {before}, but the "
                          f"band-edge table prints {bandedge[key]}")
+
+    # The sentence under the blind-score table counts how many rows fall and
+    # over what range. Both were wrong when first written -- five of eight by
+    # 0.11 to 0.16, where the table gives six and 0.11 to 0.17 -- so the prose
+    # is now recomputed from the table rather than trusted.
+    if blind_rows:
+        fell = [(b - a) for _n, b, a in blind_rows if abs(b - a) > 1e-9]
+        flat = " ".join(" ".join(tex.values()).split())
+        m = re.search(r"(\w+) of the eight rows fall, by ([\d.]+) to ([\d.]+)", flat)
+        if m is None:
+            fails.append("no sentence counting the blind-score table's falling "
+                         "rows was found, so that summary is unguarded")
+        else:
+            # A local map: the WORDS used further down is defined after this
+            # point and maps reference words, not numbers, so WORDS.get(...)
+            # here returned None for every input and the count half of this
+            # check never ran. A guard that silently does not check is worse
+            # than no guard.
+            NUM = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+                   "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+            said_n = NUM.get(m.group(1).lower())
+            lo_s, hi_s = float(m.group(2)), float(m.group(3))
+            lo_w, hi_w = round(min(fell), 2), round(max(fell), 2)
+            if said_n is not None and said_n != len(fell):
+                fails.append(f"prose says {said_n} of the blind-score rows fall; "
+                             f"the table has {len(fell)}")
+            if abs(lo_s - lo_w) > 1e-9 or abs(hi_s - hi_w) > 1e-9:
+                fails.append(f"prose says the blind-score drops run {lo_s} to "
+                             f"{hi_s}; the table gives {lo_w} to {hi_w}")
 
     # --- the between-run table's last column is derivable from the three
     # before it: Combined = sqrt(Within^2 + (2 Sd)^2). All three rows follow
@@ -1399,6 +1430,23 @@ def main() -> int:
                 f"the post-hoc table's caption claims {claimed} decisions and "
                 f"the table lists {actual}; the table's whole point is that the "
                 "count is complete")
+        # The AI-use statement counts the same table, and adding a row to the
+        # table updated the caption but not the statement: two sites, one
+        # number, and only one of them was guarded. Both are checked now.
+        stmt = re.search(r"the ([a-z]+) analytic choices of\s*\n?\s*Table "
+                         r"\\ref\{tab:posthoc\}", " ".join(tex.values()))
+        if stmt is None:
+            stmt = re.search(r"the ([a-z]+) analytic choices of[^.]*tab:posthoc",
+                             " ".join(tex.values()))
+        if actual and stmt:
+            said = WORDS.get(stmt.group(1))
+            if said is not None and said != actual:
+                fails.append(
+                    f"the statement says {said} analytic choices and the "
+                    f"post-hoc table lists {actual}")
+        elif actual and stmt is None:
+            fails.append("no statement sentence counting the post-hoc table "
+                         "was found, so that count is now unguarded")
 
     # the soft-edge section says both how far the 110 Hz partials sit from the
     # edge and where its prediction comes from; those two must agree

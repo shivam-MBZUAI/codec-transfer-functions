@@ -88,8 +88,8 @@ ROWS = [
 # the gutter names the pull verdict, which since the reframe is a statement
 # about the edge and not about the ladder: panel (b) shows the "no pull" rows
 # landing as high as the pullers, which is the paper's point
-TIERS = [(0, 4, "pulls", PULL),
-         (4, 6, "clears zero\non trials only", PULLW),
+TIERS = [(0, 5, "pulls", PULL),
+         (5, 6, "clears zero\non trials only", PULLW),
          (6, 7, "bias covers zero", LADNP),
          (7, 8, "edge 4.4 kHz", OWN),
          (8, 11, "edge censored", UNRES),
