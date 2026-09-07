@@ -115,7 +115,7 @@ def panel_move(ax):
               handletextpad=0.4)
 
     ax.set_yticks(y)
-    ax.set_yticklabels([a[0] for a in ARMS], fontsize=8.1)
+    ax.set_yticklabels([a[0] for a in ARMS], fontsize=7.4)
     for tick, arm in zip(ax.get_yticklabels(), ARMS):
         tick.set_color(arm[1])
     ax.set_xlim(0, 47)
@@ -134,11 +134,11 @@ def panel_move(ax):
     # control rows' markers.
     ax.set_xticks([0, 10, 20, 30, 40])
     ax.set_xlabel("residual's zero crossing (cents)",
-                  fontsize=8.3, color="0.2")
+                  fontsize=7.8, color="0.2")
     # shortened: at this panel width the full sentence ran into panel (b)'s
     # axis label, and the caption carries the longer statement anyway
     ax.set_title("(a) retuning moves the grid",
-                 fontsize=8.3, loc="left", color="0.12")
+                 fontsize=7.8, loc="left", color="0.12")
     ax.grid(axis="x", alpha=0.14, lw=0.6)
 
 
@@ -180,7 +180,7 @@ def panel_decompose(ax):
     # phantom third label spanning the axis.
     # one word each: at a legible size "grid kept" and "grid removed"
     # overprint, and the axis label already says these are corpus grids
-    ax.set_xticklabels(["stock", "kept", "removed"], fontsize=6.4)
+    ax.set_xticklabels(["stock", "kept", "removed"], fontsize=7.4)
     ax.set_xlabel("corpus grid", fontsize=7.8, color="0.2",
                   labelpad=1.5)
     # the panel never said which codec it was, nor what the whiskers were.
@@ -190,12 +190,12 @@ def panel_decompose(ax):
     # top it ran into the tall bar's value label and printed "13.72whiskers".
     ax.set_xlim(-0.62, 2.95)
     ax.set_ylim(0, 16.4)
-    ax.set_ylabel("fitted amplitude (cents)", fontsize=8.3, color="0.2")
+    ax.set_ylabel("fitted amplitude (cents)", fontsize=7.8, color="0.2")
     # wrapped: at this panel width one line ran past the canvas edge, and
     # there is no tight bounding box to grow now that the figure is saved
     # at the text width
-    ax.set_title("(b) what fine-tuning removes",
-                 fontsize=6.6, loc="left", color="0.12")
+    ax.set_title("(b) fine-tuning removes",
+                 fontsize=7.8, loc="left", color="0.12")
     ax.grid(axis="y", alpha=0.14, lw=0.6)
 
 
