@@ -83,12 +83,22 @@ def main() -> int:
         if band == "below":
             s_out = db_sum(window_response(cents, moved), noise - 8.0)
         elif band == "edge":
-            # two lines of comparable level, at the input frequency and at the
-            # grid harmonic. -24 is what the estimator reads off the pair; no
-            # single line sits there, which an earlier draft of this figure
-            # drew and the appendix does not claim.
-            s_out = db_sum(window_response(cents, 0.0) - 1.5,
-                           window_response(cents, GRID) - 3.0, noise)
+            # Two lines of comparable level, at the input frequency and at
+            # the grid harmonic. -24 is the power-weighted centroid of the
+            # pair; no single line sits there, which an earlier draft drew
+            # and the appendix does not claim.
+            #
+            # The grid line is the stronger of the two, and which one is
+            # stronger is load-bearing twice over. An earlier version had it
+            # the other way round: the centroid then falls at -16.6 rather
+            # than the -24.0 Table A15 prints, and the strongest line within
+            # 100 cents of 3f0 sits *on* 3f0, so H3 would not score as
+            # regenerated at all and the edge would be H4, not H3 -- which
+            # is the 1.32 kHz every register argument in the paper runs on.
+            # At -3.0 and -1.5 the centroid is -23.4, which is what the
+            # table rounds.
+            s_out = db_sum(window_response(cents, 0.0) - 3.0,
+                           window_response(cents, GRID) - 1.5, noise)
         else:
             # Above the edge: the input line is well down and the regenerated
             # line carries the partial, essentially on the grid harmonic --

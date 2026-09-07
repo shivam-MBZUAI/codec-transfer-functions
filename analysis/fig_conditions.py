@@ -278,9 +278,14 @@ def main() -> int:
     # One text line, not a three-row legend. The legend version made the
     # figure about two rows taller, which consumed the page-8 slack the
     # conclusion was living on and pushed the main text onto page 10.
-    axl.text(0.0, -0.30, "(b)  dot: mean over the two detuning signs; "
-             "pale span: their range\n"
-             "ticked bar: 95% interval (held-out and classical rows)",
+    # Wrapped to the width actually available under panel (b). Set as two
+    # long lines it ran off the canvas: with the figure saved at a fixed
+    # 5.5 in there is no tight bounding box to grow and absorb the overrun,
+    # so anything past the right margin is simply lost.
+    axl.text(-0.28, -0.30, "(b)  dot: mean over the two\n"
+             "detuning signs; pale span: range\n"
+             "ticked bar: 95% interval\n"
+             "(held-out and classical rows)",
              transform=axl.transAxes, fontsize=5.8, color="0.25",
              ha="left", va="top", linespacing=1.4)
 
@@ -288,10 +293,11 @@ def main() -> int:
     # last pixel column of the bounding box
     axl.set_xlim(-0.22, 1.30)
     out.parent.mkdir(parents=True, exist_ok=True)
-    # bbox_inches="tight" so the bounding box is measured from the drawn
-    # artists rather than assumed: without it both panel titles lost 2.7 pt
-    # of an 8.85 pt glyph box off the top of the canvas.
-    fig.savefig(out, bbox_inches="tight", pad_inches=0.02)
+    # Saved at the figsize, not to a tight box: see the note on font sizes
+    # above. The margins set by subplots_adjust have to leave room for the
+    # gutter labels and both sub-legends, since nothing outside the canvas
+    # is recovered.
+    fig.savefig(out)
     fig.savefig(out.with_suffix(".png"), dpi=220,
                 bbox_inches="tight", pad_inches=0.02)
     print(f"wrote {out}")

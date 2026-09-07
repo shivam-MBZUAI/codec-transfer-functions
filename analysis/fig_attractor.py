@@ -30,8 +30,11 @@ ARMS = [
     ("EnCodec",              ENC,  6.9, 39.6, 37.1, 42.0, 39.9),
     ("Mimi",                 MIMI, 5.7, 38.4, 34.2, 42.6, 38.7),
     ("WavTokenizer",         WAV,  4.9, 37.9, 34.6, 41.2, 37.9),
-    ("semitone shift, grid kept",  MUTED, 6.9, 7.1, 5.5, 8.7, 6.9),
-    ("0 or 100 c, grid kept",      MUTED, 6.9, 6.6, 4.9, 8.3, 6.9),
+    # named by codec as well as treatment: the coloured rows carry a model
+    # name and these carried only a manipulation, so nothing said they are
+    # the same EnCodec checkpoint.
+    ("EnCodec, semitone shift",    MUTED, 6.9, 7.1, 5.5, 8.7, 6.9),
+    ("EnCodec, 0 or 100 c",        MUTED, 6.9, 6.6, 4.9, 8.3, 6.9),
 ]
 # (label, colour, amplitude, sd) for the decomposition
 BARS = [
@@ -52,13 +55,19 @@ def style(ax):
 
 def panel_move(ax):
     """Where each family's grid sits, before and after retuning its corpus."""
+    ax.axvline(6.9, color="0.62", lw=0.7, ls=":", zorder=1)
     y = np.arange(len(ARMS))[::-1]
     for yi, (name, c, base, got, lo, hi, pred) in zip(y, ARMS):
-        # The move itself, only where there is one to draw.
+        # The move itself, only where there is one to draw. A plain
+        # segment, not an arrow: an arrowhead has to be pulled back from the
+        # endpoint marker or it covers it, and pulled back it ended 1.6 cents
+        # short of the value it pointed at -- a length-encoded mark
+        # understating the 32.7-cent move by 5% in the one panel whose claim
+        # is 32.7 against 33. The circle and the diamond are keyed, so the
+        # direction is carried by the glyphs rather than by a head.
         if abs(got - base) > 1.0:
-            ax.annotate("", xy=(got, yi), xytext=(base, yi),
-                        arrowprops=dict(arrowstyle="-|>", color=c, lw=1.3,
-                                        shrinkA=5.0, shrinkB=5.0, alpha=0.75))
+            ax.plot([base, got], [yi, yi], color=c, lw=1.5, alpha=0.60,
+                    solid_capstyle="round", zorder=3)
         # The interval sits on its own baseline below the arrow. Drawn on the
         # arrow's line it was painted over by the arrowhead, the endpoint
         # marker and the prediction tick, and survived as two slivers that
@@ -92,9 +101,9 @@ def panel_move(ax):
     # head. And the interval is a pale span, not a bar -- "bar" pointed at the
     # prediction tick, which is the next entry.
     ax.plot([], [], "o", color=MUTED, ms=4.2, mec="white", mew=0.7, ls="none",
-            label="before")
+            label="unshifted")
     ax.plot([], [], "D", color=MUTED, ms=4.0, mec="white", mew=0.7, ls="none",
-            label="after (95% CI below)")
+            label="retuned (95% CI below)")
     ax.plot([], [], marker="v", color=INK, ms=4.0, mew=0.8, ls="none",
             label="predicted")
     # In a blank band below the last row, not over it. At lower left inside
@@ -117,9 +126,13 @@ def panel_move(ax):
     # axes it overprinted the panel title.
     # The panel never said what before and after were, nor that the
     # manipulation is +33 cents -- both were only recoverable from Section 3.3.
-    ax.text(0.26, 0.36, "before / after decoder-only fine-tuning\n"
-            "predicted $=$ before $+$ 33 c, $+$0 on the controls\n"
-            "EnCodec 24k at 3 kbps, others at their\nprimary points",
+    # Boxed in: the control rows' marks end near 9 cents and
+    # WavTokenizer's interval starts at 34.6, so the note lives between them.
+    ax.text(0.235, 0.31, "unshifted / retuned corpus,\n"
+            "decoder-only; both points are\n"
+            "fine-tuned arms. predicted $=$\n"
+            "unshifted $+$ 33 c, $+$0 on the\n"
+            "controls. EnCodec 24k at 3 kbps,\nothers at their primary points",
             transform=ax.transAxes, fontsize=5.2, color=MUTED,
             va="center", linespacing=1.4)
     ax.set_xticks([0, 10, 20, 30, 40])

@@ -88,8 +88,11 @@ def main() -> int:
     for yi, (label, c, own, tet) in rows:
         yy = n - 1 - yi
         if own is None:
-            # one mark: there is no own grid for the segment to run from
-            ax.plot([tet], [yy], "o", ms=4.4, color=c, zorder=4)
+            # one mark, and it is a 12-TET reading, so it takes the open
+            # glyph: drawn filled it claimed the own-grid reading that the
+            # row's own annotation says does not exist.
+            ax.plot([tet], [yy], "o", ms=4.6, mfc="white", mec=c, mew=1.2,
+                    zorder=4)
             ax.text(tet + 0.028, yy, "no own grid", fontsize=5.4,
                     color=MUTED, va="center", style="italic")
         elif abs(own - tet) < 1e-9:
@@ -132,7 +135,7 @@ def main() -> int:
     h, l = ax.get_legend_handles_labels()
     ax.legend(h + [both], l + ["the two coincide"],
               handler_map={tuple: HandlerTuple(ndivide=1, pad=0)},
-              fontsize=6.2, loc="lower left", bbox_to_anchor=(0.02, -0.30),
+              fontsize=6.2, loc="lower left", bbox_to_anchor=(-0.62, -0.30),
               frameon=False, handlelength=1.0, borderpad=0.2, ncol=3,
               columnspacing=1.2)
 
@@ -149,8 +152,13 @@ def main() -> int:
     ax.text(1.0, -1.02, "the grid\nharmonic", fontsize=6.0,
             color="0.35", ha="center", va="top", linespacing=1.2)
     ax.grid(axis="x", alpha=0.13, lw=0.6)
+    # Explicit margins, because the figure is saved at its figsize rather
+    # than to a tight box (see the savefig note): the row labels and the
+    # block brackets are drawn outside the axes with clip_on=False, and
+    # without room reserved for them they fall off the canvas entirely.
+    fig.subplots_adjust(left=0.385, right=0.99, top=0.97, bottom=0.26)
     out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, bbox_inches="tight", pad_inches=0.02)
+    fig.savefig(out)
     print(f"wrote {out}")
     return 0
 
