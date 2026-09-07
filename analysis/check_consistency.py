@@ -1059,6 +1059,77 @@ def main() -> int:
                                  f"retention {ret}, which is no row of the "
                                  f"exclusion table")
 
+    # --- the placement-blind re-score must reproduce from its own columns,
+    # and its "before" reading must be the one the band-edge table prints.
+    # This table was added because three reviewers asked for the re-score; a
+    # table of hand-copied numbers answering that ask would be worse than not
+    # answering it.
+    # keyed on (condition, rate): "EnCodec 24k" alone matches four rows and
+    # the first of them is 1.5 kbps, which is how this check first passed a
+    # comparison against the wrong row.
+    bandedge = {}
+    for r in rows_of("tab:bandedge", apx):
+        if len(r) > 5:
+            key = (re.sub(r"\s+", " ", r[0].strip()),
+                   re.sub(r"\s+", " ", r[1].strip()))
+            v = num(r[5])
+            if v is not None:
+                bandedge.setdefault(key, v)
+    ALIAS = {  # blind-score row label -> (band-edge condition, rate)
+        "EnCodec 24k, 3 kbps":      ("EnCodec 24k", "3 kbps"),
+        "EnCodec 24k, 24 kbps":     ("EnCodec 24k", "24 kbps"),
+        "EnCodec 48k, 6 kbps":      ("EnCodec 48k, music", "6 kbps"),
+        "WavTokenizer":             ("WavTokenizer", "0.9 kbps"),
+        "DAC 16k":                  ("DAC 16k", "Q6"),
+        "Mimi":                     ("Mimi", "Q8"),
+        "SNAC 32k":                 ("SNAC 32k", "default"),
+        "EnCodec, GTZAN fine-tune": ("EnCodec, fine-tuned on GTZAN", "3 kbps"),
+    }
+    for r in rows_of("tab:blindscore", apx):
+        if len(r) < 6:
+            continue
+        name = re.sub(r"\$\^\\dagger\$|\s+", lambda m: "" if "dagger" in m.group(0) else " ",
+                      r[0]).strip()
+        m = re.match(r"\$(\d+)\s*\\to\s*(\d+)\$", r[3].strip())
+        got = re.findall(r"([\d.]+)", r[5])
+        if not m or len(got) != 2:
+            fails.append(f"blind-score row {name!r}: cannot parse a/a' or lbar pair")
+            continue
+        a, ap = int(m.group(1)), int(m.group(2))
+        before, after = float(got[0]), float(got[1])
+        t = num(r[4])
+        if ap == a:
+            if abs(after - before) > 1e-9 or t is not None:
+                fails.append(f"blind-score row {name!r}: edge does not move, so "
+                             f"lbar must be unchanged and t absent")
+        else:
+            if t is None:
+                fails.append(f"blind-score row {name!r}: edge moves but no t printed")
+            else:
+                if not (0.040 <= t <= 0.110):
+                    fails.append(f"blind-score row {name!r}: t={t} is outside the "
+                                 f"[0.040, 0.110] bound Appendix G.5 states")
+                want = round((a * before + t) / ap, 2)
+                if abs(after - want) > 1e-9:
+                    fails.append(f"blind-score row {name!r}: prints {after}, but "
+                                 f"({a}*{before}+{t})/{ap} = {want}")
+        if ap < a:
+            fails.append(f"blind-score row {name!r}: dropping the placement clause "
+                         f"cannot reduce the count above the edge")
+        if after > before + 1e-9:
+            fails.append(f"blind-score row {name!r}: placement-blind reading rose, "
+                         f"but Section 2.4 says the clause's removal lowers it")
+        key = ALIAS.get(name)
+        if key is None:
+            fails.append(f"blind-score row {name!r} has no band-edge counterpart "
+                         f"declared, so its 'before' reading is unchecked")
+        elif key not in bandedge:
+            fails.append(f"blind-score row {name!r} maps to {key}, which is no row "
+                         f"of the band-edge table")
+        elif abs(bandedge[key] - before) > 1e-9:
+            fails.append(f"blind-score row {name!r}: 'before' is {before}, but the "
+                         f"band-edge table prints {bandedge[key]}")
+
     # --- the between-run table's last column is derivable from the three
     # before it: Combined = sqrt(Within^2 + (2 Sd)^2). All three rows follow
     # that rule, but the caption said only "in quadrature", so a reader

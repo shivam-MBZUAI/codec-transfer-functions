@@ -28,6 +28,11 @@ PULL, LADNP, OWN, VOC, CLS = "#0072B2", "#009E73", "#E69F00", "#CC79A7", "#8a8a8
 # DAC 24k and SNAC 44k, and only DAC 16k's 4.4 kHz is measured. Section 3.1
 # calls those three nulls unexplained, so the figure must not explain them.
 UNRES = "#B07A2A"
+# A seventh, for the two rows that clear zero on trial bootstraps and
+# cover it once the between-run component of Appendix G.2 is included.
+# They sat inside the "pulls" bracket, which asserted a verdict Section
+# 3.1 no longer leads with.
+PULLW = "#5BA3D0"
 # rows whose panel-(b) bar is a 95% interval, not a two-point sign range
 LADDER_IS_CI = {"SNAC 24k (held out)", "DAC 44k, Q8 (held out)",
                 "HE-AAC SBR, 32 kbps"}
@@ -83,7 +88,9 @@ ROWS = [
 # the gutter names the pull verdict, which since the reframe is a statement
 # about the edge and not about the ladder: panel (b) shows the "no pull" rows
 # landing as high as the pullers, which is the paper's point
-TIERS = [(0, 6, "pulls", PULL), (6, 7, "bias covers zero", LADNP),
+TIERS = [(0, 4, "pulls", PULL),
+         (4, 6, "clears zero\non trials only", PULLW),
+         (6, 7, "bias covers zero", LADNP),
          (7, 8, "edge 4.4 kHz", OWN),
          (8, 11, "edge censored", UNRES),
          (11, 13, "resolves,\ndoes not regrid", LOWL),
