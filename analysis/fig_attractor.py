@@ -168,8 +168,13 @@ def panel_decompose(ax):
     for yv in (4.69, 3.78):
         ax.plot([2.18, 2.58], [yv, yv], color=INK, lw=0.7, alpha=0.55)
     ax.plot([2.50, 2.50], [3.78, 4.69], color=INK, lw=0.9)
-    ax.text(1.35, 9.4, "corpus tuning 0.91 c", fontsize=6.8,
-            color=INK, ha="center", va="center")
+    # The label used to float five cents above the bracket with nothing
+    # joining them, and the bracket sat on the flat bar's error bar. Leader
+    # line added, and the bracket moved clear of the bars.
+    ax.annotate("corpus tuning 0.91 c", xy=(2.50, 4.24), xytext=(1.15, 8.6),
+                fontsize=6.8, color=INK, ha="center", va="center",
+                arrowprops=dict(arrowstyle="-", color=INK, lw=0.6,
+                                alpha=0.55, shrinkA=1.0, shrinkB=1.0))
 
     # "stock" / "grid" / "flat" appeared nowhere else in the paper and a
     # reader had to reconstruct them from Section 3.3. Say what each arm is.
@@ -180,7 +185,7 @@ def panel_decompose(ax):
     # phantom third label spanning the axis.
     # one word each: at a legible size "grid kept" and "grid removed"
     # overprint, and the axis label already says these are corpus grids
-    ax.set_xticklabels(["stock", "kept", "removed"], fontsize=7.4)
+    ax.set_xticklabels(["stock", "kept", "flat"], fontsize=7.4)
     ax.set_xlabel("corpus grid", fontsize=7.8, color="0.2",
                   labelpad=1.5)
     # the panel never said which codec it was, nor what the whiskers were.
@@ -194,7 +199,9 @@ def panel_decompose(ax):
     # wrapped: at this panel width one line ran past the canvas edge, and
     # there is no tight bounding box to grow now that the figure is saved
     # at the text width
-    ax.set_title("(b) fine-tuning removes",
+    # "(b) removed by fine-tuning" ran past the canvas edge and printed as
+    # "...fine-tunin" at the saved width; this fits with room to spare.
+    ax.set_title("(b) what it removes",
                  fontsize=7.8, loc="left", color="0.12")
     ax.grid(axis="y", alpha=0.14, lw=0.6)
 
@@ -207,7 +214,7 @@ def main() -> int:
         # at 1.72 in with bbox_inches="tight" the canvas came out 448 pt wide,
         # LaTeX scaled it to 396, and the in-panel note printed at 4.6 pt.
         1, 2, figsize=(5.5, 1.78),
-        gridspec_kw={"width_ratios": [1.25, 1.0], "wspace": 0.58})
+        gridspec_kw={"width_ratios": [1.18, 1.0], "wspace": 0.58})
     style(ax1); style(ax2)
     panel_move(ax1)
     panel_decompose(ax2)
