@@ -9,6 +9,12 @@ Every command below has been **checked against the actual argparse of the script
 calls**. Where a run needs code that does not exist yet, that is stated explicitly rather
 than papered over with a plausible-looking command.
 
+**Reporting format.** Every table below is a table of *models*. When reporting
+back, give the measured number in its own clearly labelled column or line, and
+say which quantity it is. Three separate rounds of this project were lost to a
+prediction table being returned with a measured value dropped into one of the
+model columns, where it is indistinguishable from the model.
+
 Every prediction is derived from quantities already in the paper. The main tool is
 Equation 16:
 
@@ -206,14 +212,25 @@ reconciled against Table A15.
 
 ### Expected numbers — this is a discriminating test
 
-| \|δ₀\| | Proportional pull | Cap at c = 22 | Cap at c = 26 |
-|---|---|---|---|
-| 5 | 0.90 | **1.00** | **1.00** |
-| 10 | 0.90 | **1.00** | **1.00** |
-| 20 | 0.90 | 1.00 | 1.00 |
-| 30 | 0.90 | 0.73 | 0.87 |
-| 40 | 0.90 | 0.55 | 0.65 |
-| 50 | 0.90 | 0.44 | 0.52 |
+**The run returns ONE measured ℓ̄ per detuning — six numbers. Fill in the last
+column. Everything else here is a model, not a result.**
+
+| \|δ₀\| | **MEASURED ℓ̄** | Expected if paper is right | Failure mode: cap 22 | Failure mode: cap 26 |
+|---|---|---|---|---|
+| 5 | ___ | 0.90 | 1.00 | 1.00 |
+| 10 | ___ | 0.90 | 1.00 | 1.00 |
+| 20 | ___ | 0.90 | 1.00 | 1.00 |
+| 30 | ___ | 0.90 | 0.73 | 0.87 |
+| 40 | ___ | 0.90 | 0.55 | 0.65 |
+| 50 | ___ | 0.90 | 0.44 | 0.52 |
+
+**The single diagnostic: does the measured column stay flat, or fall after 20?**
+Flat near 0.90 confirms the paper. Falling means the ladder is a bounded
+displacement, not a fraction, and the paper needs rewriting throughout.
+
+A useful cross-check to report alongside: **ℓ̄ × |δ₀|**, the implied displacement
+in cents. Under the paper's account that grows (4.5, 9, 18, 27, 36, 45). Under a
+cap it flattens out at the cap value.
 
 Cap values are `min(c/|δ₀|, 1)`; c = 22 [19, 26] is where the failed (P1) prediction put
 its clipping knee.
