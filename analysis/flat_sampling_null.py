@@ -11,7 +11,7 @@ paper quotes the result as \\PeakNullSpeech and \\PeakNullMusic.
 
 Sample sizes are taken from the `hist_*.meta.json` sidecars that
 pitch_histogram.py writes (`n_f0_estimates`) when they are present next to
-the CSVs; otherwise the counts recorded in FINDINGS.md are used as defaults
+the CSVs; otherwise the counts recorded in docs/notes/FINDINGS.md are used as defaults
 and can be overridden on the command line:
 
     python flat_sampling_null.py ../results
@@ -27,7 +27,7 @@ from pathlib import Path
 
 import numpy as np
 
-# Counts recorded in FINDINGS.md section 6 and main.tex (\GenPeak comment).
+# Counts recorded in docs/notes/FINDINGS.md section 6 and main.tex (\GenPeak comment).
 DEFAULT_SIZES = {
     "librispeech": 53678,
     "gtzan": 180859,
@@ -74,7 +74,7 @@ def main() -> int:
     args = p.parse_args()
 
     sizes = dict(DEFAULT_SIZES)
-    source = "FINDINGS.md defaults"
+    source = "docs/notes/FINDINGS.md defaults"
     sidecar = sizes_from_sidecars(args.results)
     if sidecar:
         sizes.update(sidecar)

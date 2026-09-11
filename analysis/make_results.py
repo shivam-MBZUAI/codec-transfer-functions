@@ -30,7 +30,7 @@ from analyze_sweep import (  # noqa: E402
 )
 
 # Every experiment the programme defines, so what is missing is as visible as
-# what is present. Keys match EXPERIMENTS.md. The third field lists the result
+# what is present. Keys match docs/notes/EXPERIMENTS.md. The third field lists the result
 # files (stems under results/) whose presence means the experiment has run;
 # an empty tuple means it has not, and the row says so.
 PROGRAMME = [
@@ -197,7 +197,7 @@ def main() -> int:
         done = any((results_dir / f"{s}.csv").exists() for s in stems)
         out.append(f"| {eid} | {name} | {'measured' if done else 'not yet measured'} |\n")
     out.append(
-        "\nSee [EXPERIMENTS.md](EXPERIMENTS.md) for what each of these tests and "
+        "\nSee [docs/notes/EXPERIMENTS.md](docs/notes/EXPERIMENTS.md) for what each of these tests and "
         "why it is in the programme.\n"
     )
 

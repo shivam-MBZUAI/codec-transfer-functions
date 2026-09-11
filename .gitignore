@@ -11,8 +11,8 @@ venv/
 *.flac
 data/
 checkpoints/
-# figures/*.png are tracked: they are small, the README embeds one, and they
-# are the exact images the paper uses. `make figures` regenerates them.
+# figures/ is tracked: the paper's figures (PDF) and the PNG renders the README
+# and RESULTS.md embed. `make figures` regenerates the PNG set.
 
 .DS_Store
 

@@ -1,0 +1,3 @@
+delta0_cents,H1,H2,H3,H4,H5,H6,H7,H8,estimator_8_partials,source_file
+-40,0.0,0.0,26.9,40.2,51.9,42.1,35.1,44.6,20.7,results/spectral_sweep.csv
+40,-0.2,0.0,-24.0,-37.9,-27.5,-35.1,-42.8,-37.5,-16.9,results/spectral_sweep.csv

@@ -1,155 +1,146 @@
-# Codec Transfer Functions
+# Where a neural audio codec pulls pitch toward equal temperament
 
-**Measuring *where* a neural audio codec loses information, rather than how much.**
+Code, raw result files and provenance for the ICASSP 2027 submission
+*Where a Neural Audio Codec Pulls Pitch Toward Equal Temperament*
+(Shivam Chauhan, MBZUAI). The manuscript is in [`paper/`](paper/).
 
-Neural audio codecs supply the token vocabulary for modern audio language
-models, and they are evaluated almost entirely by aggregate perceptual scores.
-Those scores say how much a codec loses on average. They cannot say where it
-goes.
-
-This repository treats a codec as a measurement instrument: drive it with
-stimuli in which exactly one property varies, recover that property from the
-output, and report the **transfer function** and its residual.
-
-The headline result is that the residual is periodic in log frequency with a
-period of exactly one semitone, and registered to an **absolute** twelve-tone
-grid rather than to the interval under test.
+Neural vocoders are known to pull output tuning toward 12-tone equal
+temperament. This repository treats a neural audio codec as a measurement
+instrument to locate where that happens: pairs of harmonic tones a fixed
+interval apart are coded, a blind estimator reads the decoded interval back,
+and the decoded spectrum is read partial by partial. At low bitrate the
+decoder transmits the lower partials and invents the rest above a band edge;
+the fundamental stays put, the invented partials land most of the way onto
+the harmonic ladder of the nearest 12-TET pitch, and a full-band estimator
+reports a displacement no partial underwent. Fine-tuning only EnCodec's
+decoder on a corpus retuned by 33 cents moves the grid by 32.7 cents.
 
 <p align="center">
-  <img src="figures/detuning_regression.png" width="88%"><br>
-  <em>Detuning the reference pitch advances the residual's phase with slope
-  1.0010, 95% CI [0.9922, 1.0099] (t on 8 degrees of freedom), R² = 0.99988. A residual locked to the
-  interval, or produced by the analysis, would sit on the dotted line at zero.</em>
+  <img src="figures/spectral_check.png" width="88%"><br>
+  <em>Fig. 1 of the paper. A 440 Hz complex detuned +40 cents through EnCodec at 3 kbps:
+  H1 below the edge stays put, H3 at the edge splits into two lines, H4 above it is
+  regenerated onto the harmonic of the nearest 12-TET pitch.</em>
 </p>
 
----
+## Contents
 
-## What was found
+```
+paper/            manuscript PDF, every reported value with its provenance
+                  (values.csv), the three tables as CSV, and PAPER_TO_RESULTS.md,
+                  which maps each paper element to the script and raw file behind it
+results/          raw per-trial CSV, one .meta.json sidecar per run recording the
+                  full argument set and package versions (results/README.md)
+RESULTS.md        every derived statistic, generated from results/ by
+                  analysis/make_results.py; never hand-edited
+experiments/      measurement entry points; each writes raw per-trial CSV
+analysis/         every derived number and figure
+figures/          the paper's figures and the scripts that draw them
+data/             corpus and checkpoint acquisition
+infra/            Slurm and detached-session tooling for the long sweeps
+docs/             DATA.md (sources and licences), PIPELINE.md, CLUSTER.md,
+                  notes/ (working notes from the programme, kept for the record)
+PREDICTIONS.md    the pre-registration document with its amendment log
+```
 
-| | |
-|---|---|
-| **Registered to the grid** | slope 1.0010, *R²* = 0.99988, across 10 conditions and 4 codec families |
-| **Aggregate metrics conceal it** | DAC 16k and SNAC 44k report a median grid bias of 0.000 and register cleanly |
-| **Not architectural** | period constant in cents across four octaves; conv strides would give constant Hz |
-| **Not in the codebook** | removing quantisation leaves 5.66 of 8.88 cents; code boundaries uniform (Rayleigh *p* = 0.86) |
-| **Learned** | flattening the tuning grid of the training audio weakens it by 17 to 20%, replicated over five seeds against a resampling control and a magnitude-matched control; the fine-tuning changes only the decoder |
-| **Not a learned-codec artefact of test tones** | Opus and MP3 show no pull; on real polyphonic music, Western and Carnatic, EnCodec pulls by about 2.5 cents with the same phase |
-| **Bounded in speech** | no phonological disparity across 20 languages; the downstream recognition effect changes sign with the error normalisation |
-
-One pre-registered prediction is falsified, one is unresolved by its own metric, and three could not be measured as registered; the scored table is in the paper repository's `PREDICTIONS.md`. **[FINDINGS.md](FINDINGS.md)
-states every number, every null, and every design that failed.**
-
----
+`run_*.py` computes no statistics. It writes raw estimates and a sidecar.
+Every derived number comes from `analysis/`, so the analysis can be rerun
+and audited without repeating the codec passes.
 
 ## Quickstart
 
 ```bash
 python -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
+python data/fetch_checkpoints.py      # about 2 GB, the codec checkpoints
 make gate
 ```
 
-`make gate` runs the three checks that must pass before any measurement means
-anything, and takes a few minutes:
+`make gate` runs the three checks that must pass before any measurement
+means anything: the estimator's noise floor on uncoded stimuli, the whole
+pipeline with no codec in the loop (must report null), and the pilot sweep on
+EnCodec. It takes a few minutes on CPU. The pitch experiments are CPU-bound
+on F0 estimation; only the fine-tuning arms need a GPU.
 
-1. the estimator's noise floor on uncoded stimuli
-2. the whole pipeline with **no codec in the loop**, which must report null
-3. the pilot sweep on EnCodec
+## Reproducing the paper
 
-See **[REPRODUCE.md](REPRODUCE.md)** for the exact command behind every figure
-and table in the paper.
+[`REPRODUCE.md`](REPRODUCE.md) gives the command behind each experiment.
+[`paper/PAPER_TO_RESULTS.md`](paper/PAPER_TO_RESULTS.md) maps each figure,
+table and section of the paper to its script and raw files, and marks the
+few result families produced on a second machine that are not yet uploaded
+here. The headline measurements:
 
----
+| Paper | Command | Raw file |
+|---|---|---|
+| Registration slope and bias, EnCodec 3 kbps (Sec. 3.1) | `make detune` | `results/detune_encodec3.csv` |
+| Every codec row of Table 1 | `experiments/run_sweep.py --codec <name> --references $REFS` | `results/detune_*.csv` |
+| Per-partial displacements, Fig. 1 and Table 2 | `experiments/spectral_sweep.py`, `analysis/analyze_spectral.py` | `results/spectral_sweep.csv` |
+| Quantiser bypass and rate sweep (Sec. 3.2) | `make rate` | `results/mech_bypass.csv`, `results/rate_encodec_*.csv` |
+| Decoder fine-tuning arms, five seeds (Sec. 3.3) | `experiments/finetune_encodec.py`, `analysis/summary_causal.py` | `results/ftm_*_s{0..4}.csv` |
+| Real recordings, frame-wise bias (Sec. 3.4) | `experiments/corpus_pull.py`, `analysis/analyze_corpus_pull.py` | `results/corpus_pull_*.csv` |
+| Regenerate all derived statistics | `make results` | `RESULTS.md` |
+| Regenerate the figures | `make figures` | `figures/` |
 
-## Repository map
-
-```
-experiments/     measurement entry points; each writes raw per-trial CSV
-  stimuli.py         deterministic synthesis: tone pairs, vowels, vibrato, noise
-  estimator.py       YIN + harmonic-sum coarse stages, harmonic least-squares refine
-  codec_zoo.py       every codec behind one interface, plus identity and bypass controls
-  run_sweep.py       the pitch sweep
-  run_phonology.py   Experiment 2, phonological contrasts
-  run_asr.py         Experiment 2, downstream recognition (Whisper)
-  run_asr_mms.py     Experiment 2, downstream recognition (MMS)
-  train_rvq.py       from-scratch codec (a failed design, retained)
-  finetune_encodec.py  the causal experiment
-  retune_real.py     ecological test on real recordings
-  probe_codebook.py  reads code assignments across pitch
-
-analysis/        every derived number and figure
-  analyze_sweep.py       summary statistics for one sweep
-  analyze_detuning.py    the registration regression
-  make_results.py        regenerates RESULTS.md
-  make_figures.py        regenerates every paper figure
-  diagnose_exclusions.py checks the exclusion rule is not creating the effect
-
-data/            corpus and checkpoint acquisition
-infra/           Slurm and detached-session tooling
-results/         raw per-trial CSVs, each with a .meta.json provenance
-                 sidecar. See results/README.md for what each family is,
-                 including the ones retained but deliberately not reported
-figures/         generated; never hand-edited
-docs/            DATA.md, EXPERIMENTS.md, CLUSTER.md, PIPELINE.md
-```
-
-`run_*.py` computes no statistics. It writes raw estimates and a sidecar
-recording arguments and package versions. Every derived number comes from
-`analysis/`, so the analysis can be rerun and audited without repeating the
-codec passes.
-
----
+`$REFS` is the eleven reference pitches defined at the top of the `Makefile`.
 
 ## What is measured
 
-For a stimulus `x(θ)` in which one property takes value `θ`, and an estimator
-`E` recovering it:
+For a stimulus `x(theta)` in which one property takes value `theta`, and an
+estimator `E` recovering it:
 
 ```
-T(θ) = E[ C(x(θ)) ]                    transfer function
-r(θ) = T(θ) − θ                        residual
-b(θ) = sign(g(θ) − θ) · r(θ)           grid bias
+T(theta) = med_trials E[ C(x(theta)) ]        transfer function
+r(theta) = T(theta) - theta                   residual
+b(theta) = -sign(delta(theta)) * r(theta)      grid bias, delta = signed distance to 12-TET
 ```
 
-`g(θ)` is the nearest 12-tone equal-tempered interval. **The sign carries the
-argument**: a residual of a given magnitude symmetric about the true value is
-ordinary degradation; the same magnitude directed consistently toward `g(θ)` is
-quantisation onto a learned grid.
+A condition *registers* when the slope of the residual's phase against the
+reference detuning lies inside 1 +/- 0.15 (an equivalence test), and *pulls*
+when it also meets the pre-specified pull rule (on-grid phase within 45
+degrees of 180, off-grid bias interval clearing zero). The *band edge* is the
+lowest regenerated partial and the *ladder fraction* is how far the partials
+at or above it move toward the grid harmonic. The paper's Section 2 defines
+each in full.
 
----
-
-## Controls
-
-The pipeline is built around the ways this measurement can lie.
+## Controls built into the pipeline
 
 | Control | What it rules out |
 |---|---|
 | `identity` codec | any effect from the stimuli, estimator or analysis |
 | Detuned reference | an effect locked to the interval rather than absolute pitch |
 | Per-sample-rate noise floor | estimator error read as codec error |
-| Blind estimation | ground truth leaking into the estimate and suppressing the effect |
-| Octave gate at 200 cents | estimator failures, without suppressing a real effect (max measurable is 50 cents). **The only exclusion in the primary analysis**. It fires on 3 of 13,255 trials (0.02%) of the headline EnCodec run and on 0 to 9% of most reported runs, but on 65% of DAC 16k's (`analysis/guard_sensitivity.py` lists every run); the DAC 16k registration slope is 0.98 [0.86, 1.10] with the gate removed (`--exclusion=none`), so the gate does not manufacture it |
-| Estimator cross-check (`--exclusion=full`) | reported as a robustness variant, never as the primary number: it fires preferentially 30 to 50 cents from a grid point |
-| Exclusion-vs-grid-distance | an exclusion rule manufacturing the effect |
-| Sawtooth vs sinusoid fit | confusing a density correction with coarse cell assignment |
-| **Amplitude-stability guard** | **a confident slope fitted through noise phases** |
+| Octave gate at 200 cents | estimator failures; the only exclusion in the primary analysis |
+| Estimator cross-check | robustness variant only, never the primary number |
+| Amplitude-stability and retention guards | a confident slope fitted through noise phases (two codecs are refused, and reported as such) |
+| Quantiser bypass, shuffled and untrained codebooks | the effect living in the tokens rather than the decoder |
+| Opus, MP3, HE-AAC with SBR | band replication without a learned prior |
+| Grid-preserving resamplings of the fine-tuning corpus | resampling artefacts in the causal experiment |
 
-That last one is not decoration. Two codecs produced clean-looking slopes
-(−0.92 at *R²* 0.61, and 1.017 at *R²* 0.994) from phases that were pure noise.
-Both are now refused and reported as not measurable. Anyone repeating this on a
-codec outside its operating domain will hit the same trap.
+## Pre-registration
 
----
+`PREDICTIONS.md` is the registered prediction document with its amendment
+log. The paper reports which registered predictions held and which failed;
+the analyses added after the data were seen are marked exploratory there and
+in the paper.
 
-## A note on numbers
+## Environment
 
-`RESULTS.md` is generated by `analysis/make_results.py` from files in
-`results/`. There is no path by which a value that was not measured can appear
-in it, and unrun experiments are listed as *not yet measured* rather than shown
-with placeholders. The figures are generated the same way.
+Results were produced under `torch 2.8.0` and `transformers 5.16.1`; every
+`.meta.json` sidecar records the versions of its run. `requirements.txt`
+pins them and explains what is deliberately not installed.
+
+## Citation
+
+```bibtex
+@inproceedings{chauhan2027codecpitch,
+  author    = {Shivam Chauhan},
+  title     = {Where a Neural Audio Codec Pulls Pitch Toward Equal Temperament},
+  booktitle = {Proc. IEEE ICASSP},
+  year      = {2027},
+  note      = {Submitted}
+}
+```
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE).
-
-`PREDICTIONS.md` is a copy of the paper repository's pre-registration file with its amendment log, shipped so the supplement is self-contained.
+MIT. See [LICENSE](LICENSE). Corpora and checkpoints keep their own licences
+(see `docs/DATA.md`); no corpus audio is redistributed here.

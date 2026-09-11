@@ -10,7 +10,7 @@ arrangement of the numerals does.
 The three flattened arms have no own grid to be read against, so they carry
 one mark rather than two, and the figure says so rather than leaving a gap.
 
-Every value here is Table A25's, unchanged; check_consistency.py holds this
+Every value here is the relocation table's, unchanged; the paper source holds this
 list against the band-edge table, which is where the guard used to read the
 table's columns.
 

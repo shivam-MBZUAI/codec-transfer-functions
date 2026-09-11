@@ -1,0 +1,18 @@
+condition,group,slope_sigma,sigma_halfwidth,edge_khz,ladder_fraction,offgrid_bias_cents,bias_ci_low,bias_ci_high,source_file
+"EnCodec 24k, 3 kbps",pulls,1.001,0.009,1.3,0.90,12.55,10.71,13.67,results/detune_encodec3.csv
+"EnCodec 24k, 24 kbps",pulls,0.997,0.005,2.2,0.72,8.03,6.45,8.81,results/detune_encodec24kbps.csv
+"WavTokenizer, 0.9 kbps",pulls,1.004,0.007,0.9,0.84,7.61,6.44,8.52,pending upload
+"EnCodec 48k, 6 kbps",pulls,1.019,0.015,1.6,0.79,6.54,5.83,7.80,results/detune_encodec48.csv
+"SNAC 32k",pulls,0.964,0.038,3.1,0.86,0.61,0.18,1.02,results/detune_snac32.csv
+"EnCodec 24k, vowels",pulls,1.011,0.021,,,0.43,0.19,0.60,results/detune_vowel_encodec.csv
+"Mimi, Q8",no pull,0.958,0.028,3.4,0.75,1.19,-0.15,2.86,results/detune_mimi.csv
+"DAC 16k, Q6",no pull,1.020,0.063,4.4,0.85,-0.13,-0.55,0.07,results/detune_dac16.csv
+"SpeechTokenizer, vowels",no pull,0.856,0.032,,,-0.03,-0.21,0.14,results/detune_vowel_speechtok.csv
+"DAC 24k, Q8",no pull,0.979,0.028,,,0.01,-0.22,0.13,results/detune_dac24.csv
+"SNAC 44k",no pull,0.995,0.041,,,-0.14,-0.29,0.07,results/detune_snac44.csv
+"DAC 44k, Q4 (ladder at Q8)",refused by guards,,,resolved,0.14,,,,results/detune_dac44.csv
+"SNAC 24k",refused by guards,,,resolved,0.28,,,,results/detune_snac.csv
+"BigVGAN (vocoder)",controls,0.997,0.011,2.6,0.68,4.82,3.91,5.64,pending upload
+"HE-AAC SBR, 32 kbps",controls,,,1.32 (SBR crossover set),0.04,0.05,-0.31,0.42,pending upload
+"Opus, 6 kbps",controls,0.929,0.137,,,0.00,0.00,0.42,results/detune_opus6.csv
+"MP3, 16 kbps",controls,n/a,,,,0.00,0.00,0.00,results/detune_mp316.csv

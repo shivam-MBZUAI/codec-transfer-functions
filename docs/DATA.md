@@ -177,7 +177,7 @@ That splits the makam problem cleanly in two:
 
 - **Scale-degree offsets: solved.** These annotations are a defensible measured
   source for how far each degree sits from the nearest 12-TET pitch, replacing
-  the Arel-Ezgi-Uzdilek comma-table values the draft currently uses.
+  the Arel-Ezgi-Uzdilek comma-table values an earlier draft used.
 - **Audio to push through a codec: still blocked.** Needs Dunya, or the
   instrument-retuning route in 4a.
 

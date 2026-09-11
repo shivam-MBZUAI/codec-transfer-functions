@@ -628,4 +628,4 @@ placeholder values.
 | E3.5 | Phonological survival (FLEURS) | measured |
 | E3.6 | Downstream ASR | measured |
 
-See [EXPERIMENTS.md](EXPERIMENTS.md) for what each of these tests and why it is in the programme.
+See [docs/notes/EXPERIMENTS.md](docs/notes/EXPERIMENTS.md) for what each of these tests and why it is in the programme.

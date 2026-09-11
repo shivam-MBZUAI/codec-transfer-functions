@@ -45,3 +45,14 @@ claim. Do not read them as measurements of the phenomenon.
 | `causal_*`, `ft_*`, `ftvowel_*` | the **failed** synthetic-tone causal design. A codec trained or fine-tuned on narrow synthetic stimuli becomes too good at them and the effect disappears whatever the pitch density. Superseded by `ftm_grid` / `ftm_flat`. See "What did not work" in the appendix |
 | `codec_speechtok.csv` | SpeechTokenizer on musical tones, where it is out of distribution: ~100 cent errors, 97% estimator disagreement. The vowel runs replace it |
 | `detune_snac.csv`, `detune_dac44.csv` | conditions the amplitude-stability guard **refuses to fit**. Retained so the refusal is reproducible |
+
+## The ICASSP 2027 paper
+
+`paper/PAPER_TO_RESULTS.md` maps each table, figure and section of the
+manuscript to the script and raw file behind it. Result families the paper
+reports that were produced on a second machine and are not yet in this
+directory are listed there as *pending upload*: the WavTokenizer, BigVGAN and
+HE-AAC sweeps, the DAC 16k register runs, the stimulus-population sweeps, the
+retuned and 24-TET fine-tuning arms, the bandwidth extender, the held-out and
+registered checkpoint passes, and the scale-degree analysis on Saraga and
+makam (Table 3).

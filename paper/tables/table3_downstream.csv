@@ -1,0 +1,8 @@
+corpus,n_recordings,reading,added_degree_error_cents,ci_low,ci_high,flips,source_file
+Saraga (Carnatic),200,"full-band fit, EnCodec 3 kbps",3.2,2.6,3.8,22,pending upload (analyze_tuning.py outputs)
+Saraga (Carnatic),200,"full-band fit, matched Opus 4.6 kbps",2.8,,,2,pending upload
+Saraga (Carnatic),200,"band-limited fit, EnCodec",0.2,,,4,pending upload
+Saraga (Carnatic),200,"pYIN, EnCodec",0.7,0.2,1.2,6,pending upload
+Turkish makam,60,"full-band fit, EnCodec 3 kbps",4.4,3.5,5.4,11,pending upload
+Turkish makam,60,"full-band fit, matched Opus 5.2 kbps",3.7,,,2,pending upload
+Turkish makam,60,"band-limited fit, EnCodec",0.2,,,2,pending upload
