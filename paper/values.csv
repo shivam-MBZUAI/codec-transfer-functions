@@ -3,141 +3,43 @@ SlopeEncodec,1.0010,,
 SlopeEncodecCI,"[0.9922, 1.0099]",,t(8) interval on ten conditions
 SlopeEncodecRsq,0.99988,,
 AmpEncodec,13.72,,cents
-GateExclDac,65,,percent of DAC 16k trials removed by the tracking gate (guard_sensitivity.py)
-SlopeDacNoGate,0.98,,DAC 16k slope with --exclusion=none
-SlopeDacNoGateCI,"[0.86, 1.10]",,t(8); analyze_detuning.py --exclusion=none
-SlopeDac,1.0199,,DAC 16k; DAC 44k is not measurable
-BiasEncodec,8.88,Magnitude at the headline operating point,"cents, grid bias at 3 kbps"
-RatioEncodec,3.27,Magnitude at the headline operating point,off-grid / on-grid error
-RatioEncodecStrict,3.48,Magnitude at the headline operating point,with the estimator cross-check added
-BiasEncodecStrict,9.26,Magnitude at the headline operating point,
 BiasOffGrid,12.55,Magnitude at the headline operating point,"cents, median grid bias over the off-grid band"
-SaragaFrames,199,Magnitude at the headline operating point,
-RegHi,4.62,register test on Saraga (analyze_register_split.py); the sixth partial,
-RegHiCI,"[3.38, 6.25]",register test on Saraga (analyze_register_split.py); the sixth partial,
-RegLo,1.95,register test on Saraga (analyze_register_split.py); the sixth partial,
-RegLoCI,"[1.51, 2.40]",register test on Saraga (analyze_register_split.py); the sixth partial,
 RegDiff,2.68,register test on Saraga (analyze_register_split.py); the sixth partial,
 RegDiffCI,"[1.38, 4.30]",register test on Saraga (analyze_register_split.py); the sixth partial,
-RegOpus,-0.11,register test on Saraga (analyze_register_split.py); the sixth partial,
-RegOpusCI,"[-0.24, -0.02]",register test on Saraga (analyze_register_split.py); the sixth partial,
-RegDac,-0.19,register test on Saraga (analyze_register_split.py); the sixth partial,
-RegDacCI,"[-0.63, 0.43]",register test on Saraga (analyze_register_split.py); the sixth partial,
-RegGtzanHi,4.88,the same split on GTZAN (analyze_register_split_gtzan.py),
-RegGtzanLo,2.15,the same split on GTZAN (analyze_register_split_gtzan.py),
-RegGtzanDiff,2.74,the same split on GTZAN (analyze_register_split_gtzan.py),
-RegGtzanDiffCI,"[0.95, 5.33]",the same split on GTZAN (analyze_register_split_gtzan.py),
-ProbeFloor,0.045,"codebook probe detectable floor (rayleigh_floor.py, 4000 sims)",
-ProbeFloorCents,24.05,"codebook probe detectable floor (rayleigh_floor.py, 4000 sims)",
-ProbePower,7,"codebook probe detectable floor (rayleigh_floor.py, 4000 sims)",Saraga recordings carrying frames
 CorpusBias,2.49,"codebook probe detectable floor (rayleigh_floor.py, 4000 sims)","cents, real music, EnCodec 3 kbps (corpus_pull_encodec3)"
 CorpusBiasCI,"[2.05, 2.98]","codebook probe detectable floor (rayleigh_floor.py, 4000 sims)","bootstrap over clips (analyze_corpus_pull.py); over frames it is [2.21, 2.81]"
-CausalSpecific,0.91,The relocation experiment: retuning the corpus moves the attractor,"corpus-level specific component, cents"
-CausalSpecificCI,"[0.79, 1.03]",The relocation experiment: retuning the corpus moves the attractor,
 CausalSpecificBias,0.87,The relocation experiment: retuning the corpus moves the attractor,same contrast read on $\tilde b$ (Appendix E.1)
-BlindLo,"0.59}    % placement-blind primary range, Table \ref{tab:blindscore",The relocation experiment: retuning the corpus moves the attractor,
-BlindHi,0.86,The relocation experiment: retuning the corpus moves the attractor,
-SlopeRetune,0.9962,The relocation experiment: retuning the corpus moves the attractor,"registration slope, +33-cent arm"
 AttractorRetune,39.6,The relocation experiment: retuning the corpus moves the attractor,"zero crossing, +33-cent arm, cents"
 AttractorRetuneCI,"[37.1, 42.0]",The relocation experiment: retuning the corpus moves the attractor,
 LadderRetune,0.87,The relocation experiment: retuning the corpus moves the attractor,ladder fraction against the retuned grid
 LadderRetuneTET,0.11,The relocation experiment: retuning the corpus moves the attractor,same partials against 12-TET
-AmpQuarter,3.34,The relocation experiment: retuning the corpus moves the attractor,"50-cent-periodic amplitude, 24-TET arm"
-SlopeQuarter,1.0074,The relocation experiment: retuning the corpus moves the attractor,registration against the quarter-tone grid
 SvaraErrClean,4.1,Downstream cost: tuning analysis through a codec (analyze_tuning.py),"median abs error, Saraga degrees, uncoded (cents)"
-SvaraErrCoded,7.3,Downstream cost: tuning analysis through a codec (analyze_tuning.py),
 MakamErrClean,5.2,Downstream cost: tuning analysis through a codec (analyze_tuning.py),
-MakamErrCoded,9.6,Downstream cost: tuning analysis through a codec (analyze_tuning.py),
 SvaraDiff,3.2,Downstream cost: tuning analysis through a codec (analyze_tuning.py),
 SvaraDiffCI,"[2.6, 3.8]",Downstream cost: tuning analysis through a codec (analyze_tuning.py),
 MakamDiff,4.4,Downstream cost: tuning analysis through a codec (analyze_tuning.py),
 MakamDiffCI,"[3.5, 5.4]",Downstream cost: tuning analysis through a codec (analyze_tuning.py),
-TuningFlipCI,"[10, 30]",Downstream cost: tuning analysis through a codec (analyze_tuning.py),
-TuningFlipSaragaCI,"[7, 16]",Downstream cost: tuning analysis through a codec (analyze_tuning.py),
-SvaraErrBand,4.3,Downstream cost: tuning analysis through a codec (analyze_tuning.py),
 SvaraDiffBand,0.2,Downstream cost: tuning analysis through a codec (analyze_tuning.py),"paired diff, band-limited read"
-MakamErrBand,5.4,Downstream cost: tuning analysis through a codec (analyze_tuning.py),
-AttractorCarnatic,15.4,decoder fine-tuned on a non-Western corpus: the ladder follows it,
-AttractorCarnaticCI,"[12.1, 18.7]",decoder fine-tuned on a non-Western corpus: the ladder follows it,
-SvaraErrCarnaticFT,4.4,decoder fine-tuned on a non-Western corpus: the ladder follows it,
 SvaraDiffCarnaticFT,0.3,decoder fine-tuned on a non-Western corpus: the ladder follows it,
 SvaraDiffCarnaticFTCI,"[-0.2, 0.8]",decoder fine-tuned on a non-Western corpus: the ladder follows it,
 SvaraDiffGtzanFT,1.3,the GTZAN-tuned decoder scored on Saraga: generic effect vs corpus grid,"five seeds, ftm_grid_s0..4"
-SvaraDiffGtzanFTSpread,1.1 to 1.5,the GTZAN-tuned decoder scored on Saraga: generic effect vs corpus grid,
-GtzanFTFlips,seven or eight,the GTZAN-tuned decoder scored on Saraga: generic effect vs corpus grid,"of 200, every seed"
-StockRerun,3.3,the GTZAN-tuned decoder scored on Saraga: generic effect vs corpus grid,stock rerun beside it
-VocSlope,0.9971,"a neural vocoder, to separate this mechanism from the prior finding",
-VocSlopeCI,"[0.9862, 1.0080]","a neural vocoder, to separate this mechanism from the prior finding",
-VocPhase,+167,"a neural vocoder, to separate this mechanism from the prior finding",
-VocLadder,0.71,"a neural vocoder, to separate this mechanism from the prior finding",
 VocFundMove,3.1,"a neural vocoder, to separate this mechanism from the prior finding",
-VocFundMoveCI,"[2.4, 3.8]","a neural vocoder, to separate this mechanism from the prior finding",
-WavSlope,1.0043,"WavTokenizer, the second family carrying the ladder",
-WavSlopeCI,"[0.9971, 1.0115]","WavTokenizer, the second family carrying the ladder",
-WavPhase,+158,"WavTokenizer, the second family carrying the ladder",
-WavEdge,0.9,"WavTokenizer, the second family carrying the ladder",
-WavLadderFlat,"0.88}      % flat side, Table \ref{tab:bandedge","WavTokenizer, the second family carrying the ladder",
-VocLadderMean,0.68,"WavTokenizer, the second family carrying the ladder",
 ExtLadder,0.68,"WavTokenizer, the second family carrying the ladder","bandwidth extender, grid-peaked corpus"
-WavLadderSharp,0.79,"WavTokenizer, the second family carrying the ladder",
 AttractorRetuneWav,37.9,"WavTokenizer, the second family carrying the ladder",
 AttractorRetuneWavCI,"[34.6, 41.2]","WavTokenizer, the second family carrying the ladder",
-SvaraSpecificOpus,0.4,"WavTokenizer, the second family carrying the ladder",
-SvaraSpecificOpusCI,"[-0.2, 1.0]","WavTokenizer, the second family carrying the ladder",
-MakamSpecificOpus,0.7,"WavTokenizer, the second family carrying the ladder",
-MakamSpecificOpusCI,"[-0.3, 1.7]","WavTokenizer, the second family carrying the ladder",
 AttractorRetuneMimi,38.4,"WavTokenizer, the second family carrying the ladder",
 AttractorRetuneMimiCI,"[34.2, 42.6]","WavTokenizer, the second family carrying the ladder",
-MakamIdClean,0.80,"WavTokenizer, the second family carrying the ladder",
-MakamIdCoded,0.73,"WavTokenizer, the second family carrying the ladder",
-SvaraSpecific,0.9,"WavTokenizer, the second family carrying the ladder",
-SvaraSpecificCI,"[0.2, 1.6]","WavTokenizer, the second family carrying the ladder",
-MakamSpecific,1.5,"WavTokenizer, the second family carrying the ladder",
-MakamSpecificCI,"[0.5, 2.5]","WavTokenizer, the second family carrying the ladder",
 TuningFlip,18\%,"WavTokenizer, the second family carrying the ladder",makam recordings whose best-fitting system flips
 TuningFlipSaraga,11\%,"WavTokenizer, the second family carrying the ladder",
-LadderFrac,nine tenths,"WavTokenizer, the second family carrying the ladder",weighted ladder fraction of the regenerated partials
-NSynthBias,"+0.007 [-0.23, +0.26]","WavTokenizer, the second family carrying the ladder","isolated NSynth notes, EnCodec 3 kbps"
 CarnaticBias,2.63,"WavTokenizer, the second family carrying the ladder","cents, EnCodec 3 kbps on Saraga Carnatic (corpus_pull_saraga_encodec3)"
 CarnaticBiasCI,"[2.17, 3.14]","WavTokenizer, the second family carrying the ladder","over clips; over frames [2.27, 2.97]"
 BypassBias,5.66,"Mechanism: it is NOT the codebook (mech_bypass.csv, probe_encodec3.csv)",cents with NO quantisation
 ProbeBoundaries,2341,"Mechanism: it is NOT the codebook (mech_bypass.csv, probe_encodec3.csv)",
-ProbeMeanDist,25.09,"Mechanism: it is NOT the codebook (mech_bypass.csv, probe_encodec3.csv)",uniform expects 25.0
 ProbeRayleighP,0.86,"Mechanism: it is NOT the codebook (mech_bypass.csv, probe_encodec3.csv)",
-RateSlopeRaw,-0.324,Rate scaling (analyze_rate.py on rate_encodec_*.csv),
-RateSlopeRawCI,"[-0.756, 0.108]",Rate scaling (analyze_rate.py on rate_encodec_*.csv),"t(3) interval on five rates; the 1.96 interval was [-0.590, -0.058]"
-RateSlopeCorrected,-2.612,Rate scaling (analyze_rate.py on rate_encodec_*.csv),
-RateSlopeCorrectedCI,"[-3.802, -1.422]",Rate scaling (analyze_rate.py on rate_encodec_*.csv),t(3)
-MusicPeak,1.788,"The premise, measured (hist_gtzan.csv, hist_librispeech.csv)",
-SpeechPeak,1.113,"The premise, measured (hist_gtzan.csv, hist_librispeech.csv)",
-DetunedPeak,1.073,"The premise, measured (hist_gtzan.csv, hist_librispeech.csv)",
-QuarterPeakZero,7.3,the 24-TET corpus: every pitch snapped to its nearest 50-cent point (author-supplied),peak/mean at the 12-TET pitch
-QuarterPeakFifty,3.4,the 24-TET corpus: every pitch snapped to its nearest 50-cent point (author-supplied),peak/mean at the quarter-tone
-QuarterCount,"178,768",the 24-TET corpus: every pitch snapped to its nearest 50-cent point (author-supplied),"F0 estimates, 24-TET corpus"
-GtzanNearShare,71\%,the 24-TET corpus: every pitch snapped to its nearest 50-cent point (author-supplied),GTZAN pitch within 25 cents of a 12-TET note
 CausalGrid,4.51,"Causal experiment (ftm_grid.csv, ftm_flat.csv)","cents, mean of five seeds, decoder fine-tuned on original clips (summary_causal.py)"
 CausalFlat,3.75,"Causal experiment (ftm_grid.csv, ftm_flat.csv)","cents, mean of five seeds, flattened corpus"
-CausalGridRes,4.62,"Causal experiment (ftm_grid.csv, ftm_flat.csv)","cents, mean of five seeds, whole-semitone resampled control"
 CausalGridMix,4.69,"Causal experiment (ftm_grid.csv, ftm_flat.csv)","cents, mean of five seeds, magnitude-matched control (0 or 100 cents per clip)"
-GenPeak,4.28,"Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)","peak/mean of MusicGen-small text-prompted output, 60 clips, 17,374 F0 estimates"
-GenPeakOffset,3.6,"Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)","cents sharp of A440 12-TET, circular mean under the YIN stage; the refined estimator gives 0.4 on 40 clips (test_yin_bias.py), so the offset is estimator-dependent"
-ContPull,7.5,"Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)","cents, grid-directed displacement of continuations, prompts >= 20 c off-grid (n=49)"
-ContPullCI,"[4.3, 11.4]","Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)",
-ContPullFraction,0.23,"Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)",7.54 / 33.2
-ContShuffleNull,13.3,"Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)","cents, mean of the shuffle null (continuations permuted across prompts), 95% range [0.4, 23.5]"
-ContShuffleRange,"[0.4, 23.5]","Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)",
-ContTrackRange,"[-4.1, 4.1]","Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)","95% range of the dispersion-matched tracking null (prompt + resampled |residual| with random sign), mean 0"
-ContTrackDist,9.7,"Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)","cents, median |continuation - prompt| for the off-grid prompts; median |continuation - grid| 25.2, |prompt - grid| 33.2"
-PeakNullSpeech,1.07,"Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)","expected max/mean of a 50-bin histogram of a flat density at 53,678 samples (flat_sampling_null.py)"
-PeakNullMusic,1.04,"Downstream generation (musicgen_pull.py, analyze_musicgen.py; musicgen_text.csv, musicgen_continue.csv)","same at 175,552 and 180,859 samples (flat_sampling_null.py)"
-SinusoidBias,<0.01,"Controls (ctrl_sinusoid.csv, ctrl_identity.csv)",pure tones: no effect
-IdentityBias,<10^{-5},"Controls (ctrl_sinusoid.csv, ctrl_identity.csv)",
-ToneRatio,1.048,"Experiment 2, phonology: NULL (phon_encodec3_big.csv)",
-ToneRatioCI,"[0.86, 1.25]","Experiment 2, phonology: NULL (phon_encodec3_big.csv)",
-FrameBased,5.90,Values the abstract quotes. These were literals for seven drafts and,"frame-based reading, same audio"
 PopMedian,4.37,Values the abstract quotes. These were literals for seven drafts and,
-PopCellLo,0.42,Values the abstract quotes. These were literals for seven drafts and,smallest of the 24 stimulus cells (Appendix C.7)
-PopCellHi,15.02,Values the abstract quotes. These were literals for seven drafts and,largest of the 24 stimulus cells
 PopMedianCI,"[1.73, 9.13]",Values the abstract quotes. These were literals for seven drafts and,"two-way bootstrap over both margins of the crossed envelope x register design (Appendix C.7); resampling the 24 cells exchangeably gives the narrower [2.75, 6.95] and ignores both margins"
 LadderHi,0.89,Values the abstract quotes. These were literals for seven drafts and,highest fine-tuned arm
 EdgeStock,1.3,Values the abstract quotes. These were literals for seven drafts and,"kHz, stock EnCodec 3 kbps"
@@ -145,47 +47,16 @@ EdgeTuned,2.0,Values the abstract quotes. These were literals for seven drafts a
 ExtEdge,1.32,Values the abstract quotes. These were literals for seven drafts and,"kHz, the extender's matched edge"
 RetuneShift,32.7,Values the abstract quotes. These were literals for seven drafts and,"cents, grid displacement"
 RetuneSeedSD,2.8,Values the abstract quotes. These were literals for seven drafts and,"cents, seed-level spread of the retuned displacement"
-MissRegrid,0.71,Values the abstract quotes. These were literals for seven drafts and,lowest conditional reading among the seven missing-tier rows that still regrid
-TierLo,0.60,Values the abstract quotes. These were literals for seven drafts and,lower tier boundary in the sensitivity sweep
-TierHi,0.75,Values the abstract quotes. These were literals for seven drafts and,upper tier boundary in the sensitivity sweep
 CtrlSemitone,0.88,Values the abstract quotes. These were literals for seven drafts and,"grid-preserving control, semitone shift"
 CtrlMixed,0.86,Values the abstract quotes. These were literals for seven drafts and,"grid-preserving control, 0-or-100 shift"
 LadderFlat,0.59,Values the abstract quotes. These were literals for seven drafts and,"highest of the four grid-manipulated arms, against 12-TET"
-VocFundCents,3.1,Values the abstract quotes. These were literals for seven drafts and,"BigVGAN's fundamental displacement, Appendix C.5"
 CodecFundMax,0.2,Values the abstract quotes. These were literals for seven drafts and,"max |mean over repetitions| of the H1 displacement, every EnCodec row of Table \ref{tab:spectral}; was 0.4, which no row reaches"
-CodecFundRepMax,0.8,Values the abstract quotes. These were literals for seven drafts and,"largest single repetition at 440 Hz (1.5 kbps), spectral_sweep.csv"
-CodecFundSweepMax,2.2,Values the abstract quotes. These were literals for seven drafts and,"largest single repetition over the whole sweep, all tones and detunings"
-CodecFundMedian,0.05,Values the abstract quotes. These were literals for seven drafts and,median |H1 displacement| over the whole EnCodec sweep
 PyinCost,0.7,Values the abstract quotes. These were literals for seven drafts and,"cents, pYIN on Saraga"
-LibrosaToward,134,"A1: librosa.estimate_tuning at recording level, Saraga, EnCodec 3 kbps",of 200 recordings moving toward 12-TET
-LibrosaTowardP,1.7\times10^{-6},"A1: librosa.estimate_tuning at recording level, Saraga, EnCodec 3 kbps",exact two-sided binomial  % two-sided binomial against 50%
-MakamIdN,235,B: makam identification at n = 235,
-MakamIdCleanBig,0.80,B: makam identification at n = 235,
-MakamIdCodedBig,0.74,B: makam identification at n = 235,
-MakamIdDrop,-0.06,B: makam identification at n = 235,
-MakamIdDropCI,"[-0.11, -0.02]",B: makam identification at n = 235,
-MakamIdP,0.011,B: makam identification at n = 235,"exact McNemar, n = 235"
-MakamCrossCoded,11.8,"D1: Saraga-tuned decoder read on the makam corpus, out of corpus",
 MakamCrossDiff,6.6,"D1: Saraga-tuned decoder read on the makam corpus, out of corpus",
 MakamCrossDiffCI,"[5.5, 7.7]","D1: Saraga-tuned decoder read on the makam corpus, out of corpus",
-MakamCrossFlip,32\%,"D1: Saraga-tuned decoder read on the makam corpus, out of corpus",19 of 60
-MakamCrossFlipCI,"[20, 45]","D1: Saraga-tuned decoder read on the makam corpus, out of corpus",
-MakamCrossToward,19,"D1: Saraga-tuned decoder read on the makam corpus, out of corpus","of 19, toward Carnatic degrees"
-MakamCrossTowardP,4\times10^{-6},"D1: Saraga-tuned decoder read on the makam corpus, out of corpus",
 ConfN,15,E: registered pass on checkpoints untouched by either earlier arm,
 ConfHits,11,E: registered pass on checkpoints untouched by either earlier arm,
 ConfConst,5,E: registered pass on checkpoints untouched by either earlier arm,
 ConfP,0.070,E: registered pass on checkpoints untouched by either earlier arm,
 ConfMajLo,0.375,E: registered pass on checkpoints untouched by either earlier arm,"exact McNemar against always-ladder, 4:1 split (the rule got neither input's-tier row)"
-OursCost,3.2,E: registered pass on checkpoints untouched by either earlier arm,"cents, eight-partial fit on Saraga"
-OursPartials,eight,"third-party estimator defaults. Library constants, not measurements:",partials our fit uses
-StdPartials,20,"third-party estimator defaults. Library constants, not measurements:",Essentia numberHarmonics default
-LibrosaLo,150,"third-party estimator defaults. Library constants, not measurements:","librosa piptrack fmin, Hz"
-LibrosaHi,4 000,"third-party estimator defaults. Library constants, not measurements:","librosa piptrack fmax, Hz"
-LibrosaInvented,45\%,"third-party estimator defaults. Library constants, not measurements:",log-span of that window above the 0.9 kHz edge
-SwapVocos,0.89,"third-party estimator defaults. Library constants, not measurements:","conditional l-bar, Vocos on DAC tokens"
-SwapNative,0.17,"third-party estimator defaults. Library constants, not measurements:","conditional l-bar, DAC 44k's own decoder"
 ExtFlat,0.14,"third-party estimator defaults. Library constants, not measurements:","extender, same audio tuning-flattened"
-HeldNotLadder,16,"third-party estimator defaults. Library constants, not measurements:",
-HeldTotal,26,"third-party estimator defaults. Library constants, not measurements:",
-TierFrozen,0.70,"third-party estimator defaults. Library constants, not measurements:",frozen ladder-fraction tier boundary

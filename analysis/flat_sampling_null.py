@@ -1,21 +1,20 @@
 """Flat-sampling null for the within-semitone peak/mean ratio.
 
-pitch_histogram.py and analyze_musicgen.py summarise a corpus by the
+pitch_histogram.py summarises a corpus by the
 peak-to-mean ratio of a 50-bin histogram of F0 modulo 100 cents (max bin over
 mean bin, 1.0 = flat). Even a perfectly flat density does not give exactly 1.0
 at a finite sample size: the maximum of 50 multinomial counts sits above their
 mean by an amount that shrinks with n. This script simulates that expectation
 for the sample sizes of the reported histograms, so the corpus ratios (GTZAN
-1.788, detuned GTZAN 1.073, LibriSpeech 1.113) can be read against it. The
-paper quotes the result as \\PeakNullSpeech and \\PeakNullMusic.
+1.788, detuned GTZAN 1.073) can be read against it.
 
 Sample sizes are taken from the `hist_*.meta.json` sidecars that
 pitch_histogram.py writes (`n_f0_estimates`) when they are present next to
-the CSVs; otherwise the counts recorded in docs/notes/FINDINGS.md are used as defaults
+the CSVs; otherwise the counts above are used as defaults
 and can be overridden on the command line:
 
     python flat_sampling_null.py ../results
-    python flat_sampling_null.py --sizes librispeech=53678 gtzan=180859
+    python flat_sampling_null.py --sizes gtzan=180859
 """
 
 from __future__ import annotations
@@ -27,12 +26,10 @@ from pathlib import Path
 
 import numpy as np
 
-# Counts recorded in docs/notes/FINDINGS.md section 6 and main.tex (\GenPeak comment).
+# F0-estimate counts of the corpus histograms (also in each hist_*.meta.json).
 DEFAULT_SIZES = {
-    "librispeech": 53678,
     "gtzan": 180859,
     "gtzan_detuned": 175552,
-    "musicgen_text": 17374,
 }
 N_BINS = 50
 N_REPS = 500
@@ -74,7 +71,7 @@ def main() -> int:
     args = p.parse_args()
 
     sizes = dict(DEFAULT_SIZES)
-    source = "docs/notes/FINDINGS.md defaults"
+    source = "defaults"
     sidecar = sizes_from_sidecars(args.results)
     if sidecar:
         sizes.update(sidecar)

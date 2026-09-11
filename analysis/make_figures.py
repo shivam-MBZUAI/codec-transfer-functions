@@ -19,12 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
-# FIG must be the *paper's* figures directory, not code/figures. It was the
-# latter for many rounds, so every figure this script produced was written
-# somewhere main.tex does not read: eight of them had silently diverged from
-# the copies the paper was compiling, some by more than a day.
-PAPER = ROOT.parent
-EXP, RES, FIG = ROOT / "experiments", ROOT / "results", PAPER / "figures"
+EXP, RES, FIG = ROOT / "experiments", ROOT / "results", ROOT / "figures"
 FIG.mkdir(exist_ok=True)
 sys.path.insert(0, str(EXP))
 _ROOT = Path(__file__).resolve().parent.parent

@@ -26,8 +26,6 @@ ONE_FORMAT = ["*.safetensors", "*.json", "*.txt", "*.model"]
 
 MANIFEST = [
     # (repo, allow_patterns, why, tier)
-    ("openai/whisper-large-v3", ONE_FORMAT, "ASR for downstream WER", "T3"),
-    ("facebook/mms-1b-all", ONE_FORMAT, "second ASR; a disparity under one but not the other implicates the recogniser", "T3"),
     # Extra codecs for the breadth claim. Repo ids are uncertain for several of
     # these, so failure here is expected and informative rather than fatal.
     ("hubertsiuzdak/snac_24khz", WEIGHTS, "SNAC 24k, extra codec", "T2"),

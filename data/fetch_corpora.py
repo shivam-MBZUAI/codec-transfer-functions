@@ -32,13 +32,8 @@ from huggingface_hub import snapshot_download
 PAYLOAD_EXT = (".parquet", ".tar.gz", ".tar", ".safetensors", ".bin", ".pt", ".zip")
 
 TARGETS = [
-    ("openslr/librispeech_asr", "dataset", ["clean/validation/*"],
-     "LibriSpeech dev-clean: SpeechTokenizer's training distribution, p known"),
     ("marsyas/gtzan", "dataset", None,
      "GTZAN: Western music, grid-peaked F0 reference"),
-    ("facebook/musicgen-small", "model",
-     ["*.safetensors", "*.json", "*.txt", "*.model"],
-     "MusicGen small: codec-token music model for the propagation test"),
 ]
 
 

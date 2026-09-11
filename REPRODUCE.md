@@ -111,11 +111,9 @@ Expect uniform boundary positions, Rayleigh *p* = 0.86.
 python data/fetch_corpora.py
 python experiments/pitch_histogram.py --audio-root corpora/gtzan \
     --out results/hist_gtzan.csv
-python experiments/pitch_histogram.py --audio-root corpora/librispeech \
-    --out results/hist_librispeech.csv
 python analysis/plot_histograms.py
 ```
-Expect peak/mean 1.788 for music and 1.113 for speech.
+Expect peak/mean 1.788 for GTZAN.
 
 ### The causal experiment
 
@@ -147,32 +145,6 @@ and Opus nothing.
 
 ---
 
-## Experiment 2: the two speech tests
-
-```bash
-python data/get_fleurs_pod.py                      # 21 languages, test splits
-python experiments/run_phonology.py --codec encodec:3 --per-language 150 \
-    --out results/phon_encodec3_big.csv
-python analysis/analyze_phonology.py results/phon_encodec3_big.csv
-# Table 2 also reports Mimi and DAC 16k: repeat with --codec mimi:8 --out results/phon_mimi.csv
-# and --codec dac16:6 --out results/phon_dac16.csv (150 utterances per language each).
-
-python experiments/run_asr.py --codec encodec:3 --per-language 100 \
-    --out results/asr_encodec3_n100.csv            # Whisper
-python experiments/run_asr_mms.py --codec encodec:3 --per-language 100 \
-    --out results/asr_mms_encodec3_n100.csv        # MMS
-python experiments/run_asr_mms.py --codec mimi:8 --per-language 100 \
-    --out results/asr_mms_mimi_n100.csv
-python analysis/analyze_asr.py results/asr_mms_encodec3_n100.csv   # prints bootstrap intervals
-```
-
-Both return nulls. Two caveats are built into the code rather than left to the
-reader: utterances are **level-normalised** before coding, because FLEURS levels
-span a factor of 100 and a codec cannot represent near-silent input (Whisper
-then emits its silence hallucination, which reads as catastrophic codec damage);
-and languages where the recogniser fails **before** any codec is applied are
-flagged and excluded, since a baseline error near 1.0 leaves no headroom.
-
 ## The classical-codec control, the extra registers, and real music
 
 `infra/pod_run.sh` runs all of these (`classical`, `registers`, `corpus`);
@@ -197,51 +169,16 @@ MP3 32 kbps are refused by the guard; MP3 16 kbps registers at 0.01 cents;
 Opus 6 kbps shows a 1.6-cent residual with zero grid bias whose amplitude
 tracks the octave-gate rate, not pitch.
 
-## The ecological test on isolated notes, and its control
+## Corpus acquisition
 
 ```bash
-python data/get_nsynth.py
-python experiments/retune_real.py --audio-root corpora/nsynth --codec encodec:3 \
-    --max-files 300 --out results/retune_encodec3_big.csv
-# the control that validates the protocol: same protocol, synthetic stimuli
-python experiments/retune_real.py --synthetic-control --codec encodec:3 \
-    --max-files 200 --out results/retune_synthetic.csv
-```
-The control must find the effect (+6.6 cents) for the null on real recordings to
-mean anything.
-
----
-
-## Supporting runs
-
-These produce results the paper discusses but that are not headline figures.
-
-```bash
-# Does vibrato destroy the effect? It amplifies it, refuting the
-# out-of-distribution account. check_vibrato confirms the trend is the codec and
-# not the estimator, by running the same statistic on the UNCODED signal.
-for v in 0 5 10 20 40; do
-  python experiments/run_sweep.py --codec encodec:3 --reps 4 --vibrato-cents $v \
-      --references 440 452.8929 --out results/vib_${v}.csv
-done
-python analysis/check_vibrato.py
-
-# The failed designs, retained because the paper discusses why they failed.
-python experiments/train_rvq.py --distribution 12tet --steps 30000 \
-    --out checkpoints/rvq_12tet.pt          # collapses or keeps only the fundamental
-python experiments/tune_loss.py 6000        # the loss sweep that showed why
-
-# Corpus and model acquisition beyond the core checkpoints.
-python data/fetch_aux.py            # forced aligner and NSynth, via HF mirrors
-python data/fetch_pod_corpora.py    # GTZAN and LibriSpeech samples
-python data/extract_librispeech.py  # LibriSpeech ships as parquet; decode a sample
+python data/fetch_pod_corpora.py    # GTZAN samples for the training-density histogram
 python data/fetch_makam.py          # open makam annotations from Zenodo (no audio)
 ```
 
-**Makam audio is not obtainable through this repository.** A Dunya API token
-gives metadata and SymbTr scores; the `/document/` audio endpoints use session
-authentication and return 401 under token auth, including through the official
-`pycompmusic` client. Audio requires a separate CompMusic agreement.
+Makam audio is not obtainable through this repository: the Dunya audio
+endpoints need a separate CompMusic agreement. Saraga is fetched by
+`infra/saraga_fetch.sh`.
 
 ## Regenerating everything derived
 
@@ -253,47 +190,6 @@ make results        # RESULTS.md
 Neither reads anything but `results/`. If a figure cannot be regenerated this
 way it does not belong in the paper.
 
-## Accumulation under repeated coding
-
-Does the pull compound when audio is coded again and again? `encodec_iter:<kbps>@<n>`
-applies EnCodec n times in succession (decode, then encode the decoded audio).
-The headline sweep through 1, 2, 4 and 8 round trips runs on CPU in about
-fifteen minutes each:
-
-```bash
-for k in 1 2 4 8; do
-  python experiments/run_sweep.py --codec encodec_iter:3@$k --reps 5 --out results/iter_encodec3_k$k.csv
-  python analysis/analyze_sweep.py results/iter_encodec3_k$k.csv
-done
-```
-Expect all-trial grid biases of 8.88, 8.20, 7.39 and 7.26 cents at the on-grid
-reference, with the fitted amplitude between 13.0 and 13.9 cents and the phase
-within 3 degrees: the pull is applied once and then held, not accumulated.
-These four runs were produced on CPU (torch 2.8.0, transformers 5.16.1 pinned
-to the same checkpoint revision); the k = 1 run reproduces the GPU value 8.88
-of `rate_encodec_3.csv` exactly.
-
-## Downstream generation through MusicGen
-
-Does a token language model built on EnCodec inherit the grid? `experiments/musicgen_pull.py`
-generates with `facebook/musicgen-small` (EnCodec tokens, EnCodec decoder) and reads the
-output with the paper's blind estimator. Needs a GPU and the flattened corpus.
-
-```bash
-python experiments/musicgen_pull.py --mode text --n 60 --out results/musicgen_text.csv
-python experiments/musicgen_pull.py --mode continue --audio-root corpora/gtzan_detuned --n 80 \
-    --out results/musicgen_continue.csv
-python analysis/analyze_musicgen.py results/musicgen_text.csv       # peak/mean 4.28 at +3.6 cents
-python analysis/analyze_musicgen.py results/musicgen_continue.csv   # grid-directed +7.5 [4.3, 11.4] cents, then the null models
-```
-Text-prompted output peaks at 4.28 times its mean within the semitone (GTZAN 1.79), 3.6 cents
-sharp of A440. Continuations of tuning-flattened prompts move toward the grid by a median
-7.5 cents for prompts at least 20 cents off-grid, but the same script's null block shows a
-shuffle null (prompt-ignoring reversion to the model's grid-peaked output) of 13.3 [0.4, 23.5]
-cents and a direction-free tracking null of 0 [-4.1, 4.1]: the continuations track the prompt
-with a grid-directed residual, and the statistic does not separate a pull from reversion to the
-marginal. Neither test was pre-specified.
-
 ## Which partials move (spectral check)
 
 ```bash
@@ -304,23 +200,6 @@ Prints, per partial, the location of the decoded line relative to the input part
 first two, and writes `figures/spectral_check.pdf`. Expect the fundamental within 0.4 cents at
 every bitrate, and the first displaced partial at about 0.9 / 1.3 / 2.2 kHz for 1.5 / 3 / 24 kbps
 (Table A15 in the paper).
-
-## The flat-sampling nulls, the YIN stage, and the isolated-notes recipe
-
-```bash
-python analysis/flat_sampling_null.py                 # 1.070 at 53,678 samples (speech), 1.037 at 180,859 (music)
-python experiments/test_yin_bias.py                   # plain YIN vs the refined estimator on 721 synthetic fundamentals
-python analysis/analyze_retune.py results/retune_encodec3.csv   # 884/3455 usable, +0.007 [-0.232, +0.260]
-```
-`test_yin_bias.py` shows the YIN stage used by the histograms, the MusicGen readings and the
-phonology contours is about 0.2 to 0.3 cents sharp on clean tones and flat across the
-within-semitone position; on MusicGen's polyphonic output it and the refined estimator agree on
-the density's peak/mean (4.28 vs 4.27) but differ by about 2 cents on its absolute offset. Point it
-at a directory of wavs with `--audio-dir` to repeat that comparison. `analyze_retune.py` is the
-recipe behind the isolated-notes rows of the ecological table (usable: both coarse-seeded readings
-agree within 50 cents and the shift is within the 60-cent window; statistic: median shift toward
-the grid for notes 30 cents or more from a grid pitch minus that for notes within 10 cents;
-bootstrap over readings); `--sensitivity` shows the null holds under every gate and split.
 
 ## Table 1's adjusted intervals, phase errors and the DAC 16k gate profile
 

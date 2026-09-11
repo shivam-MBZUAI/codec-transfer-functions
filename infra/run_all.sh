@@ -32,15 +32,17 @@ done
 
 echo "=== C. mechanism controls ==="
 run mech_bypass   --codec encodec_bypass   --reps $REPS --references 440 452.8929
-run mech_shuffled --codec encodec_shuffled:3 --reps $REPS --references 440 452.8929
 
-echo "=== D. codec breadth, ordered by music in training data ==="
-run codec_encodec48    --codec encodec48:6      --reps $REPS --references 440 452.8929
-run codec_dac44        --codec dac:4            --reps $REPS --references 440 452.8929
-run codec_dac24        --codec dac24:8          --reps $REPS --references 440 452.8929
-run codec_dac16        --codec dac16:6          --reps $REPS --references 440 452.8929
-run codec_mimi         --codec mimi:8           --reps $REPS --references 440 452.8929
-run codec_speechtok    --codec speechtokenizer:8 --reps $REPS --references 440 452.8929
+echo "=== D. codec breadth: the registration sweep for every codec (Table 1) ==="
+run detune_encodec24kbps --codec encodec:24     --reps 4 --references $REFS
+run detune_encodec48     --codec encodec48:6    --reps 4 --references $REFS
+run detune_mimi          --codec mimi:8         --reps 4 --references $REFS
+run detune_dac16         --codec dac16:6        --reps 4 --references $REFS
+run detune_dac24         --codec dac24:8        --reps 4 --references $REFS
+run detune_dac44         --codec dac:4          --reps 4 --references $REFS
+run detune_snac          --codec snac           --reps 4 --references $REFS
+run detune_snac32        --codec snac32         --reps 4 --references $REFS
+run detune_snac44        --codec snac44         --reps 4 --references $REFS
 
 echo "=== E. controls ==="
 run ctrl_identity  --codec identity:24000 --reps $REPS --references 440 452.8929

@@ -10,8 +10,7 @@ inputs, and exactly one of those is not automatable.
 | Stage | External input needed |
 |---|---|
 | Gate, controls, mechanism, codec breadth | **none beyond codec checkpoints** |
-| Ecological validity | instrument samples, or makam audio |
-| Downstream | FLEURS, ASR models |
+| Real recordings | Saraga (fetched by `infra/saraga_fetch.sh`) or makam audio |
 
 ---
 
@@ -92,60 +91,7 @@ any "ok" that is not backed by a file count as unverified.
 
 ---
 
-## 3. Speech corpus and ASR — automatic
-
-```bash
-python data/fetch_fleurs.py
-```
-
-| Input | Source | Note |
-|---|---|---|
-| FLEURS | [google/fleurs](https://huggingface.co/datasets/google/fleurs) | 102 languages; we pull 23, test split only |
-| Whisper | [openai/whisper-large-v3](https://huggingface.co/openai/whisper-large-v3) | primary recogniser |
-| MMS | [facebook/mms-1b-all](https://huggingface.co/facebook/mms-1b-all) | second recogniser; a disparity under one but not the other implicates the recogniser rather than the codec |
-| Forced alignment | `torchaudio.pipelines.MMS_FA` | **use this, not Montreal Forced Aligner**, which is conda-based and painful on macOS and on locked-down clusters |
-
-### Two caveats that affect the science, not the download
-
-**FLEURS is parallel by translation, not by identical content.** It is built
-from FLoRes sentences read aloud, so languages share *meaning*, not words,
-phonemes, syllable counts or duration. Any claim that it "holds lexical content
-fixed by construction" is wrong. It controls semantic content and speaking
-register; it cannot control phonetic content.
-
-**The contrast-to-language mapping is not settled.** The current grouping puts
-Arabic, Hebrew, Amharic and Maltese under pharyngealisation. Only Arabic is
-solid: Modern Israeli Hebrew has largely lost the pharyngeals for most
-speakers, Amharic lost the Ge'ez pharyngeals and belongs in the ejective group
-only, and Maltese `għ` is generally silent or realised as vowel lengthening.
-Fix the grouping before deriving any number from it.
-
----
-
-## 4. Ecological validity — one automatic route, one blocked
-
-### 4a. Instrument samples — cached
-
-Real instrument recordings pitch-shifted off-grid. This answers the reviewer
-objection that synthetic stimuli do not transfer, without any restricted
-corpus, and is entirely under your control.
-
-**Cached:** NSynth test split, 350 MB, via [confit/nsynth](https://huggingface.co/datasets/confit/nsynth).
-Isolated instrument notes with pitch labels, which is exactly the shape this
-experiment needs. Its canonical home is a Google Storage bucket that this
-cluster's proxy blocks; the HuggingFace mirror works.
-
-### 4a-old. Other instrument sources
-
-Real instrument recordings pitch-shifted off-grid. This answers the reviewer
-objection that synthetic stimuli do not transfer, without any restricted
-corpus, and it is entirely under your control.
-
-| Source | Where | Note |
-|---|---|---|
-| Philharmonia Orchestra samples | philharmonia.co.uk, "sound samples" resource | free, small, isolated single notes across many instruments |
-| NSynth | [magenta.tensorflow.org/datasets/nsynth](https://magenta.tensorflow.org/datasets/nsynth) | far larger than needed; the *test* split alone is sufficient |
-| Good-Sounds | Universitat Pompeu Fabra, MTG | single notes with quality annotations |
+## 4. Turkish makam corpus
 
 ### 4b. Turkish makam corpus — BLOCKED, needs a human
 
@@ -222,9 +168,7 @@ so bounded samples are enough.
 
 | Sample | Repo | Size | Role |
 |---|---|---|---|
-| LibriSpeech dev-clean | [openslr/librispeech_asr](https://huggingface.co/datasets/openslr/librispeech_asr) | 342 MB | **SpeechTokenizer's entire training set.** `p` is knowable exactly |
 | GTZAN | [marsyas/gtzan](https://huggingface.co/datasets/marsyas/gtzan) | 1.2 GB | Western music, grid-peaked F0 reference |
-| MusicGen small | [facebook/musicgen-small](https://huggingface.co/facebook/musicgen-small) | 2.4 GB | codec-token music model for the propagation test |
 
 SpeechTokenizer is the clean case. It was trained on LibriSpeech and nothing
 else, so `p` can be computed rather than estimated, and speech F0 is smooth
@@ -252,12 +196,6 @@ Verified 2026-08-26 on the cluster cache:
 | Python environment | 4.8 GB |
 | 7 core codec checkpoints | 1.9 GB |
 | 8 additional codec checkpoints | 21 GB |
-| Whisper large-v3 | 8.7 GB |
-| MMS-1B-all (1199 language adapters) | 14 GB |
-| **Total model cache** | **46 GB** |
-| FLEURS, 23 languages test split | 9.8 GB |
-| MMS forced aligner | 1.3 GB |
-| NSynth test split | 350 MB |
 | Makam annotations | 118 MB |
 
 Everything lives under `$CODECS_ROOT` on shared scratch storage. Nothing is
@@ -280,8 +218,6 @@ datasets), zenodo.org **API**.
 |---|---|
 | GitHub *releases* | `uv` cannot fetch a standalone interpreter |
 | `download.pytorch.org` | the CUDA-specific wheel index |
-| `dl.fbaipublicfiles.com` | `torchaudio.pipelines.MMS_FA` weights |
-| `storage.googleapis.com` | NSynth's canonical home |
 | zenodo.org *file* downloads | the makam annotation archives |
 
 **The workaround that always applies:** almost everything is mirrored on

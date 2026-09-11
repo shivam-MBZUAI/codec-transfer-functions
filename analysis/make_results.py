@@ -30,30 +30,23 @@ from analyze_sweep import (  # noqa: E402
 )
 
 # Every experiment the programme defines, so what is missing is as visible as
-# what is present. Keys match docs/notes/EXPERIMENTS.md. The third field lists the result
+# what is present. The third field lists the result
 # files (stems under results/) whose presence means the experiment has run;
 # an empty tuple means it has not, and the row says so.
 PROGRAMME = [
     ("E0.1", "Estimator noise floor", ("ctrl_identity",)),   # floor column of every run
     ("E0.2", "Identity control (no codec)", ("ctrl_identity",)),
     ("E0.3", "Resample-only control", ()),
-    ("E0.4", "Pilot gate", ("pilot_encodec3",)),
     ("E1.1", "Detuning sweep, phase vs reference offset", ("detune_encodec3",)),
     ("E1.2", "Quantiser bypass", ("mech_bypass",)),
     ("E1.3", "Direct codebook probing", ("probe_encodec3",)),
-    ("E1.4", "Per-RVQ-level decomposition", ()),
-    ("E1.5", "Random-codebook control", ("mech_shuffled",)),
-    ("E1.6", "Causal: RVQ trained on controlled pitch distributions", ("causal_12tet", "ftm_grid")),
+    ("E1.6", "Causal: decoder fine-tuned on controlled pitch distributions", ("ftm_grid",)),
     ("E2.1", "Codec breadth", ("detune_mimi", "detune_dac16", "detune_snac44")),
     ("E2.2", "Training-distribution contrast", ("detune_encodec48", "ftm_flat")),
     ("E2.3", "Rate sweep in bits per latent dimension", ("rate_encodec_3",)),
-    ("E2.4", "Stimulus ablations", ("ctrl_sinusoid", "vib_20")),
+    ("E2.4", "Stimulus ablations", ("ctrl_sinusoid",)),
     ("E3.1", "Speech-shaped pitch stimuli", ("detune_vowel_encodec", "detune_vowel_speechtok")),
-    ("E3.2", "Retuned instrument samples", ("retune_encodec3_big",)),
-    ("E3.3", "Makam validation", ()),
-    ("E3.4", "Token-level probe", ()),
-    ("E3.5", "Phonological survival (FLEURS)", ("phon_encodec3_big",)),
-    ("E3.6", "Downstream ASR", ("asr_encodec3_v2", "asr_mms_encodec3")),
+    ("E3.2", "Real recordings, frame-wise bias", ("corpus_pull_encodec3", "corpus_pull_saraga_encodec3")),
 ]
 
 HEADER = """# Results
@@ -184,7 +177,7 @@ def main() -> int:
             "rate.\n\n"
         )
 
-    figs = sorted(p for p in (ROOT.parent / "figures").glob("*.png"))
+    figs = sorted(p for p in (ROOT / "figures").glob("*.png"))
     out.append("## Figures\n\n")
     if figs:
         for f in figs:
@@ -197,7 +190,7 @@ def main() -> int:
         done = any((results_dir / f"{s}.csv").exists() for s in stems)
         out.append(f"| {eid} | {name} | {'measured' if done else 'not yet measured'} |\n")
     out.append(
-        "\nSee [docs/notes/EXPERIMENTS.md](docs/notes/EXPERIMENTS.md) for what each of these tests and "
+        "\nSee `paper/PAPER_TO_RESULTS.md` for what each of these tests and "
         "why it is in the programme.\n"
     )
 

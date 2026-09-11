@@ -7,7 +7,6 @@ os.makedirs(dest, exist_ok=True)
 
 for repo, patterns, name in [
     ("marsyas/gtzan", None, "gtzan"),
-    ("openslr/librispeech_asr", ["clean/validation/*"], "librispeech"),
 ]:
     print(f"--- {repo}", flush=True)
     p = snapshot_download(repo_id=repo, repo_type="dataset",

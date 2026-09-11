@@ -10,10 +10,7 @@ torch==2.8.0
 transformers==5.16.1
 numpy>=2.1
 scipy>=1.15
-# Speech recognition (Section 5.2) additionally needs:
-jiwer>=3.0
-accelerate>=1.0
-# and an ffmpeg binary on PATH for the classical-codec control (Opus, MP3).
+# An ffmpeg binary on PATH is needed for the classical-codec controls (Opus, MP3).
 soundfile>=0.13
 matplotlib>=3.9
 huggingface_hub>=0.30

@@ -1,9 +1,8 @@
 # Where every number in the paper comes from
 
 The manuscript is `icassp2027_chauhan.pdf`. Every measured value it prints is a
-macro in its LaTeX source; `values.csv` lists all of them with the group they
-belong to and the provenance note recorded beside each (script and result
-file). The three tables are transcribed in `tables/` with a `source_file`
+macro in its LaTeX source; `values.csv` lists the ones the paper prints, with the group each belongs
+to and the provenance note recorded beside it (script and result file). The three tables are transcribed in `tables/` with a `source_file`
 column.
 
 **Status legend.** *in repo*: the raw per-trial file is in `results/` with its
@@ -33,12 +32,12 @@ is not yet checkable here.
 | Held-out and registered checkpoint passes (Sec. 3.3) | | | pending upload |
 | Frame-wise bias on real recordings (Sec. 3.4) | `experiments/corpus_pull.py`, `analysis/analyze_corpus_pull.py` | `corpus_pull_encodec3.csv`, `corpus_pull_saraga_encodec3.csv`, `corpus_pull_opus*.csv`, `corpus_pull_dac166.csv` | in repo |
 | Register split of the real-recording bias | `analyze_register_split.py` | same | script pending |
-| Table 3, scale-degree error and flips; matched Opus; band-limited fit; pYIN | `experiments/retune_real.py`, `analyze_tuning.py` | | pending upload |
-| Corpus tuning histograms (GTZAN, flattened GTZAN, LibriSpeech) | `experiments/pitch_histogram.py`, `analysis/plot_histograms.py` | `hist_gtzan.csv`, `hist_gtzan_detuned.csv`, `hist_librispeech.csv` | in repo |
+| Table 3, scale-degree error and flips; matched Opus; band-limited fit; pYIN | `analyze_tuning.py` | | pending upload (script and files) |
+| Corpus tuning histograms (GTZAN, flattened GTZAN) | `experiments/pitch_histogram.py`, `analysis/plot_histograms.py` | `hist_gtzan.csv`, `hist_gtzan_detuned.csv`, `hist_librispeech.csv` | in repo |
 | Identity and sinusoid controls | `analysis/analyze_sweep.py` | `ctrl_identity.csv`, `ctrl_sinusoid.csv` | in repo |
 | Pre-registration and its amendment log | | `../PREDICTIONS.md` | in repo |
 
-Result families in `results/` that the ICASSP paper does not use (speech
-recognition, phonology, MusicGen, vibrato, isolated NSynth notes, the failed
-synthetic-tone causal design) are documented in `results/README.md` and kept
-because they were part of the registered programme.
+Every file in `results/` serves a row of this table; `results/README.md`
+describes each family. The pre-registration document also covers speech
+tests that the ICASSP paper does not report; their result files are not
+included here.

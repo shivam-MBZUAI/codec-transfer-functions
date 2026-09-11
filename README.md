@@ -37,8 +37,7 @@ analysis/         every derived number and figure
 figures/          the paper's figures and the scripts that draw them
 data/             corpus and checkpoint acquisition
 infra/            Slurm and detached-session tooling for the long sweeps
-docs/             DATA.md (sources and licences), PIPELINE.md, CLUSTER.md,
-                  notes/ (working notes from the programme, kept for the record)
+docs/             DATA.md (sources and licences), PIPELINE.md, CLUSTER.md
 PREDICTIONS.md    the pre-registration document with its amendment log
 ```
 
@@ -111,7 +110,7 @@ each in full.
 | Octave gate at 200 cents | estimator failures; the only exclusion in the primary analysis |
 | Estimator cross-check | robustness variant only, never the primary number |
 | Amplitude-stability and retention guards | a confident slope fitted through noise phases (two codecs are refused, and reported as such) |
-| Quantiser bypass, shuffled and untrained codebooks | the effect living in the tokens rather than the decoder |
+| Quantiser bypass | the effect living in the tokens rather than the decoder |
 | Opus, MP3, HE-AAC with SBR | band replication without a learned prior |
 | Grid-preserving resamplings of the fine-tuning corpus | resampling artefacts in the causal experiment |
 

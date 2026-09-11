@@ -13,24 +13,6 @@ placeholder values.
 ## Pitch transfer function
 | run | codec | rate | reference | n | floor (c) | on-grid (c) | off-grid (c) | ratio | grid bias (c) | 95% CI | sine R2 | saw R2 | better |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `causal_12tet` | trained_12tet | 12tet-Q4 | 440Hz_ongrid | 151 | 4.9e-06 | 0.091 | 0.268 | 2.95 | -0.006 | [-0.03, 0.00] | 0.03 | 0.03 | n/a, below floor |
-| `causal_12tet` | trained_12tet | 12tet-Q4 | 452.9Hz_+50c | 107 | 5.2e-06 | 0.330 | 0.223 | 0.67 | -0.061 | [-0.14, 0.00] | 0.04 | 0.05 | n/a, below floor |
-| `causal_53tet` | trained_53tet | 53tet-Q4 | 440Hz_ongrid | 190 | 4.9e-06 | 0.062 | 0.066 | 1.07 | 6.4e-04 | [0.00, 0.01] | 0.02 | 0.03 | sawtooth |
-| `causal_53tet` | trained_53tet | 53tet-Q4 | 452.9Hz_+50c | 131 | 5.2e-06 | 0.111 | 0.141 | 1.26 | -0.011 | [-0.07, 0.00] | 0.01 | 0.03 | n/a, below floor |
-| `causal_uniform` | trained_uniform | uniform-Q4 | 440Hz_ongrid | 151 | 4.9e-06 | 0.067 | 0.094 | 1.39 | -0.004 | [-0.03, 0.01] | 0.03 | 0.06 | n/a, below floor |
-| `causal_uniform` | trained_uniform | uniform-Q4 | 452.9Hz_+50c | 90 | 5.2e-06 | 0.144 | 0.109 | 0.75 | 0.007 | [-7.0e-03, 0.05] | 0.03 | 0.03 | sawtooth |
-| `codec_dac16` | dac | Q6 | 440Hz_ongrid | 540 | 1.6e-05 | 0.945 | 0.839 | 0.89 | 0.000 | [-0.03, 5.2e-04] | 0.03 | 0.03 | n/a, below floor |
-| `codec_dac16` | dac | Q6 | 452.9Hz_+50c | 201 | 3.0e-05 | 0.908 | 1.397 | 1.54 | -0.017 | [-0.31, 0.12] | 0.09 | 0.14 | n/a, below floor |
-| `codec_dac24` | dac | Q8 | 440Hz_ongrid | 1205 | 4.9e-06 | 0.429 | 0.879 | 2.05 | 0.030 | [0.00, 0.10] | 0.10 | 0.10 | sinusoid |
-| `codec_dac24` | dac | Q8 | 452.9Hz_+50c | 1205 | 5.2e-06 | 1.085 | 1.598 | 1.47 | -0.128 | [-0.34, 0.00] | 0.11 | 0.10 | n/a, below floor |
-| `codec_dac44` | dac | Q4 | 440Hz_ongrid | 1137 | 2.9e-06 | 0.226 | 0.411 | 1.82 | 0.000 | [0.00, 0.03] | 3.4e-03 | 0.02 | n/a, below floor |
-| `codec_dac44` | dac | Q4 | 452.9Hz_+50c | 1143 | 5.0e-06 | 0.593 | 0.366 | 0.62 | 0.000 | [-0.02, 0.00] | 5.3e-03 | 0.01 | n/a, below floor |
-| `codec_encodec48` | encodec | 6.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.209 | 7.740 | 6.40 | 3.965 | [3.55, 4.30] | 0.46 | 0.44 | sinusoid |
-| `codec_encodec48` | encodec | 6.0kbps | 452.9Hz_+50c | 1154 | 5.2e-06 | 13.465 | 13.609 | 1.01 | -2.841 | [-4.08, -1.27] | 0.24 | 0.24 | n/a, below floor |
-| `codec_mimi` | mimi | Q8 | 440Hz_ongrid | 1199 | 4.9e-06 | 5.464 | 7.158 | 1.31 | 2.147 | [1.41, 3.07] | 0.08 | 0.05 | sinusoid |
-| `codec_mimi` | mimi | Q8 | 452.9Hz_+50c | 1199 | 5.2e-06 | 9.551 | 7.738 | 0.81 | -2.213 | [-3.26, -1.51] | 0.08 | 0.05 | n/a, below floor |
-| `codec_speechtok` | speechtokenizer | Q8 | 440Hz_ongrid | 777 | 1.6e-05 | 55.217 | 47.398 | 0.86 | 0.000 | [-7.34, 0.00] | 2.9e-03 | 4.3e-03 | n/a, below floor |
-| `codec_speechtok` | speechtokenizer | Q8 | 452.9Hz_+50c | 632 | 3.0e-05 | 51.929 | 52.810 | 1.02 | 5.757 | [0.00, 11.51] | 1.8e-03 | 4.0e-03 | sawtooth |
 | `ctrl_identity` | identity | uncoded | 440Hz_ongrid | 1205 | 4.9e-06 | 6.5e-06 | 6.0e-06 | n/a, below floor | 7.5e-08 | [0.00, 4.9e-07] | 8.6e-03 | 0.02 | n/a, below floor |
 | `ctrl_identity` | identity | uncoded | 452.9Hz_+50c | 1205 | 5.2e-06 | 5.1e-06 | 5.4e-06 | n/a, below floor | 0.000 | [-2.4e-07, 0.00] | 4.9e-03 | 0.02 | n/a, below floor |
 | `ctrl_sinusoid` | encodec | 3.0kbps | 440Hz_ongrid | 1205 | 2.9e-05 | 0.094 | 0.105 | 1.11 | 2.6e-04 | [0.00, 0.01] | 4.6e-03 | 6.7e-03 | sawtooth |
@@ -222,12 +204,6 @@ placeholder values.
 | `detune_vowel_speechtok` | speechtokenizer | Q8 | 229.1Hz_+69.9c | 964 | 3.9e-05 | 1.062 | 0.885 | 0.83 | 0.000 | [-0.08, 0.00] | 0.05 | 0.06 | n/a, below floor |
 | `detune_vowel_speechtok` | speechtokenizer | Q8 | 230.4Hz_+80.0c | 964 | 4.3e-05 | 0.941 | 1.082 | 1.15 | -0.076 | [-0.22, 0.00] | 0.05 | 0.05 | n/a, below floor |
 | `detune_vowel_speechtok` | speechtokenizer | Q8 | 231.7Hz_+90.0c | 963 | 5.8e-05 | 0.814 | 0.942 | 1.16 | -0.075 | [-0.18, 0.00] | 0.02 | 0.02 | n/a, below floor |
-| `ft_12tet` | encodec_ft_encodec_ft_12tet | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 0.242 | 0.580 | 2.40 | 0.328 | [0.29, 0.37] | 0.34 | 0.28 | sinusoid |
-| `ft_12tet` | encodec_ft_encodec_ft_12tet | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 0.837 | 1.036 | 1.24 | -0.460 | [-0.53, -0.33] | 0.29 | 0.22 | n/a, below floor |
-| `ft_53tet` | encodec_ft_encodec_ft_53tet | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 0.227 | 0.357 | 1.57 | 0.233 | [0.20, 0.26] | 0.32 | 0.24 | sinusoid |
-| `ft_53tet` | encodec_ft_encodec_ft_53tet | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 0.296 | 0.398 | 1.34 | -0.258 | [-0.29, -0.22] | 0.32 | 0.23 | n/a, below floor |
-| `ft_uniform` | encodec_ft_encodec_ft_uniform | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 0.226 | 0.378 | 1.67 | 0.232 | [0.20, 0.26] | 0.32 | 0.24 | sinusoid |
-| `ft_uniform` | encodec_ft_encodec_ft_uniform | 3.0kbps | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 0.331 | 0.378 | 1.14 | -0.239 | [-0.29, -0.20] | 0.33 | 0.23 | n/a, below floor |
 | `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 1.301 | 2.798 | 2.15 | 2.060 | [1.86, 2.21] | 0.59 | 0.48 | sinusoid |
 | `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 442.5Hz_+09.8c | 1205 | 4.5e-06 | 1.084 | 3.100 | 2.86 | 2.226 | [2.02, 2.39] | 0.59 | 0.46 | sinusoid |
 | `ftm_flat` | encodec_ft_encodec_ftm_flat | 3.0kbps | 445.1Hz_+20.0c | 1205 | 7.0e-06 | 1.240 | 4.258 | 3.43 | 1.799 | [1.54, 1.99] | 0.59 | 0.46 | sinusoid |
@@ -468,20 +444,6 @@ placeholder values.
 | `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.538 | 6.091 | 3.96 | 0.343 | [0.00, 0.72] | 0.55 | 0.46 | sinusoid |
 | `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.217 | 5.619 | 4.62 | 1.747 | [1.47, 2.04] | 0.56 | 0.45 | sinusoid |
 | `ftm_gridres_s4` | encodec_ft_encodec_ftm_gridres_s4 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.280 | 4.560 | 3.56 | 2.627 | [2.37, 2.86] | 0.57 | 0.47 | sinusoid |
-| `ftvowel_12tet` | encodec_ft_encodec_ft_12tet | 3.0kbps | 220Hz_ongrid | 1168 | 1.6e-05 | 0.148 | 0.193 | 1.31 | 0.027 | [4.6e-03, 0.05] | 0.05 | 0.04 | sinusoid |
-| `ftvowel_12tet` | encodec_ft_encodec_ft_12tet | 3.0kbps | 226.4Hz_+49.6c | 1169 | 2.7e-05 | 0.294 | 0.276 | 0.94 | -0.018 | [-0.04, 0.00] | 0.02 | 0.02 | n/a, below floor |
-| `ftvowel_53tet` | encodec_ft_encodec_ft_53tet | 3.0kbps | 220Hz_ongrid | 1172 | 1.6e-05 | 0.141 | 0.171 | 1.21 | 0.013 | [0.00, 0.03] | 0.02 | 0.02 | sinusoid |
-| `ftvowel_53tet` | encodec_ft_encodec_ft_53tet | 3.0kbps | 226.4Hz_+49.6c | 1174 | 2.7e-05 | 0.252 | 0.222 | 0.88 | 0.000 | [-0.01, 0.00] | 5.9e-03 | 9.2e-03 | n/a, below floor |
-| `ftvowel_uniform` | encodec_ft_encodec_ft_uniform | 3.0kbps | 220Hz_ongrid | 1164 | 1.6e-05 | 0.142 | 0.162 | 1.14 | 0.012 | [0.00, 0.03] | 0.02 | 0.02 | sinusoid |
-| `ftvowel_uniform` | encodec_ft_encodec_ft_uniform | 3.0kbps | 226.4Hz_+49.6c | 1164 | 2.7e-05 | 0.245 | 0.220 | 0.90 | 0.000 | [-4.9e-03, 0.00] | 5.1e-03 | 8.3e-03 | n/a, below floor |
-| `iter_encodec3_k1` | encodec_iter1 | 3.0kbps x1 | 440Hz_ongrid | 1205 | 4.9e-06 | 4.195 | 13.740 | 3.28 | 8.880 | [8.12, 9.54] | 0.65 | 0.59 | sinusoid |
-| `iter_encodec3_k1` | encodec_iter1 | 3.0kbps x1 | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 8.696 | 15.346 | 1.76 | -5.350 | [-7.51, -3.33] | 0.56 | 0.48 | n/a, below floor |
-| `iter_encodec3_k2` | encodec_iter2 | 3.0kbps x2 | 440Hz_ongrid | 1205 | 4.9e-06 | 3.936 | 12.761 | 3.24 | 8.196 | [7.56, 8.83] | 0.63 | 0.58 | sinusoid |
-| `iter_encodec3_k2` | encodec_iter2 | 3.0kbps x2 | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 9.852 | 9.853 | 1.00 | -7.308 | [-8.59, -5.86] | 0.51 | 0.45 | n/a, below floor |
-| `iter_encodec3_k4` | encodec_iter4 | 3.0kbps x4 | 440Hz_ongrid | 1205 | 4.9e-06 | 3.475 | 13.248 | 3.81 | 7.388 | [6.90, 8.08] | 0.59 | 0.57 | sinusoid |
-| `iter_encodec3_k4` | encodec_iter4 | 3.0kbps x4 | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 9.111 | 7.909 | 0.87 | -6.376 | [-7.16, -5.47] | 0.47 | 0.41 | n/a, below floor |
-| `iter_encodec3_k8` | encodec_iter8 | 3.0kbps x8 | 440Hz_ongrid | 1205 | 4.9e-06 | 3.280 | 13.035 | 3.97 | 7.258 | [6.82, 7.86] | 0.56 | 0.54 | sinusoid |
-| `iter_encodec3_k8` | encodec_iter8 | 3.0kbps x8 | 452.9Hz_+50.0c | 1205 | 5.2e-06 | 10.457 | 7.531 | 0.72 | -6.807 | [-7.51, -6.03] | 0.39 | 0.34 | n/a, below floor |
 | `mech_bypass` | encodec_bypass | no-quantiser | 440Hz_ongrid | 1205 | 4.9e-06 | 2.584 | 8.719 | 3.37 | 5.665 | [5.28, 6.06] | 0.68 | 0.61 | sinusoid |
 | `mech_bypass` | encodec_bypass | no-quantiser | 452.9Hz_+50c | 1205 | 5.2e-06 | 5.145 | 7.526 | 1.46 | -4.672 | [-5.76, -3.65] | 0.69 | 0.62 | n/a, below floor |
 | `octaves_encodec3` | encodec | 3.0kbps | 110Hz_ongrid | 1446 | 2.6e-05 | 0.725 | 1.548 | 2.13 | 0.725 | [0.57, 0.86] | 0.31 | 0.24 | sinusoid |
@@ -492,8 +454,6 @@ placeholder values.
 | `octaves_opus6` | opus | 6kbps | 220Hz_ongrid | 1187 | 8.4e-06 | 2.306 | 2.137 | 0.93 | 0.000 | [0.00, 0.09] | 5.4e-04 | 5.1e-03 | n/a, below floor |
 | `octaves_opus6` | opus | 6kbps | 440Hz_ongrid | 725 | 4.9e-06 | 4.079 | 3.590 | 0.88 | 0.000 | [0.00, 0.48] | 8.5e-03 | 0.02 | n/a, below floor |
 | `octaves_opus6` | opus | 6kbps | 880Hz_ongrid | 412 | 3.4e-06 | 5.661 | 6.478 | 1.14 | 0.000 | [-0.34, 0.45] | 2.8e-03 | 7.4e-03 | n/a, below floor |
-| `pilot_encodec3` | encodec | 3.0kbps | 440Hz_ongrid | 723 | 4.9e-06 | 4.196 | 13.786 | 3.29 | 9.206 | [8.29, 9.92] | 0.65 | 0.60 | sinusoid |
-| `pilot_encodec3` | encodec | 3.0kbps | 452.9Hz_+50c | 723 | 5.2e-06 | 9.321 | 15.524 | 1.67 | -6.041 | [-8.36, -3.26] | 0.56 | 0.49 | n/a, below floor |
 | `rate_encodec_1.5` | encodec | 1.5kbps | 440Hz_ongrid | 1191 | 4.9e-06 | 4.102 | 17.080 | 4.16 | 10.459 | [9.70, 11.02] | 0.57 | 0.48 | sinusoid |
 | `rate_encodec_1.5` | encodec | 1.5kbps | 452.9Hz_+50c | 1201 | 5.2e-06 | 14.166 | 12.953 | 0.91 | -8.972 | [-10.51, -7.98] | 0.33 | 0.25 | n/a, below floor |
 | `rate_encodec_12` | encodec | 12.0kbps | 440Hz_ongrid | 1205 | 4.9e-06 | 2.587 | 9.118 | 3.52 | 5.938 | [5.45, 6.36] | 0.69 | 0.64 | sinusoid |
@@ -548,16 +508,6 @@ placeholder values.
 | `swap_stockenc_griddec` | encodec_swap_encodec_24khz|encodec_ftm_grid_s0 | 3.0kbps | 460.8Hz_+80.0c | 1205 | 4.5e-06 | 1.429 | 6.133 | 4.29 | 0.336 | [0.00, 0.74] | 0.54 | 0.45 | sinusoid |
 | `swap_stockenc_griddec` | encodec_swap_encodec_24khz|encodec_ftm_grid_s0 | 3.0kbps | 463.5Hz_+90.0c | 1205 | 7.2e-06 | 1.207 | 5.526 | 4.58 | 1.690 | [1.39, 2.00] | 0.56 | 0.45 | sinusoid |
 | `swap_stockenc_griddec` | encodec_swap_encodec_24khz|encodec_ftm_grid_s0 | 3.0kbps | 466.2Hz_ongrid | 1205 | 6.4e-06 | 1.220 | 4.370 | 3.58 | 2.482 | [2.26, 2.71] | 0.56 | 0.46 | sinusoid |
-| `vib_0` | encodec | 3.0kbps | 440Hz_ongrid | 964 | 4.9e-06 | 4.179 | 13.759 | 3.29 | 9.056 | [8.27, 9.75] | 0.65 | 0.59 | sinusoid |
-| `vib_0` | encodec | 3.0kbps | 452.9Hz_+50.0c | 964 | 5.2e-06 | 9.338 | 15.429 | 1.65 | -5.749 | [-8.11, -3.28] | 0.57 | 0.50 | n/a, below floor |
-| `vib_10` | encodec | 3.0kbps | 440Hz_ongrid | 964 | 1.036 | 4.767 | 14.814 | 3.11 | 9.861 | [9.18, 10.59] | 0.68 | 0.61 | sinusoid |
-| `vib_10` | encodec | 3.0kbps | 452.9Hz_+50.0c | 964 | 0.314 | 10.846 | 16.949 | 1.56 | -7.673 | [-9.66, -4.82] | 0.56 | 0.51 | n/a, below floor |
-| `vib_20` | encodec | 3.0kbps | 440Hz_ongrid | 964 | 2.420 | 5.316 | 19.598 | 3.69 | 12.716 | [11.97, 13.49] | 0.67 | 0.59 | sinusoid |
-| `vib_20` | encodec | 3.0kbps | 452.9Hz_+50.0c | 964 | 2.258 | 13.578 | 20.821 | 1.53 | -10.326 | [-12.86, -7.71] | 0.58 | 0.56 | n/a, below floor |
-| `vib_40` | encodec | 3.0kbps | 440Hz_ongrid | 964 | 3.308 | 7.618 | 21.886 | 2.87 | 16.032 | [14.54, 17.02] | 0.68 | 0.53 | sinusoid |
-| `vib_40` | encodec | 3.0kbps | 452.9Hz_+50.0c | 964 | 2.208 | 18.877 | 29.734 | 1.58 | -9.778 | [-13.35, -6.29] | 0.53 | 0.41 | n/a, below floor |
-| `vib_5` | encodec | 3.0kbps | 440Hz_ongrid | 964 | 0.422 | 4.715 | 14.156 | 3.00 | 9.033 | [8.27, 9.99] | 0.66 | 0.59 | sinusoid |
-| `vib_5` | encodec | 3.0kbps | 452.9Hz_+50.0c | 964 | 0.206 | 8.974 | 15.908 | 1.77 | -5.137 | [-7.54, -2.99] | 0.56 | 0.53 | n/a, below floor |
 | `vowel_encodec3` | encodec | 3.0kbps | 220Hz_ongrid | 948 | 1.6e-05 | 0.391 | 0.667 | 1.71 | 0.377 | [0.30, 0.44] | 0.17 | 0.17 | sinusoid |
 | `vowel_encodec3` | encodec | 3.0kbps | 226.4Hz_+49.6c | 954 | 2.7e-05 | 0.991 | 1.181 | 1.19 | -0.413 | [-0.61, -0.14] | 0.19 | 0.16 | n/a, below floor |
 | `vowel_mimi` | mimi | Q8 | 220Hz_ongrid | 947 | 1.6e-05 | 0.960 | 0.985 | 1.03 | 0.000 | [-0.04, 0.00] | 2.5e-05 | 4.7e-03 | n/a, below floor |
@@ -565,7 +515,7 @@ placeholder values.
 | `vowel_speechtok` | speechtokenizer | Q8 | 220Hz_ongrid | 964 | 3.6e-05 | 0.971 | 0.784 | 0.81 | 0.000 | [-0.04, 0.00] | 0.03 | 0.03 | n/a, below floor |
 | `vowel_speechtok` | speechtokenizer | Q8 | 226.4Hz_+49.6c | 963 | 3.4e-05 | 1.057 | 1.022 | 0.97 | 0.033 | [0.00, 0.17] | 0.05 | 0.04 | sinusoid |
 
-**Skipped:** `asr_encodec3` (no usable rows), `asr_encodec3_n100` (no usable rows), `asr_encodec3_v2` (no usable rows), `asr_mms_encodec3` (no usable rows), `asr_mms_encodec3_n100` (no usable rows), `asr_mms_mimi` (no usable rows), `asr_mms_mimi_n100` (no usable rows), `corpus_pull_dac166` (no usable rows), `corpus_pull_encodec3` (no usable rows), `corpus_pull_opus12` (no usable rows), `corpus_pull_opus6` (no usable rows), `corpus_pull_saraga_dac166` (no usable rows), `corpus_pull_saraga_encodec3` (no usable rows), `corpus_pull_saraga_opus12` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `hist_librispeech` (no usable rows), `hist_musicgen_continue` (no usable rows), `hist_musicgen_text` (no usable rows), `mech_shuffled` (no usable rows), `mech_untrained` (no usable rows), `musicgen_continue` (no usable rows), `musicgen_text` (no usable rows), `phon_dac16` (no usable rows), `phon_encodec3` (no usable rows), `phon_encodec3_big` (no usable rows), `phon_mimi` (no usable rows), `probe_encodec3` (no usable rows), `retune_dac16` (no usable rows), `retune_encodec3` (no usable rows), `retune_encodec3_big` (no usable rows), `retune_synthetic` (no usable rows)
+**Skipped:** `corpus_pull_dac166` (no usable rows), `corpus_pull_encodec3` (no usable rows), `corpus_pull_opus12` (no usable rows), `corpus_pull_opus6` (no usable rows), `corpus_pull_saraga_dac166` (no usable rows), `corpus_pull_saraga_encodec3` (no usable rows), `corpus_pull_saraga_opus12` (no usable rows), `hist_gtzan` (no usable rows), `hist_gtzan_detuned` (no usable rows), `probe_encodec3` (no usable rows), `spectral_sweep` (no usable rows), `spectral_sweep_summary` (no usable rows)
 
 **Reading this table.** `floor` is the estimator's own error on uncoded stimuli in the same run: no effect below it means anything. `grid bias` is positive when the codec moved an interval *toward* the Western semitone grid, which is the directional claim; a symmetric residual of the same magnitude is ordinary degradation. `sine R2` against `saw R2` discriminates the two candidate mechanisms: a density correction predicts a sinusoid, coarse cell assignment predicts a sawtooth, and they scale differently with rate.
 
@@ -603,6 +553,10 @@ placeholder values.
 
 ![residual_shape](figures/residual_shape.png)
 
+### `spectral_check.png`
+
+![spectral_check](figures/spectral_check.png)
+
 ## Programme status
 
 | id | experiment | status |
@@ -610,22 +564,15 @@ placeholder values.
 | E0.1 | Estimator noise floor | measured |
 | E0.2 | Identity control (no codec) | measured |
 | E0.3 | Resample-only control | not yet measured |
-| E0.4 | Pilot gate | measured |
 | E1.1 | Detuning sweep, phase vs reference offset | measured |
 | E1.2 | Quantiser bypass | measured |
 | E1.3 | Direct codebook probing | measured |
-| E1.4 | Per-RVQ-level decomposition | not yet measured |
-| E1.5 | Random-codebook control | measured |
-| E1.6 | Causal: RVQ trained on controlled pitch distributions | measured |
+| E1.6 | Causal: decoder fine-tuned on controlled pitch distributions | measured |
 | E2.1 | Codec breadth | measured |
 | E2.2 | Training-distribution contrast | measured |
 | E2.3 | Rate sweep in bits per latent dimension | measured |
 | E2.4 | Stimulus ablations | measured |
 | E3.1 | Speech-shaped pitch stimuli | measured |
-| E3.2 | Retuned instrument samples | measured |
-| E3.3 | Makam validation | not yet measured |
-| E3.4 | Token-level probe | not yet measured |
-| E3.5 | Phonological survival (FLEURS) | measured |
-| E3.6 | Downstream ASR | measured |
+| E3.2 | Real recordings, frame-wise bias | measured |
 
-See [docs/notes/EXPERIMENTS.md](docs/notes/EXPERIMENTS.md) for what each of these tests and why it is in the programme.
+See `paper/PAPER_TO_RESULTS.md` for what each of these tests and why it is in the programme.
